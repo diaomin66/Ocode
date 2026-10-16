@@ -13,11 +13,15 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
+export function createBootProfile() {
+  return mkdtemp(join(tmpdir(), "ocode-boot-"));
+}
+
 export function validateProbe(output, version) {
   const line = output.split(/\r?\n/).find((entry) => entry.startsWith("BOOT_PROBE "));
   assert.ok(line, "packaged app did not emit BOOT_PROBE");
   const probe = JSON.parse(line.slice("BOOT_PROBE ".length));
-  assert.equal(probe.ok, true);
+  assert.equal(probe.ok, true, `packaged boot failed: ${probe.reason ?? "unknown reason"}`);
   assert.equal(probe.appName, "Ocode");
   assert.equal(probe.version, version);
   assert.equal(probe.platform, "win32");
@@ -93,8 +97,7 @@ async function main() {
     assert.equal(metadata.name, "@ocode/desktop");
     assert.equal(metadata.version, version);
     assert.equal(metadata.ocodeDistribution, distribution);
-    const profile = join(temp, `${distribution}-profile`);
-    await mkdir(profile, { recursive: true });
+    const profile = await createBootProfile();
     const { stdout, stderr } = await run(join(directory, "Ocode.exe"), [], {
       ...options, cwd: directory, env: { ...env, OCODE_DATA_DIR: profile, OCODE_BOOT_PROBE: "1" },
     });
