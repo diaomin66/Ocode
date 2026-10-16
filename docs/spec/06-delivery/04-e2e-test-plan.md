@@ -8,6 +8,22 @@
 
 ## 1. Goals
 
+### E2E-WINDOWS-installer-candidate
+
+- **Preconditions:** Disposable GitHub-hosted Windows x64 runner, locked
+  dependencies and native host built from the recorded candidate/base commits.
+- **Steps:** Run `dist:win`, silently install the NSIS artifact into a temporary
+  directory, extract the portable ZIP, and boot each with its own temporary
+  `OCODE_DATA_DIR` through the existing `OCODE_BOOT_PROBE` entry point.
+- **Expected:** Both copies contain x64 Ocode/host executables, matching version
+  and installed/ZIP distribution metadata. The sandboxed preload and Host RPC
+  boot probe succeed. All expected artifacts are nonempty and have SHA-256
+  checksums. Upload only after verification; do not publish an updater feed.
+- **Command:** `node scripts/verify-windows-installer.mjs` (hosted CI only).
+- **Boundary:** No real provider, credentials, existing profile or self-hosted
+  runner. Signing, SmartScreen reputation, upgrades and portable EXE startup
+  remain separate qualification work.
+
 ### E2E-QUEUE-send-now-wakes-subagents
 
 - **Preconditions:** Dedicated request worktree with built workspace packages,
