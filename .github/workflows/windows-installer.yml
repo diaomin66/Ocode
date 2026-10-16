@@ -1,0 +1,69 @@
+name: Windows installer candidate
+
+on:
+  push:
+    branches: ['build/windows/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-installer-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Build and smoke-test Windows x64
+    runs-on: windows-2022
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Record current main base
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor origin/main HEAD
+          echo "OCODE_BASE_SHA=$(git rev-parse origin/main)" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install locked dependencies and native modules
+        run: pnpm install --frozen-lockfile
+      - name: Build native host and workspace dependencies
+        run: |
+          set -euo pipefail
+          cargo build --release --locked -p host-core
+          pnpm --filter '@ocode/desktop^...' --fail-if-no-match build
+      - name: Validate packaging contracts
+        run: |
+          set -euo pipefail
+          pnpm --filter @ocode/desktop typecheck
+          pnpm lint
+          node --test apps/desktop/test/windows-installer-workflow.test.mjs apps/desktop/test/windows-host-runtime.test.mjs apps/desktop/test/ocode-branding.test.mjs apps/desktop/test/ocode-compatibility.test.mjs apps/desktop/test/packaging-footprint.test.mjs apps/desktop/test/release-asar.test.mjs
+      - name: Package Windows installer and portable artifacts
+        run: pnpm --filter @ocode/desktop run dist:win
+      - name: Install, boot and verify candidate artifacts
+        run: node scripts/verify-windows-installer.mjs
+      - name: Upload verified unsigned Windows candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: Ocode-windows-x64-${{ github.sha }}
+          path: |
+            apps/desktop/release/Ocode-Setup-*.exe
+            apps/desktop/release/Ocode-Setup-*.exe.blockmap
+            apps/desktop/release/Ocode-Portable-*.exe
+            apps/desktop/release/Ocode-Portable-*.zip
+            apps/desktop/release/*-verification.json
+            apps/desktop/release/SHA256SUMS.txt
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7

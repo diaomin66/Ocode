@@ -20,6 +20,24 @@ requires an injected Developer ID identity (local) or `CSC_LINK` certificate
 (CI), and fails before publication if signing or notarization verification does
 not pass.
 
+### Windows-only candidate builds
+
+Use `.github/workflows/windows-installer.yml` on a `build/windows/**` branch
+or by manual dispatch to produce a Windows x64 candidate without launching
+the macOS/Linux release matrix. It uses the locked dependency graph, native
+MSVC host build, existing `dist:win` command, packaging contract tests and
+`scripts/verify-windows-installer.mjs` on a disposable GitHub-hosted runner.
+The verifier silently installs NSIS into a temporary path, checks the installed
+and extracted ZIP metadata/native architecture, and boots both through the
+existing preload/Host RPC probe with separate temporary profiles.
+
+The workflow uploads the installer, portable EXE/ZIP, blockmap, SHA-256 sums
+and commit/base-bound verification evidence as a private Actions artifact
+with seven-day retention. It has read-only repository permissions, uses no
+signing secrets and does not publish a Release or updater feed. These are
+unsigned candidates; SmartScreen reputation, clean-client upgrade behavior
+and publisher signing are not qualified by this lane.
+
 On macOS, `pnpm dev` creates and reuses a fingerprinted branded Electron host
 bundle under `.cache/electron-dev/`. Its bundle name, executable, identifier,
 and ICNS resource are development-only Ocode values, so AppKit shows
