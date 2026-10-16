@@ -35,3 +35,23 @@ test("Windows smoke accepts only successful matching packaged boot probes", asyn
   assert.throws(() => validateProbe("no probe", good.version));
   assert.throws(() => validateProbe("BOOT_PROBE invalid", good.version));
 });
+
+test("Windows smoke reports boot failure reasons", async () => {
+  const { validateProbe } = await import("../../../scripts/verify-windows-installer.mjs");
+  assert.throws(() => validateProbe('BOOT_PROBE {"ok":false,"reason":"isolated profile required"}', "1.0.0"), /isolated profile required/);
+});
+
+test("Windows packaged boot profiles satisfy the existing destructive-probe guard", async () => {
+  const { createBootProfile } = await import("../../../scripts/verify-windows-installer.mjs");
+  const { basename, dirname } = await import("node:path");
+  const { tmpdir } = await import("node:os");
+  const { realpath, rm } = await import("node:fs/promises");
+  const profile = await createBootProfile();
+  try {
+    const actual = await realpath(profile);
+    assert.ok(basename(actual).startsWith("ocode-boot-"));
+    assert.equal(dirname(actual), await realpath(tmpdir()));
+  } finally {
+    await rm(profile, { recursive: true, force: true });
+  }
+});
