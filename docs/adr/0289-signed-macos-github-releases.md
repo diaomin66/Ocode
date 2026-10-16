@@ -34,17 +34,17 @@ credentials and must never be used by this derivative.
    retried at most six times with a 10-second delay by the signing watchdog;
    all other `xcrun` calls pass through. The DMG stapler has the same bounded
    retry policy. Retries only occur after Apple accepts the matching
+   notarization submission. Missing signing or notarization secrets fail the
+   job; unsigned macOS artifacts must not be published from a tag.
 2. A signing identity is read from maintainer-owned Actions secrets. Its team
    must equal the configured `APPLE_TEAM_ID`; an empty identity, malformed team
    identifier or mismatch fails closed. The certificate name must be the bare
    common name: electron-builder 26 rejects an identity that keeps the
    `Developer ID Application:` prefix, and the verification step re-adds that
    prefix when comparing the `codesign` authority.
-   keeps the `Developer ID Application:` prefix, and the verification step
-   re-adds that prefix when it compares the `codesign` authority.
 3. Certificate material stays in GitHub Actions secrets:
    `CSC_LINK` (p12, file path or base64), `CSC_KEY_PASSWORD`, `APPLE_ID`,
-   `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`. Nothing of that set is
+   `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`, and `MAC_SIGNING_IDENTITY`. Nothing of that set is
    committed, echoed, or written into electron-builder config.
 4. Local `pnpm dist:mac` / `pnpm pack` remain unsigned when no identity is
    configured. `scripts/release-macos.sh` remains the local signed lane.
