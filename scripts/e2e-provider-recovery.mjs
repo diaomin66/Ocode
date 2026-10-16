@@ -134,10 +134,10 @@ await new Promise((r) => debugServer.close(r));
 const { appDir, electronBinary } = resolveElectronBinary(root);
 const env = {
   ...process.env,
-  PI_DESKTOP_DATA_DIR: join(artifacts, "data"),
-  PI_DESKTOP_HOST_BIN: resolveHostBinary(),
+  OCODE_DATA_DIR: join(artifacts, "data"),
+  OCODE_HOST_BIN: resolveHostBinary(),
   ELECTRON_RENDERER_URL: "",
-  PI_DESKTOP_START_MAXIMIZED: "0",
+  OCODE_START_MAXIMIZED: "0",
 };
 delete env.ELECTRON_RUN_AS_NODE;
 for (const key of [
@@ -205,7 +205,7 @@ async function waitFor(fn, label, timeout = 45000) {
 }
 async function ipc(name, ...args) {
   const result = await evaluate(
-    `window.piDesktop.invoke(window.piDesktop.channels.invoke[${JSON.stringify(name)}], ...${JSON.stringify(args)})`,
+    `window.ocode.invoke(window.ocode.channels.invoke[${JSON.stringify(name)}], ...${JSON.stringify(args)})`,
   );
   assert.equal(result.ok, true, `${name}: ${JSON.stringify(result)}`);
   return result.data;
@@ -239,10 +239,10 @@ async function run(name, mode, style = "chat_completions") {
     modelId: "network-fixture",
     thinkingLevel: "off",
   });
-  await evaluate(`window.__PI_DESKTOP__.refreshProviders()`);
-  await evaluate(`window.__PI_DESKTOP__.selectSession(${JSON.stringify(session.id)})`);
+  await evaluate(`window.__OCODE__.refreshProviders()`);
+  await evaluate(`window.__OCODE__.selectSession(${JSON.stringify(session.id)})`);
   await evaluate(
-    `window.__events699 = []; window.__off699?.(); window.__off699 = window.piDesktop.on(window.piDesktop.channels.event.agentMessage, e => window.__events699.push(e));`,
+    `window.__events699 = []; window.__off699?.(); window.__off699 = window.ocode.on(window.ocode.channels.event.agentMessage, e => window.__events699.push(e));`,
   );
   await waitFor(
     () => evaluate('Boolean(document.querySelector(".composer-input"))'),
@@ -387,7 +387,7 @@ try {
   await waitFor(
     () =>
       evaluate(
-        'Boolean(window.__PI_DESKTOP__ && window.piDesktop && !document.querySelector(".app-shell.is-booting"))',
+        'Boolean(window.__OCODE__ && window.ocode && !document.querySelector(".app-shell.is-booting"))',
       ),
     "desktop ready",
   );

@@ -26,7 +26,7 @@ import {
   type PluginDisposer,
   type PluginSlotPosition,
   type PluginSlotRegistration,
-} from "@pi-desktop/plugin-sdk";
+} from "@ocode/plugin-sdk";
 import { PluginRendererError } from "../renderer-error";
 
 export type SlotEntry = {

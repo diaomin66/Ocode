@@ -19,7 +19,7 @@ import {
   discoveryProbeUrl,
   discoveryStyleForApiStyle,
   type DiscoveryStyle,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 export type DiscoveredModel = {
   modelId: string;

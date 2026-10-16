@@ -1,4 +1,4 @@
-import type { PlanProposal } from "@pi-desktop/shared";
+import type { PlanProposal } from "@ocode/shared";
 import { headAsk, type AskQueues } from "../../../lib/pending-asks";
 import { headPermission, type PermissionQueues } from "../../../lib/pending-permissions";
 

@@ -1,6 +1,6 @@
 import { dialog } from "electron";
-import { IPC, type ActivationScope } from "@pi-desktop/shared";
-import { isTemplateName, scaffold } from "@pi-desktop/plugin-devkit";
+import { IPC, type ActivationScope } from "@ocode/shared";
+import { isTemplateName, scaffold } from "@ocode/plugin-devkit";
 import type { AgentExtensionBridge } from "../agent-extensions";
 import type { BrowserHost } from "../browser-host";
 import type { HostProcess } from "../host-process";
@@ -342,7 +342,7 @@ export function registerPluginIpc({
     const result = await dialog.showOpenDialog({
       properties: ["openFile"],
       filters: [
-        { name: "PI Plugin", extensions: ["piplug", "zip"] },
+        { name: "Ocode Plugin", extensions: ["piplug", "zip"] },
       ],
     });
     if (result.canceled || !result.filePaths[0]) {

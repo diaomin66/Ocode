@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createServer } from "vite";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@ocode/shared";
 
 test("sending the first prompt derives a replaceable title instead of renaming", async (t) => {
   const server = await createServer({
@@ -19,7 +19,7 @@ test("sending the first prompt derives a replaceable title instead of renaming",
     const { createQueueSlice } = await server.ssrLoadModule("/src/stores/slices/queue-slice.ts");
     const invoked = [];
     let refreshed = 0;
-    globalThis.window = { piDesktop: { invoke: async (channel, ...args) => {
+    globalThis.window = { ocode: { invoke: async (channel, ...args) => {
       invoked.push([channel, ...args]);
       if (channel === IPC.invoke.agentPrompt) return { ok: true, data: { turnId: "turn-1" } };
       if (channel === IPC.invoke.sessionDeriveTitle) return { ok: true, data: { updated: true } };
@@ -93,7 +93,7 @@ test("Send now promotes queued input without stopping the running session", asyn
     const { createQueueSlice } = await server.ssrLoadModule("/src/stores/slices/queue-slice.ts");
     const invoked = [];
     let entries = [];
-    globalThis.window = { piDesktop: { invoke: async (channel, payload) => {
+    globalThis.window = { ocode: { invoke: async (channel, payload) => {
       invoked.push([channel, payload]);
       if (channel === IPC.invoke.agentQueuePush) {
         const entry = { ...payload, id: "queued-correction", position: 1, createdAt: "2026-10-13T00:00:00Z" };
@@ -149,7 +149,7 @@ test("pending queue actions stay locked until admission succeeds", async (t) => 
         const admission = new Promise((resolve) => { resolvePush = resolve; });
         let entries = [];
         const removed = [];
-        globalThis.window = { piDesktop: { invoke: async (channel, payload) => {
+        globalThis.window = { ocode: { invoke: async (channel, payload) => {
           if (channel === IPC.invoke.agentQueuePush) {
             await admission;
             const entry = { ...payload, id: "durable-turn", createdAt: "2026-09-21T00:00:00Z" };
@@ -211,7 +211,7 @@ test("pending queue actions stay locked until admission succeeds", async (t) => 
       const admission = new Promise((_, reject) => { rejectPush = reject; });
       const errors = [];
       let entries = [];
-      globalThis.window = { piDesktop: { invoke: async (channel, payload) => {
+      globalThis.window = { ocode: { invoke: async (channel, payload) => {
         if (channel === IPC.invoke.agentQueuePush) {
           if (!errors.length) await admission;
           const entry = { ...payload, id: "retried-turn", createdAt: "2026-09-21T00:00:00Z" };
@@ -266,7 +266,7 @@ test("editing a restored queue preserves attachments when resubmitted", async (t
         let entries = [{ id: "restored-turn", sessionId: "session-a", content, attachments,
           position: 1, createdAt: "2026-09-23T00:00:00Z" }];
         let submitted;
-        globalThis.window = { piDesktop: { invoke: async (channel, payload) => {
+        globalThis.window = { ocode: { invoke: async (channel, payload) => {
           if (channel === IPC.invoke.agentQueueList) return { ok: true, data: { entries } };
           if (channel === IPC.invoke.agentQueueRemove) {
             entries = entries.filter((entry) => entry.id !== payload.turnId);

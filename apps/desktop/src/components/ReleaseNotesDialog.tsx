@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ChangelogEntry } from "@pi-desktop/shared";
+import type { ChangelogEntry } from "@ocode/shared";
 import {
   loadChangelogCatalog,
   normalizeChangelogVersion,
   resolveChangelogLocale,
-} from "@pi-desktop/shared/changelog-loader";
+} from "@ocode/shared/changelog-loader";
 import { OverlayBackdrop, Badge, cx, portalOverlay, TooltipButton } from "./ui";
 import { IconClose } from "./icons";
 

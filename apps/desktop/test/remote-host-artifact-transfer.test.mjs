@@ -12,7 +12,7 @@ const { createSystemSshTransport } = await import("../electron/main/remote/ssh-t
 const bytes = Buffer.from([0, 255, 10, 13, 42, 0, 123]);
 const digest = createHash("sha256").update(bytes).digest("hex");
 const url = "https://github.com/example/release/artifact.tar.gz";
-const remoteDir = "/home/test/.pi-desktop/pi-host/.upload.ABC123";
+const remoteDir = "/home/test/.ocode/ocode-host/.upload.ABC123";
 function transferFixture(overrides = {}) {
   const commands = [], uploads = [];
   const transport = {
@@ -72,8 +72,8 @@ function bootstrapFixture(step = "download-failed") {
       execWithInput: async (_command, script) => {
         scripts.push(script);
         if (scripts.length === 1) throw Object.assign(new Error("remote download failed"), {
-          stdout: `PI_HOST_BOOTSTRAP_FAILED ${step}\n`, stderr: "" });
-        return { stdout: 'PI_HOST_READY {"hostId":"fixture","host":"127.0.0.1","port":41000,"version":"1.0.0"}\nPI_HOST_PAIRING_TOKEN {"token":"test","expiresAt":1}\n', stderr: "", code: 0 };
+          stdout: `OCODE_HOST_BOOTSTRAP_FAILED ${step}\n`, stderr: "" });
+        return { stdout: 'OCODE_HOST_READY {"hostId":"fixture","host":"127.0.0.1","port":41000,"version":"1.0.0"}\nOCODE_HOST_PAIRING_TOKEN {"token":"test","expiresAt":1}\n', stderr: "", code: 0 };
       },
       forward: async () => { forwarded++; return { localPort: 40000, close: async () => {} }; },
       dispose: () => { disposed++; },
@@ -91,7 +91,7 @@ test("remote download failure takes one verified upload path then pairs successf
   assert.equal(result.deviceToken, "device");
   assert.equal(f.uploads.length, 1); assert.equal(f.scripts.length, 2); assert.equal(f.paired.length, 1);
   assert.equal(f.uploads[0].expectedSha256, digest);
-  assert.match(f.scripts[1], /ARTIFACT_PATH='\/home\/test\/\.pi-desktop\/pi-host\/\.upload.ABC123\/artifact.tar.gz'/);
+  assert.match(f.scripts[1], /ARTIFACT_PATH='\/home\/test\/\.ocode\/ocode-host\/\.upload.ABC123\/artifact.tar.gz'/);
   assert.deepEqual(f.counts(), { cleanups: 1, disposed: 0, forwarded: 1 });
 });
 test("checksum failure never falls back or forwards", async () => {

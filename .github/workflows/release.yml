@@ -9,15 +9,15 @@
 # Builds installers for every platform defined in the electron-builder config
 # (macOS dmg/zip arm64 and x64, Windows NSIS and portable ZIP x64, Linux
 # AppImage/deb/rpm x64 and arm64), each
-# with its native pi-desktop-host-core Rust sidecar. The Linux app.asar is also
+# with its native ocode-host-core Rust sidecar. The Linux app.asar is also
 # exported as a system-Electron repackaging asset, and all outputs — with their
 # electron-updater latest*.yml feeds — are published to the GitHub Release
 # (D126/D285/D364/D603). macOS tag artifacts are Developer ID-signed, notarized, and
 # stapled before upload (D450 / ADR 0289).
 #
-# It also builds the headless `pi-host` bundle for both Linux architectures the
+# It also builds the headless `ocode-host` bundle for both Linux architectures the
 # desktop publishes and publishes each as
-# pi-host-<version>-linux-<arch>.tar.gz plus a .sha256 sidecar. The desktop's
+# ocode-host-<version>-linux-<arch>.tar.gz plus a .sha256 sidecar. The desktop's
 # SSH bootstrap downloads that asset at the desktop's version and verifies the
 # published checksum before installing on the remote machine (rollout
 # 06-delivery/07-remote-control-rollout.md §6 acceptance 4; D375 / ADR 0284).
@@ -71,7 +71,7 @@ jobs:
         run: pnpm build:js
 
       - name: Typecheck Desktop
-        run: pnpm --filter @pi-desktop/desktop typecheck
+        run: pnpm --filter @ocode/desktop typecheck
 
       - name: Lint
         run: pnpm lint
@@ -202,7 +202,7 @@ jobs:
           trap 'kill "$host_build_pid" 2>/dev/null || true' EXIT
 
           pnpm install --frozen-lockfile
-          pnpm --filter '@pi-desktop/desktop^...' --fail-if-no-match build
+          pnpm --filter '@ocode/desktop^...' --fail-if-no-match build
 
           wait "$host_build_pid"
           trap - EXIT
@@ -213,7 +213,7 @@ jobs:
         # must not self-publish on tag builds (no token; softprops owns it).
         # The explicit architecture keeps the package and native Rust sidecar
         # aligned with the runner selected by this matrix entry.
-        run: pnpm --filter @pi-desktop/desktop run ${{ matrix.dist }} -- --${{ matrix.arch }}
+        run: pnpm --filter @ocode/desktop run ${{ matrix.dist }} -- --${{ matrix.arch }}
 
       - name: Package unsigned macOS installer
         if: matrix.platform == 'macos' && env.MACOS_SIGN_RELEASE != 'true'
@@ -224,7 +224,7 @@ jobs:
           set -euo pipefail
           # Artifact names are defined in apps/desktop/package.json: the mac
           # pattern labels ZIPs, and the dmg target pattern labels DMGs.
-          pnpm --filter @pi-desktop/desktop run dist:mac -- --${{ matrix.arch }}
+          pnpm --filter @ocode/desktop run dist:mac -- --${{ matrix.arch }}
 
       - name: Diagnose macOS signing environment
         # Records the runner baseline (system, codesign, identities, keychain,
@@ -232,6 +232,9 @@ jobs:
         # imports the certificate. Informational: the Developer ID identity is
         # absent here by design and is imported from CSC_LINK during packaging.
         if: matrix.platform == 'macos'
+        env:
+          MAC_SIGNING_IDENTITY: ${{ secrets.MAC_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: scripts/macos-signing-diagnostics.sh
 
       - name: Require macOS signing and notarization secrets
@@ -239,6 +242,7 @@ jobs:
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          MAC_SIGNING_IDENTITY: ${{ secrets.MAC_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -247,6 +251,8 @@ jobs:
           missing=()
           [[ -n "${CSC_LINK}" ]] || missing+=(CSC_LINK)
           [[ -n "${CSC_KEY_PASSWORD}" ]] || missing+=(CSC_KEY_PASSWORD)
+          identity="${MAC_SIGNING_IDENTITY#Developer ID Application: }"
+          [[ -n "${identity//[[:space:]]/}" ]] || missing+=(MAC_SIGNING_IDENTITY)
           [[ -n "${APPLE_ID}" ]] || missing+=(APPLE_ID)
           [[ -n "${APPLE_APP_SPECIFIC_PASSWORD}" ]] || missing+=(APPLE_APP_SPECIFIC_PASSWORD)
           [[ -n "${APPLE_TEAM_ID}" ]] || missing+=(APPLE_TEAM_ID)
@@ -255,8 +261,12 @@ jobs:
             echo "::error::Add them under Settings → Secrets and variables → Actions. See docs/spec/06-delivery/06-release-runbook.md."
             exit 1
           fi
-          if [[ "${APPLE_TEAM_ID}" != "DUV63RKYTW" ]]; then
-            echo "::error::APPLE_TEAM_ID must be DUV63RKYTW (XingYu Liu Developer ID team)."
+          if [[ ! "${APPLE_TEAM_ID}" =~ ^[A-Z0-9]{10}$ ]]; then
+            echo "::error::APPLE_TEAM_ID must be 10 uppercase alphanumeric characters."
+            exit 1
+          fi
+          if [[ "$identity" != *" ($APPLE_TEAM_ID)" || "$identity" == *$'\n'* || "$identity" == *$'\r'* ]]; then
+            echo "::error::MAC_SIGNING_IDENTITY must name a Developer ID certificate in APPLE_TEAM_ID."
             exit 1
           fi
 
@@ -267,12 +277,13 @@ jobs:
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           # electron-builder rejects the "Developer ID Application:" prefix on
           # identity names and resolves the certificate itself, so CSC_NAME
-          # carries the bare common name only.
-          CSC_NAME: "XingYu Liu (DUV63RKYTW)"
+          # is normalized to the bare common name before packaging.
+          CSC_NAME: ${{ secrets.MAC_SIGNING_IDENTITY }}
+          MAC_SIGNING_IDENTITY: ${{ secrets.MAC_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          # electron-builder prints one "signing PI-Desktop.app" line and then
+          # electron-builder prints one "signing Ocode.app" line and then
           # goes quiet: @electron/osx-sign walks Contents and codesigns every
           # Mach-O serially, builder-util silently retries a failing pass up to
           # three times, and @electron/notarize zips, uploads, and waits for
@@ -287,22 +298,23 @@ jobs:
           DEBUG: "electron-osx-sign*,electron-notarize*"
           # 30 minutes keeps a stuck signing/notarization phase reported by the
           # watchdog (diagnostics + summary) inside the 60-minute job budget.
-          PI_SIGNING_TIMEOUT_SECONDS: "1800"
-          PI_SIGNING_STALL_SECONDS: "300"
-          PI_STAPLER_MAX_ATTEMPTS: "6"
-          PI_STAPLER_RETRY_DELAY_SECONDS: "10"
+          OCODE_SIGNING_TIMEOUT_SECONDS: "1800"
+          OCODE_SIGNING_STALL_SECONDS: "300"
+          OCODE_STAPLER_MAX_ATTEMPTS: "6"
+          OCODE_STAPLER_RETRY_DELAY_SECONDS: "10"
         run: |
           set -euo pipefail
+          export CSC_NAME="${CSC_NAME#Developer ID Application: }"
           # Artifact names are defined in apps/desktop/package.json: the mac
           # pattern labels ZIPs, and the dmg target pattern labels DMGs.
           # The watchdog forwards every line unchanged and keeps the child's
           # exit code; it adds a heartbeat while the phase is silent, dumps the
           # active codesign target and process state when it stalls, reports
           # per-file codesign timings, and fails the step after
-          # PI_SIGNING_TIMEOUT_SECONDS instead of waiting for the job timeout.
+          # OCODE_SIGNING_TIMEOUT_SECONDS instead of waiting for the job timeout.
           node scripts/macos-signing-watchdog.mjs \
             --label "dist:mac-${{ matrix.arch }}" \
-            -- pnpm --filter @pi-desktop/desktop run dist:mac -- --${{ matrix.arch }} \
+            -- pnpm --filter @ocode/desktop run dist:mac -- --${{ matrix.arch }} \
               -c.mac.forceCodeSigning=true \
               -c.mac.notarize=true
 
@@ -318,13 +330,14 @@ jobs:
       - name: Notarize and staple the macOS DMG
         if: matrix.platform == 'macos' && env.MACOS_SIGN_RELEASE == 'true'
         env:
+          MAC_SIGNING_IDENTITY: ${{ secrets.MAC_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           # 20 minutes bounds the second Apple wait; the packaging phase owns
           # the first one.
-          PI_SIGNING_TIMEOUT_SECONDS: "1200"
-          PI_SIGNING_STALL_SECONDS: "300"
+          OCODE_SIGNING_TIMEOUT_SECONDS: "1200"
+          OCODE_SIGNING_STALL_SECONDS: "300"
         run: |
           set -euo pipefail
           # notarytool submit --wait blocks until Apple answers; the watchdog
@@ -335,11 +348,14 @@ jobs:
 
       - name: Verify signed and notarized macOS installer
         if: matrix.platform == 'macos' && env.MACOS_SIGN_RELEASE == 'true'
+        env:
+          MAC_SIGNING_IDENTITY: ${{ secrets.MAC_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: scripts/verify-macos-release.sh apps/desktop/release
 
       - name: Verify Linux host-core glibc floor
         if: matrix.platform == 'linux'
-        run: node scripts/check-linux-host-glibc.mjs target/release/pi-desktop-host-core
+        run: node scripts/check-linux-host-glibc.mjs target/release/ocode-host-core
 
       - name: Export Linux ASAR release asset
         if: matrix.platform == 'linux'
@@ -366,16 +382,16 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          expected_dmg=(apps/desktop/release/PI-Desktop-*-${{ matrix.arch }}.dmg)
-          expected_dmg_blockmap=(apps/desktop/release/PI-Desktop-*-${{ matrix.arch }}.dmg.blockmap)
-          expected_zip=(apps/desktop/release/PI-Desktop-*-${{ matrix.arch }}-mac.zip)
-          expected_zip_blockmap=(apps/desktop/release/PI-Desktop-*-${{ matrix.arch }}-mac.zip.blockmap)
+          expected_dmg=(apps/desktop/release/Ocode-*-${{ matrix.arch }}.dmg)
+          expected_dmg_blockmap=(apps/desktop/release/Ocode-*-${{ matrix.arch }}.dmg.blockmap)
+          expected_zip=(apps/desktop/release/Ocode-*-${{ matrix.arch }}-mac.zip)
+          expected_zip_blockmap=(apps/desktop/release/Ocode-*-${{ matrix.arch }}-mac.zip.blockmap)
           if [[ "${#expected_dmg[@]}" -ne 1 || "${#expected_dmg_blockmap[@]}" -ne 1 || "${#expected_zip[@]}" -ne 1 || "${#expected_zip_blockmap[@]}" -ne 1 ]]; then
             echo "::error::Expected exactly one ${{ matrix.arch }} DMG, DMG blockmap, ZIP, and ZIP blockmap."
             printf '%s\n' apps/desktop/release/* || true
             exit 1
           fi
-          for artifact in apps/desktop/release/PI-Desktop-*; do
+          for artifact in apps/desktop/release/Ocode-*; do
             case "$artifact" in
               *-${{ matrix.arch }}.dmg|*-${{ matrix.arch }}.dmg.blockmap|*-${{ matrix.arch }}-mac.zip|*-${{ matrix.arch }}-mac.zip.blockmap) ;;
               *)
@@ -406,8 +422,8 @@ jobs:
             apps/desktop/release/*.blockmap
             apps/desktop/release/latest*.yml
 
-  pi-host-bundle:
-    name: Bundle pi-host (Linux ${{ matrix.arch }})
+  ocode-host-bundle:
+    name: Bundle ocode-host (Linux ${{ matrix.arch }})
     needs: verify
     strategy:
       fail-fast: false
@@ -415,7 +431,7 @@ jobs:
         include:
           # Every Linux platform the desktop release publishes. Keep this list
           # in lockstep with the desktop build matrix above and with
-          # PUBLISHED_TARGETS in apps/desktop/electron/main/remote/pi-host-release.ts:
+          # PUBLISHED_TARGETS in apps/desktop/electron/main/remote/ocode-host-release.ts:
           # a bundle the desktop refuses to install is dead weight, and a target
           # the desktop offers without a bundle fails mid-download.
           - arch: x64
@@ -475,24 +491,24 @@ jobs:
 
           pnpm install --frozen-lockfile
           pnpm build:js
-          pnpm --filter @pi-desktop/agent-runtime bundle
-          pnpm --filter @pi-desktop/pi-host build
+          pnpm --filter @ocode/agent-runtime bundle
+          pnpm --filter @ocode/host build
 
           wait "$host_build_pid"
           trap - EXIT
 
       - name: Verify host-core glibc floor
-        run: node scripts/check-linux-host-glibc.mjs target/release/pi-desktop-host-core
+        run: node scripts/check-linux-host-glibc.mjs target/release/ocode-host-core
 
-      - name: Assemble pi-host bundle
-        run: node apps/pi-host/scripts/bundle.mjs --platform linux --arch ${{ matrix.arch }}
+      - name: Assemble ocode-host bundle
+        run: node apps/ocode-host/scripts/bundle.mjs --platform linux --arch ${{ matrix.arch }}
 
       - name: Archive bundle with checksum
         run: |
           set -euo pipefail
-          VERSION="$(node -p "require('./apps/pi-host/package.json').version")"
-          name="pi-host-${VERSION}-linux-${{ matrix.arch }}"
-          out="apps/pi-host/dist-bundle"
+          VERSION="$(node -p "require('./apps/ocode-host/package.json').version")"
+          name="ocode-host-${VERSION}-linux-${{ matrix.arch }}"
+          out="apps/ocode-host/dist-bundle"
           if [ ! -d "$out/$name" ]; then
             echo "::error::expected bundle directory $out/$name"
             ls -la "$out" || true
@@ -502,20 +518,20 @@ jobs:
           ( cd "$out" && sha256sum "${name}.tar.gz" > "${name}.tar.gz.sha256" )
           cat "$out/${name}.tar.gz.sha256"
 
-      - name: Upload pi-host bundle
+      - name: Upload ocode-host bundle
         uses: actions/upload-artifact@v7
         with:
-          name: pi-host-linux-${{ matrix.arch }}
+          name: ocode-host-linux-${{ matrix.arch }}
           if-no-files-found: error
           compression-level: 0
           path: |
-            apps/pi-host/dist-bundle/pi-host-*-linux-${{ matrix.arch }}.tar.gz
-            apps/pi-host/dist-bundle/pi-host-*-linux-${{ matrix.arch }}.tar.gz.sha256
+            apps/ocode-host/dist-bundle/ocode-host-*-linux-${{ matrix.arch }}.tar.gz
+            apps/ocode-host/dist-bundle/ocode-host-*-linux-${{ matrix.arch }}.tar.gz.sha256
 
   publish:
     name: Publish GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build, pi-host-bundle]
+    needs: [build, ocode-host-bundle]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

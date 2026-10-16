@@ -28,9 +28,9 @@ import {
   MAX_INLINE_IMAGE_BYTES,
   type AgentPromptAttachment,
   type MessageAttachment,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
-export { MAX_INLINE_IMAGE_BYTES } from "@pi-desktop/shared";
+export { MAX_INLINE_IMAGE_BYTES } from "@ocode/shared";
 
 const IMAGE_EXTENSIONS = new Set([
   "avif",

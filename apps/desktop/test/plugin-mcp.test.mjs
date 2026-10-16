@@ -76,7 +76,7 @@ function handle(msg) {
     const name = msg.params.name;
     if (name === "echo") return text(msg.id, String(msg.params.arguments.text));
     if (name === "env") {
-      return text(msg.id, [process.env.PI_PLUGIN_ID, process.env.STUB_TOKEN, process.env.PI_LEAKED_SECRET ?? "absent"].join("|"));
+      return text(msg.id, [process.env.PI_PLUGIN_ID, process.env.STUB_TOKEN, process.env.OCODE_LEAKED_SECRET ?? "absent"].join("|"));
     }
     if (name === "roundtrip") {
       roundtripId = msg.id;
@@ -142,9 +142,9 @@ test("a stdio mcp server is handshaken, paginated and callable", async (t) => {
 
 test("a stdio server only sees the values the plugin declared", async (t) => {
   const dir = stdioPlugin();
-  process.env.PI_LEAKED_SECRET = "must-not-cross";
+  process.env.OCODE_LEAKED_SECRET = "must-not-cross";
   t.after(() => {
-    delete process.env.PI_LEAKED_SECRET;
+    delete process.env.OCODE_LEAKED_SECRET;
   });
   const client = new McpServerClient({
     pluginId: "com.example.mcp",
@@ -689,19 +689,19 @@ test("an oversized remote mcp response fails closed", async (t) => {
 });
 
 test("the stdio environment carries no host secrets", () => {
-  process.env.PI_LEAKED_SECRET = "must-not-cross";
+  process.env.OCODE_LEAKED_SECRET = "must-not-cross";
   try {
     const env = mcpProcessEnv("com.example.mcp", { TOKEN: "t0ken" });
     assert.equal(env.PI_PLUGIN_ID, "com.example.mcp");
     assert.equal(env.TOKEN, "t0ken");
-    assert.equal(env.PI_LEAKED_SECRET, undefined);
+    assert.equal(env.OCODE_LEAKED_SECRET, undefined);
     // PATH still crosses, or a bare command name could never be found.
     assert.ok(typeof env.PATH === "string" && env.PATH.length > 0);
     for (const part of (process.env.PATH ?? "").split(delimiter).filter(Boolean)) {
       assert.ok(env.PATH.split(delimiter).includes(part), part);
     }
   } finally {
-    delete process.env.PI_LEAKED_SECRET;
+    delete process.env.OCODE_LEAKED_SECRET;
   }
 });
 

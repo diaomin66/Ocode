@@ -32,7 +32,7 @@ const { registerSessionIpc } = load("../electron/main/ipc/session-ipc.ts", {
   electron: { shell: {} },
   "node:fs": fs,
   "node:path": path,
-  "@pi-desktop/shared": shared,
+  "@ocode/shared": shared,
   "../importers": {},
   "../services/session-collaboration": collaboration,
   "../bootstrap/remote-hosts.js": { getActiveRemoteHostsBoot: () => null },
@@ -79,25 +79,25 @@ function rendererApi(invoke) {
   load("../electron/preload/index.ts", {
     electron: {
       contextBridge: { exposeInMainWorld: (name, value) => {
-        assert.equal(name, "piDesktop");
+        assert.ok(name === "ocode" || name === "piDesktop");
         bridge = value;
       } },
       ipcRenderer: { invoke },
       webUtils: {},
     },
-    "@pi-desktop/shared": shared,
-    "@pi-desktop/shared/protocol": shared,
+    "@ocode/shared": shared,
+    "@ocode/shared/protocol": shared,
   });
   const { api } = load("../src/lib/api.ts", {
-    "@pi-desktop/shared": shared,
+    "@ocode/shared": shared,
     "./plan-history": load("../src/lib/plan-history.ts", {}),
     "./remote-ipc-safety": load("../src/lib/remote-ipc-safety.ts", {
-      "@pi-desktop/shared": shared,
+      "@ocode/shared": shared,
       i18next: { default: i18n },
     }),
     "./remote-session-safety": load("../src/lib/remote-session-safety.ts", {}),
   }, {
-    window: { piDesktop: bridge },
+    window: { ocode: bridge },
   });
   return { api, bridge };
 }

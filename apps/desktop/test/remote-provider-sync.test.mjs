@@ -12,9 +12,9 @@ const hook = pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")).href;
 register(hook);
 const { buildImportPayload, importProvidersOverSsh } = await import("../electron/main/remote/remote-provider-sync.ts");
 const { createSystemSshTransport } = await import("../electron/main/remote/ssh-transport.ts");
-const { startAdminSocket } = await import("../../pi-host/src/admin-socket.ts");
+const { startAdminSocket } = await import("../../ocode-host/src/admin-socket.ts");
 const originalCwd = process.cwd();
-before(() => process.chdir(process.env.PI_SCRATCH_DIR ?? tmpdir()));
+before(() => process.chdir(process.env.OCODE_SCRATCH_DIR ?? tmpdir()));
 after(() => process.chdir(originalCwd));
 const KEY = "fixture-only-private-api-key";
 const model = (id) => ({ id, contextWindow: 160000, contextWindowSource: "user", maxTokens: 8000, maxTokensSource: "catalog", thinkingLevels: ["off", "high", "max"], defaultThinkingLevel: "max", thinkingProtocol: "adaptive", supportsImages: false, supportsDocuments: null, availableForSubagents: true, nativeWebSearch: true });
@@ -49,8 +49,8 @@ test("selected providers flow through SSH stdin, the CLI, the live socket and ho
   } };
   const server = await startAdminSocket({ dataDir: dir, getHost: () => host });
   t.after(() => server.close());
-  const command = 'node "$HOME/.pi-desktop/pi-host/current/pi-host.js" provider-import';
-  const cli = fileURLToPath(new URL("../../pi-host/src/cli.ts", import.meta.url));
+  const command = 'node "$HOME/.ocode/ocode-host/current/ocode-host.js" provider-import';
+  const cli = fileURLToPath(new URL("../../ocode-host/src/cli.ts", import.meta.url));
   // External SSH edge only: the fixture executes the real CLI with stdin/stdout
   // inherited. No SSH, provider network, runtime or user Desktop is started.
   const flags = [];
@@ -109,9 +109,9 @@ test("preserves zero overrides and snapshots the selection across key retrieval"
 test("malformed/secret-bearing remote results and SSH errors never escape; every transport is disposed", async () => {
   const payload = await buildImportPayload(selection());
   for (const result of [
-    { code: 0, stdout: `PI_HOST_PROVIDERS {"imported": "${KEY}"}` },
-    { code: 0, stdout: `PI_HOST_FAILED {"code":"${KEY}"}` },
-    { code: 0, stdout: `PI_HOST_PROVIDERS {"imported":[],"skipped":[],"defaultSet":false,"secretValue":"${KEY}"}` },
+    { code: 0, stdout: `OCODE_HOST_PROVIDERS {"imported": "${KEY}"}` },
+    { code: 0, stdout: `OCODE_HOST_FAILED {"code":"${KEY}"}` },
+    { code: 0, stdout: `OCODE_HOST_PROVIDERS {"imported":[],"skipped":[],"defaultSet":false,"secretValue":"${KEY}"}` },
     { code: 0, stdout: "x".repeat(65537) },
     { code: 1, stdout: KEY },
     new Error(KEY),

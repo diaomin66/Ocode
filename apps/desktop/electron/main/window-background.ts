@@ -1,5 +1,5 @@
 import type { BrowserWindow, BrowserWindowConstructorOptions } from "electron";
-import { isWindowBackgroundColor } from "@pi-desktop/plugin-sdk";
+import { isWindowBackgroundColor } from "@ocode/plugin-sdk";
 
 type BackgroundPlatform = NodeJS.Platform;
 type BackgroundWindow = Pick<BrowserWindow, "contentView" | "setBackgroundColor">;

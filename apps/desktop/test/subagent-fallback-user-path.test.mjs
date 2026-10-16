@@ -14,7 +14,7 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
 import { SubagentEditorSheet } from "../../apps/desktop/src/components/settings/SubagentEditorSheet";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
 import "../../apps/desktop/src/styles/model-config.css";
@@ -22,7 +22,7 @@ import "../../apps/desktop/src/styles/model-config.css";
 await i18n.use(initReactI18next).init({ lng: "en", keySeparator: false,
   resources: { en: { translation: flattenCatalog(catalogs.en) } },
   interpolation: { escapeValue: false } });
-window.piDesktop = { platform: "win32", on() { return () => {}; },
+window.ocode = { platform: "win32", on() { return () => {}; },
   invoke() { throw new Error("Unexpected IPC in fallback display test"); } };
 const provider = (id, name) => ({ id, name, vendorKey: "custom", enabled: true,
   hasSecret: true, hasOauth: false, authKind: "api_key_and_base_url", models: [{ id: "model" }] });
@@ -101,8 +101,8 @@ test("saved fallback names survive provider disable, move, remove, keyboard add 
       outfile: join(temp, "renderer.js"), bundle: true, platform: "browser", format: "esm", jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@ocode/i18n": join(root, "packages/i18n/src"),
+        "@ocode/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

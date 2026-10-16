@@ -1,7 +1,7 @@
 import type { SessionModelRef } from "./session-model";
 
 export type RecentModel = { providerId: string; modelId: string };
-const KEY = "pi.desktop.recentModels";
+const KEY = "ocode.desktop.recentModels";
 const LIMIT = 20;
 
 export function sameRecentModel(left: RecentModel, right: RecentModel): boolean {

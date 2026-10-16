@@ -26,8 +26,8 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createServer, connect } from "node:net";
 import { createReadStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
-import { ErrorCodes } from "@pi-desktop/shared";
-import { redactBootstrapOutput } from "./pi-host-bootstrap-script.js";
+import { ErrorCodes } from "@ocode/shared";
+import { redactBootstrapOutput } from "./ocode-host-bootstrap-script.js";
 import { createSshAskpass, type SshAskpassMaterial } from "./ssh-askpass.js";
 
 /** Where to reach a machine over SSH. */

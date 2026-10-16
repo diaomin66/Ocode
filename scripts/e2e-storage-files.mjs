@@ -25,7 +25,7 @@ await createPackage(archiveSource, join(artifacts, "fixture.asar"));
 const main = join(artifacts, "main.mjs");
 await build({ entryPoints: [join(root, "scripts/e2e/storage-files-main.mjs")],
   outfile: main, bundle: true, platform: "node", format: "esm", external: ["electron", "original-fs"] });
-const env = { ...process.env, PI_STORAGE_FILES_ARTIFACTS: artifacts };
+const env = { ...process.env, OCODE_STORAGE_FILES_ARTIFACTS: artifacts };
 delete env.ELECTRON_RUN_AS_NODE;
 const child = spawn(resolveElectronBinary(root).electronBinary, [main], { env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
 let output = "";

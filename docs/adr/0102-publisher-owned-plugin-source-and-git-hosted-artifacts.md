@@ -6,7 +6,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-08-18
-- Deciders: PI-Desktop plugin and distribution maintainers
+- Deciders: Ocode plugin and distribution maintainers
 - Supersedes: ADR 0006 (marketplace postponed)
 - Amends: ADR 0007 (plugin package format), ADR 0005 (user-installable plugins)
 
@@ -44,7 +44,7 @@ We want the ownership model without operating object storage.
 ### 1. The publisher's repository is the source of truth
 
 A publisher submits a repository coordinate — canonical HTTPS repository URL,
-path, and a ref that resolves to a 40-hex commit. PI-Desktop never copies plugin
+path, and a ref that resolves to a 40-hex commit. Ocode never copies plugin
 source into a project-owned repository. `pluginId`, `publisherId`, the linked
 repository, and the packaged `manifest.json` identity must agree, and a published
 version is pinned to exactly one `(repository, commit, path)` tuple.
@@ -63,7 +63,7 @@ keeps mirroring it. There is no S3, no R2, and no separately operated CDN.
   own repository, or the center's isolated runner builds it from the pinned
   commit.
 - The center verifies the bytes, then commits the package to
-  `pi-desktop-plugins/packages/` together with a regenerated `catalog.json`, in
+  `ocode-plugins/packages/` together with a regenerated `catalog.json`, in
   one commit.
 - Package URLs stay relative, so they resolve against whichever host served the
   catalog. Switching between GitHub and the CNB mirror therefore cannot send a
@@ -113,7 +113,7 @@ attention.
 ## Consequences
 
 - Third-party publishers can ship plugins without write access to any
-  PI-Desktop-owned repository, and can version on their own schedule.
+  Ocode-owned repository, and can version on their own schedule.
 - The default catalog URL is unchanged, so no client release and no user action
   is needed to reach plugins published through the center.
 - The client needs no code change for this decision: relative package URLs

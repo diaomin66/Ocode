@@ -3,8 +3,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { SettingsPage } from "../../apps/desktop/src/features/settings/SettingsPage";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
 import { initLanguageSync } from "../../apps/desktop/src/lib/app-language";
@@ -33,10 +33,10 @@ let updateState = {
   status: "available",
   currentVersion: "0.15.8",
   availableVersion: "0.15.9",
-  releasesUrl: "https://github.com/vastsa/PI-Desktop/releases/latest",
+  releasesUrl: "https://github.com/diaomin66/Ocode/releases/latest",
 };
 const updateStateListeners = new Set();
-window.piDesktop = {
+window.ocode = {
   platform: "darwin",
   on(channel, listener) {
     if (channel === IPC.event.updatesState) updateStateListeners.add(listener);

@@ -4,8 +4,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { catalogs } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { createServer } from "vite";
 import { fileURLToPath } from "node:url";
 
@@ -17,7 +17,7 @@ async function harness() {
   const listeners = new Map();
   const reads = [];
   let read = async () => { throw new Error("host unavailable"); };
-  globalThis.window = { piDesktop: {
+  globalThis.window = { ocode: {
     invoke: async (channel, input) => {
       assert.equal(channel, IPC.invoke.todosGet);
       reads.push(input.sessionId);

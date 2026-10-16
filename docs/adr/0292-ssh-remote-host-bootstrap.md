@@ -18,7 +18,7 @@ The historical constraints and alternatives below remain context for that amendm
 
 ADR 0286 delivered the desktop-side R2a kernel and left the bootstrap explicitly
 out of scope: "Every paired host today assumes the loopback URL already exists."
-Reaching another machine meant the user installed `pi-host` there, started it,
+Reaching another machine meant the user installed `ocode-host` there, started it,
 opened `ssh -L` themselves, and pasted the resulting URL and a pairing token into
 Settings.
 
@@ -29,7 +29,7 @@ executable bytes, and it never holds an SSH secret.
 
 Three properties of the system as it stands shaped the design:
 
-- `release.yml` publishes `pi-host-<version>-<platform>-<arch>.tar.gz` and its
+- `release.yml` publishes `ocode-host-<version>-<platform>-<arch>.tar.gz` and its
   `.sha256` to the `v<version>` GitHub Release, and the bundle matrix is Linux
   x64 only.
 - A paired host is a URL in `remote-hosts.json`, but a bootstrapped host has no
@@ -51,7 +51,7 @@ extended boot hook, and one new IPC channel.
    `StrictHostKeyChecking=accept-new`, `ConnectTimeout=15`, and
    `ExitOnForwardFailure=yes`.
 
-2. **Pure release coordinates (`pi-host-release.ts`).** The artifact is resolved
+2. **Pure release coordinates (`ocode-host-release.ts`).** The artifact is resolved
    for the *remote* platform at the *desktop's* version, and the SHA-256 the
    release publishes is the trust anchor. `PUBLISHED_TARGETS` is the release
    matrix (`linux-x64` and `linux-arm64`), so any other target is refused with
@@ -60,14 +60,14 @@ extended boot hook, and one new IPC channel.
    constant-work digest comparison, and the version-parity rule are all pure
    functions with no network and no SSH.
 
-3. **One script runs remotely (`pi-host-bootstrap-script.ts`).** It downloads the
-   pinned URL, verifies the digest, installs under `$HOME/.pi-desktop/pi-host`,
-   (re)starts the host on loopback with `--pair`, and echoes `PI_HOST_READY` /
-   `PI_HOST_PAIRING_TOKEN`. It runs under `umask 077`, so the single-use pairing
+3. **One script runs remotely (`ocode-host-bootstrap-script.ts`).** It downloads the
+   pinned URL, verifies the digest, installs under `$HOME/.ocode/ocode-host`,
+   (re)starts the host on loopback with `--pair`, and echoes `OCODE_HOST_READY` /
+   `OCODE_HOST_PAIRING_TOKEN`. It runs under `umask 077`, so the single-use pairing
    token only ever exists in a work file inside the bootstrap directory and on
    the SSH channel's stdout — never a world-readable path, never a URL
    (security §3.4). Every failure exits non-zero after a
-   `PI_HOST_BOOTSTRAP_FAILED <step>` line, so the desktop reports the step that
+   `OCODE_HOST_BOOTSTRAP_FAILED <step>` line, so the desktop reports the step that
    failed instead of a bare exit code. Generating it is pure and every input is
    shell-quoted by `shellQuote`, which is what lets the tests execute the
    generated text for real.
@@ -92,7 +92,7 @@ extended boot hook, and one new IPC channel.
 
 6. **Version parity is checked before a forward exists.** The desktop's version
    is what gets downloaded — there is no version negotiation — and
-   `PI_HOST_READY.version` must equal it (`v` prefix tolerated either way). A
+   `OCODE_HOST_READY.version` must equal it (`v` prefix tolerated either way). A
    mismatch raises `HOST_VERSION_MISMATCH` (D375) before any forward exists, and
    the desktop tears down the SSH processes it spawned on the way out instead of
    leaving a half-connected host behind.
@@ -106,7 +106,7 @@ extended boot hook, and one new IPC channel.
    change carry no `transport` and read as `direct`.
 
 8. **One IPC channel and one pairing exchange.**
-   `pi-desktop/remoteHost/bootstrap` joins `list` / `pair` / `remove` and carries
+   `ocode/remoteHost/bootstrap` joins `list` / `pair` / `remove` and carries
    a host, never a credential. The `connection/pair` exchange was factored into
    `exchangePairingToken`, used by both the pasted-URL path and the bootstrap
    path, and it closes its throwaway connection on every path. `bootstrapHost`
@@ -120,7 +120,7 @@ extended boot hook, and one new IPC channel.
   resolves itself.
 - No executable bytes travel over the SSH channel. The remote script downloads
   the bundle; the bytes the desktop sends are the script text on stdin.
-- `pi-host` keeps binding loopback only. The desktop reaches it through a
+- `ocode-host` keeps binding loopback only. The desktop reaches it through a
   forward and never opens a listener of its own.
 - The renderer stays transport-agnostic. `RemoteHostSummary.transport` is
   optional and rendered as a label; no renderer call branches on it.

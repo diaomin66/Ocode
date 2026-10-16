@@ -1,10 +1,10 @@
 /**
  * Capture-rig fixtures for the screenshot suite (electron/main, driven by
- * `PI_DESKTOP_CAPTURE=1`). Nothing here ships on the production code path:
+ * `OCODE_CAPTURE=1`). Nothing here ships on the production code path:
  * `renderer-api.ts` only `import()`s this module the first time a fixture
- * method is called while `window.__PI_CAPTURE__` is set.
+ * method is called while `window.__OCODE_CAPTURE__` is set.
  *
- * Every method still checks `__PI_CAPTURE__` itself because several seed
+ * Every method still checks `__OCODE_CAPTURE__` itself because several seed
  * fixtures are destructive (they replace transcript, sessions, or
  * monkey-patch `api.*` list calls) and must never run from a stray call.
  */
@@ -17,7 +17,7 @@ import type {
   SubagentDefinition,
   UserSkillRecord,
   UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { useAppStore } from "../stores/app-store";
 import { api } from "../lib/api";
 import { browserPluginTab, toolWorkPanelTab } from "../lib/work-panel-tabs";
@@ -69,7 +69,7 @@ export function installCaptureRig(): CaptureRig {
       kind: "review" | "browser" | "file",
       resource?: string,
     ) => {
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (kind === "file" && resource) {
         useAppStore.getState().openFileInWorkPanel(resource);
         return;
@@ -83,7 +83,7 @@ export function installCaptureRig(): CaptureRig {
       }
     },
     collapseWorkPanel: () => {
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       useAppStore.getState().collapseWorkPanel();
     },
     /**
@@ -92,21 +92,21 @@ export function installCaptureRig(): CaptureRig {
      * empty body is photographed. Production reaches it via `Cmd/Ctrl+J`.
      */
     openWorkPanel: () => {
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       useAppStore.getState().openWorkPanel();
     },
     openNewWorkPanelTab: () => {
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       useAppStore.getState().openNewWorkPanelTab();
     },
     setWorkPanelWidth: (width) => {
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       useAppStore.getState().setWorkPanelWidth(width);
     },
     seedTranscript: (count = 12) => {
       // Capture-only transcript fixture (conversation minimap scenes);
       // count 0 restores the empty transcript for later scenes.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({ messages: [] });
         return;
@@ -121,7 +121,7 @@ export function installCaptureRig(): CaptureRig {
         ["user", "启动报错了，说找不到 host 二进制"],
         [
           "assistant",
-          "这是因为 Rust 侧还没编译。运行 `cargo build -p pi-desktop-host-core`，产物会出现在 `target/debug/` 下，Electron 主进程会自动拾取。",
+          "这是因为 Rust 侧还没编译。运行 `cargo build -p ocode-host-core`，产物会出现在 `target/debug/` 下，Electron 主进程会自动拾取。",
         ],
         ["user", "编译通过了，界面也起来了"],
         [
@@ -136,7 +136,7 @@ export function installCaptureRig(): CaptureRig {
         ["user", "分组标题的字号再小一点"],
         [
           "assistant",
-          "已把分组标题从 `--text-sm` 调整为 `--text-2xs`，同时收紧了上下间距，现在与 PI-Desktop 的密度一致。",
+          "已把分组标题从 `--text-sm` 调整为 `--text-2xs`，同时收紧了上下间距，现在与 Ocode 的密度一致。",
         ],
         ["user", "最后跑一遍检查"],
         [
@@ -161,7 +161,7 @@ export function installCaptureRig(): CaptureRig {
       // The Review tab reads the session transcript, so the fixture is a set
       // of successful workspace Write/Edit tool messages carrying
       // `details.review`; count 0 restores the empty transcript.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({ messages: [] });
         return;
@@ -293,7 +293,7 @@ export function installCaptureRig(): CaptureRig {
       // success — the case the head must not read as done (D227) — a success
       // with output, and one still running; count 0 restores the empty
       // transcript.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({ messages: [] });
         return;
@@ -326,7 +326,7 @@ export function installCaptureRig(): CaptureRig {
           },
         },
         {
-          command: "pnpm --filter @pi-desktop/desktop build",
+          command: "pnpm --filter @ocode/desktop build",
           status: "running" as const,
           details: undefined,
         },
@@ -359,7 +359,7 @@ export function installCaptureRig(): CaptureRig {
       // in the same transcript, so the scene shows that a lone delegation now
       // gets the same card as a fan-out; count 0 restores the empty
       // transcript.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({ messages: [] });
         return;
@@ -444,7 +444,7 @@ export function installCaptureRig(): CaptureRig {
       // Capture-only plugins fixture (plugins index scenes); count 0 clears.
       // One sample per row group so the D169 bands are all exercised, and one
       // sample per new contribution kind so the capability/service chips do.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({ plugins: [] });
         (api as any).listPluginServices = originalListPluginServices;
@@ -647,7 +647,7 @@ export function installCaptureRig(): CaptureRig {
       // straight from IPC into local state rather than the store, so the rig
       // has to stand in for the host rather than seed a slice; count 0 puts
       // the real calls back.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         (api as any).listMcpServers = originalListMcpServers;
         (api as any).listUserSkills = originalListUserSkills;
@@ -932,7 +932,7 @@ export function installCaptureRig(): CaptureRig {
     seedPluginThemes: (count = 2) => {
       // Capture-only theme fixture: plugin themes share the built-in grid on
       // the general settings page, so the rig needs some to render.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({ pluginThemes: [] });
         return;
@@ -959,7 +959,7 @@ export function installCaptureRig(): CaptureRig {
     },
     seedNotifications: (count = 105) => {
       // Capture-only notification fixture; count 0 restores an empty inbox.
-      if (!window.__PI_CAPTURE__) return;
+      if (!window.__OCODE_CAPTURE__) return;
       if (count <= 0) {
         useAppStore.setState({
           notifications: [],
@@ -995,7 +995,7 @@ export function installCaptureRig(): CaptureRig {
       });
     },
     seedSidebarStatuses: () => {
-      if (!window.__PI_CAPTURE__) return null;
+      if (!window.__OCODE_CAPTURE__) return null;
       const sessions = useAppStore.getState().sessions.slice(0, 4);
       if (sessions.length < 4) return null;
       const [selected, running, completed, failed] = sessions;
@@ -1018,15 +1018,15 @@ export function installCaptureRig(): CaptureRig {
     },
     ensureVisualFixtures: async () => {
       // Destructive fixture seeding is capture-rig only; the rig sets
-      // __PI_CAPTURE__ before invoking (see electron/main capture suite).
-      if (!window.__PI_CAPTURE__) return;
+      // __OCODE_CAPTURE__ before invoking (see electron/main capture suite).
+      if (!window.__OCODE_CAPTURE__) return;
       // Optical hero title length: short folder basenames under-ink vs Codex gold.
       const ws = useAppStore.getState().workspace;
       if (ws?.path) {
         const base = (ws.name || ws.path.split(/[\/]/).filter(Boolean).pop() || "").trim();
         if (base.length > 0 && base.length < 12) {
           useAppStore.setState({
-            workspace: { ...ws, name: "PI-Desktop" },
+            workspace: { ...ws, name: "Ocode" },
           });
         }
       }
@@ -1077,12 +1077,12 @@ export function installCaptureRig(): CaptureRig {
           .sessions.find((s) => (s.title || "").trim() === "同步代码");
         if (preferred) {
           try {
-            const raw = localStorage.getItem("pi.desktop.pinnedSessions");
+            const raw = localStorage.getItem("ocode.desktop.pinnedSessions");
             const parsed = raw ? JSON.parse(raw) : [];
             const pins = Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : [];
             if (!pins.includes(preferred.id)) {
               localStorage.setItem(
-                "pi.desktop.pinnedSessions",
+                "ocode.desktop.pinnedSessions",
                 JSON.stringify([preferred.id, ...pins].slice(0, 40)),
               );
             }

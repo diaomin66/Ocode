@@ -98,7 +98,7 @@ test("renders semantic, shape-distinct sidebar status indicators", () => {
   );
   const styles = loadStylesSync();
   // The status fixture lives in the capture rig, which App only loads lazily
-  // behind __PI_CAPTURE__.
+  // behind __OCODE_CAPTURE__.
   const app = fs.readFileSync(
     new URL("../src/capture/capture-rig.ts", import.meta.url),
     "utf8",
@@ -121,6 +121,6 @@ test("renders semantic, shape-distinct sidebar status indicators", () => {
   );
   assert.match(
     main,
-    /PI_DESKTOP_CAPTURE_STATUS_ONLY[\s\S]*prefers-reduced-motion[\s\S]*SIDEBAR_STATUS_PROBE[\s\S]*pi-sidebar-status-/,
+    /OCODE_CAPTURE_STATUS_ONLY[\s\S]*prefers-reduced-motion[\s\S]*SIDEBAR_STATUS_PROBE[\s\S]*pi-sidebar-status-/,
   );
 });

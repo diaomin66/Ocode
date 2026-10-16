@@ -55,8 +55,8 @@ test("agent-runtime bundle uses hashed ESM chunks and a stable sidecar entry", (
 test("agent-runtime bundle declares the bundled-Node flag for the extension loader", () => {
   assert.match(
     bundleSource,
-    /define:\s*\{\s*PI_BUNDLED_NODE:\s*"true"\s*\}/,
-    "bundle must define PI_BUNDLED_NODE for packaged native Pi extensions",
+    /define:\s*\{\s*OCODE_BUNDLED_NODE:\s*"true"\s*\}/,
+    "bundle must define OCODE_BUNDLED_NODE for packaged native Pi extensions",
   );
 });
 
@@ -109,7 +109,7 @@ test(
         TMPDIR: workDir,
       };
       delete childEnv.NODE_PATH;
-      delete childEnv.PI_DESKTOP_PROXY_JSON;
+      delete childEnv.OCODE_PROXY_JSON;
       child = spawn(process.execPath, [join(bundleDir, "sidecar.js")], {
         cwd: workDir,
         env: childEnv,

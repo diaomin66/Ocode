@@ -279,8 +279,8 @@ test("session time sort modes keep missing timestamps stable at the end", () => 
 
 test("legacy pin preferences migrate once and respect a later unpin", () => {
   const values = new Map([
-    ["pi.desktop.pinnedSessions", JSON.stringify(["legacy-session"])],
-    ["pi.desktop.pinnedProjects", JSON.stringify(["/work/legacy/"])],
+    ["ocode.desktop.pinnedSessions", JSON.stringify(["legacy-session"])],
+    ["ocode.desktop.pinnedProjects", JSON.stringify(["/work/legacy/"])],
   ]);
   const previousStorage = globalThis.localStorage;
   globalThis.localStorage = {
@@ -447,7 +447,7 @@ test("manual title metadata survives a renderer restart", () => {
 test("renames a recent project without changing its recency", () => {
   const values = new Map([
     [
-      "pi.desktop.recentProjects",
+      "ocode.desktop.recentProjects",
       JSON.stringify([
         { path: "/work/api/", name: "api", openedAt: 42, pinned: true },
         { path: "/work/web", name: "web", openedAt: 7 },
@@ -489,10 +489,10 @@ test("renames a recent project without changing its recency", () => {
 
 test("home switcher lists retained sidebar projects and the active workspace", () => {
   const projects = listSwitcherProjects({
-    openProjectPaths: ["/Users/lan/PI-Desktop", "/Users/lan/pi-desktop-plugins"],
+    openProjectPaths: ["/Users/lan/Ocode", "/Users/lan/ocode-plugins"],
     openProjects: [
-      { path: "/Users/lan/PI-Desktop", name: "PI-Desktop" },
-      { path: "/Users/lan/pi-desktop-plugins", name: "pi-desktop-plugins" },
+      { path: "/Users/lan/Ocode", name: "Ocode" },
+      { path: "/Users/lan/ocode-plugins", name: "ocode-plugins" },
     ],
     workspace: { path: "/Users/lan/other", name: "other" },
     projectMeta: {},
@@ -501,7 +501,7 @@ test("home switcher lists retained sidebar projects and the active workspace", (
 
   assert.deepEqual(
     projects.map((project) => project.name),
-    ["other", "PI-Desktop", "pi-desktop-plugins"],
+    ["Ocode", "ocode-plugins", "other"],
   );
 });
 
@@ -528,22 +528,22 @@ test("home switcher hides archived projects and prefers renamed labels", () => {
 
 test("home switcher search matches name or path and ignores case", () => {
   const projects = [
-    { key: "/tmp/pi-desktop", path: "/tmp/pi-desktop", name: "PI-Desktop", pinned: false },
+    { key: "/tmp/ocode", path: "/tmp/ocode", name: "Ocode", pinned: false },
     {
       key: "/tmp/plugins",
       path: "/tmp/plugins",
-      name: "pi-desktop-plugins",
+      name: "ocode-plugins",
       pinned: false,
     },
   ];
 
   assert.deepEqual(
     filterSwitcherProjects(projects, "PLUGIN").map((project) => project.name),
-    ["pi-desktop-plugins"],
+    ["ocode-plugins"],
   );
   assert.deepEqual(
-    filterSwitcherProjects(projects, "/tmp/pi-desktop").map((project) => project.name),
-    ["PI-Desktop"],
+    filterSwitcherProjects(projects, "/tmp/ocode").map((project) => project.name),
+    ["Ocode"],
   );
   assert.equal(filterSwitcherProjects(projects, "   ").length, 2);
 });

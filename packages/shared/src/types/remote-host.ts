@@ -1,5 +1,5 @@
 /**
- * Renderer-facing shape of one paired remote `pi-host`. The device token that
+ * Renderer-facing shape of one paired remote `ocode-host`. The device token that
  * authenticates the connection stays inside Electron main — the renderer only
  * sees the routing key, label, URL, and last-known live-connection state so
  * the Settings row can render a status pill without a second round trip.
@@ -55,7 +55,7 @@ export type RemoteHostSshMetadata = {
   identityFile?: string;
   /** Absent means `key`, so descriptors written before password auth read back unchanged. */
   auth?: RemoteHostSshAuth;
-  /** `pi-host`'s loopback port on the remote machine. */
+  /** `ocode-host`'s loopback port on the remote machine. */
   remotePort: number;
   /** Release version the bootstrap installed, checked against `APP_VERSION`. */
   version: string;
@@ -105,7 +105,7 @@ export type RemoteHostRemoveRequest = {
 };
 
 /**
- * Input for `remoteHostBootstrap`: install and pair a `pi-host` on a machine
+ * Input for `remoteHostBootstrap`: install and pair a `ocode-host` on a machine
  * the user can already reach over SSH (spec §5.2). The desktop uses the user's
  * own SSH configuration and keys, so no credential ever crosses this IPC
  * channel.
@@ -122,7 +122,7 @@ export type RemoteHostBootstrapRequest = {
   /** `ssh -i` value; absent means the agent and `~/.ssh/config` decide. */
   identityFile?: string;
   /**
-   * Loopback port `pi-host` should bind on the remote machine. `0` or absent
+   * Loopback port `ocode-host` should bind on the remote machine. `0` or absent
    * lets the host pick a free port and report it back.
    */
   remotePort?: number;

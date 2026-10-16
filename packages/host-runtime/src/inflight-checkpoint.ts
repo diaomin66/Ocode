@@ -1,4 +1,4 @@
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@ocode/shared";
 
 /**
  * Minimum spacing between two checkpoints of the same session (D299). One

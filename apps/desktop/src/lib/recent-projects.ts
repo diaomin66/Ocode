@@ -1,4 +1,4 @@
-import type { RemoteWorkspace } from "@pi-desktop/shared";
+import type { RemoteWorkspace } from "@ocode/shared";
 
 export type RecentProject = {
   remote?: RemoteWorkspace;
@@ -10,7 +10,7 @@ export type RecentProject = {
   color?: string;
 };
 
-const KEY = "pi.desktop.recentProjects";
+const KEY = "ocode.desktop.recentProjects";
 const MAX = 24;
 
 const COLORS = ["#6b6b6b", "#5d5d5d", "#4f4f4f", "#414141", "#383838", "#303030"];

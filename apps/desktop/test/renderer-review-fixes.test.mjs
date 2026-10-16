@@ -18,7 +18,7 @@ test("screenshot fixtures stay out of the production App bundle", () => {
   // App only mounts the tiny automation surface; the fixtures are a separate
   // module reached through a dynamic import.
   assert.match(app, /useEffect\(\(\) => installRendererApi\(\), \[\]\);/);
-  assert.doesNotMatch(app, /__PI_CAPTURE__|seedTranscript|ensureVisualFixtures|\(api as any\)/);
+  assert.doesNotMatch(app, /__OCODE_CAPTURE__|seedTranscript|ensureVisualFixtures|\(api as any\)/);
   assert.match(rendererApi, /import\("\.\/capture-rig"\)/);
   assert.match(rendererApi, /^import type \{[^}]*\} from "\.\/capture-rig";/m);
   assert.doesNotMatch(rendererApi, /^import \{[^}]*\} from "\.\/capture-rig";/m);
@@ -36,11 +36,11 @@ test("screenshot fixtures stay out of the production App bundle", () => {
   }
   // Fixture stubs refuse to load the rig unless the capture flag is set, and
   // every fixture in the rig re-checks it before touching state.
-  assert.match(rendererApi, /if \(!window\.__PI_CAPTURE__\) return undefined;/);
-  const guards = captureRig.match(/if \(!window\.__PI_CAPTURE__\) return/g) ?? [];
+  assert.match(rendererApi, /if \(!window\.__OCODE_CAPTURE__\) return undefined;/);
+  const guards = captureRig.match(/if \(!window\.__OCODE_CAPTURE__\) return/g) ?? [];
   const fixtures = captureRig.match(/^    (?:seed\w+|ensureVisualFixtures|openWorkPanel\w*|collapseWorkPanel): /gm) ?? [];
   assert.ok(fixtures.length >= 13, `expected the fixture methods, saw ${fixtures.length}`);
-  assert.ok(guards.length >= fixtures.length, "every fixture checks __PI_CAPTURE__");
+  assert.ok(guards.length >= fixtures.length, "every fixture checks __OCODE_CAPTURE__");
   // Restoring the monkey-patched api.* calls is part of tearing the rig down.
   assert.match(captureRig, /dispose: \(\) => \{[\s\S]*api\.listPluginServices = originalListPluginServices;/);
 });

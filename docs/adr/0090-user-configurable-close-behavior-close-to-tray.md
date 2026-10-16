@@ -2,7 +2,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-08-12
-- Deciders: PI-Desktop core
+- Deciders: Ocode core
 - Related: D230, D256, ADR 0021, ADR 0025, ADR 0078, ADR 0123
 
 ## Context
@@ -42,8 +42,8 @@ matches the desired behavior.
    lifecycle state, read and written only by the main process, and needs no
    host RPC or schema change.
 4. Two additive IPC channels expose it to the renderer:
-   `pi-desktop/window/closeBehavior/get` (returns `{ behavior, supported }`)
-   and `pi-desktop/window/closeBehavior/set`, which accepts only `tray` and
+   `ocode/window/closeBehavior/get` (returns `{ behavior, supported }`)
+   and `ocode/window/closeBehavior/set`, which accepts only `tray` and
    `quit` (`ask` and unknown values fail with `INVALID_ARGUMENT`).
    `supported` is `false` on macOS, where the Settings row is hidden and
    `set` itself fails with `INVALID_ARGUMENT` — the renderer is not the only
@@ -101,5 +101,5 @@ matches the desired behavior.
 - Close on Windows/Linux either hides to tray or quits, per user choice,
   remembered across launches and changeable in Settings.
 - The tray menu and the first-close dialog reuse the existing
-  `@pi-desktop/i18n` catalogs (English and Simplified Chinese).
+  `@ocode/i18n` catalogs (English and Simplified Chinese).
 - No host protocol, storage schema, or macOS behavior changes.

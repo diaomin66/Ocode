@@ -53,7 +53,7 @@ if (target === "win") {
     "--publish",
     "never",
     ...forwardedArgs,
-    "-c.extraMetadata.piDistribution=installed",
+    "-c.extraMetadata.ocodeDistribution=installed",
   ]);
   await runBuilder([
     "--win",
@@ -61,7 +61,7 @@ if (target === "win") {
     "--publish",
     "never",
     ...forwardedArgs,
-    "-c.extraMetadata.piDistribution=zip",
+    "-c.extraMetadata.ocodeDistribution=zip",
   ]);
   await runBuilder([
     "--win",
@@ -69,7 +69,7 @@ if (target === "win") {
     "--publish",
     "never",
     ...forwardedArgs,
-    "-c.extraMetadata.piDistribution=portable",
+    "-c.extraMetadata.ocodeDistribution=portable",
   ]);
 } else {
   await runBuilder([

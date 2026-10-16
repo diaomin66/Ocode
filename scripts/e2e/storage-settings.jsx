@@ -3,23 +3,23 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { SettingsPage } from "../../apps/desktop/src/features/settings/SettingsPage";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
 
 const baseline = {
-  dataPath: "/old/PI-Desktop", browserPath: "/old/chromium", managed: true,
+  dataPath: "/old/Ocode", browserPath: "/old/chromium", managed: true,
   cacheBytes: 2 * 1024 * 1024, pendingPath: null, lastError: null,
-  backupPaths: ["/previous/PI-Desktop"],
+  backupPaths: ["/previous/Ocode"],
 };
 let info = { ...baseline };
-let chosen = "/new/PI-Desktop";
+let chosen = "/new/Ocode";
 let readError = false;
 let operationError = false;
 let operationGate = null;
 const calls = [];
-window.piDesktop = {
+window.ocode = {
   platform: "darwin", locale: "en-US",
   on: () => () => {},
   async invoke(channel, input) {
@@ -72,7 +72,7 @@ window.storageSettingsProbe = async () => {
   click("settings.storage.choose");
   await settled();
   assert(!scope().querySelector(".settings-storage-confirmation"), "Canceling native picker must not begin migration");
-  chosen = "/new/PI-Desktop";
+  chosen = "/new/Ocode";
   click("settings.storage.choose");
   await settled();
   assert(scope().querySelector(".settings-storage-confirmation").textContent.includes(chosen), "Chosen target must be shown before confirmation");

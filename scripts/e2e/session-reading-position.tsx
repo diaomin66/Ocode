@@ -2,9 +2,9 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { en } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared/protocol";
-import type { Result, SessionSummary, UiMessage } from "@pi-desktop/shared";
+import { en } from "@ocode/i18n";
+import { IPC } from "@ocode/shared/protocol";
+import type { Result, SessionSummary, UiMessage } from "@ocode/shared";
 import { SessionPane } from "../../apps/desktop/src/components/SessionPane";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
 
@@ -39,11 +39,11 @@ declare global { var sessionReadingPositionProbe: () => Promise<unknown>; }
 globalThis.sessionReadingPositionProbe = async () => {
   await i18n.init({ lng: "en", resources: { en: { translation: en } } });
   const initial = useAppStore.getState();
-  const bridge = window.piDesktop;
+  const bridge = window.ocode;
   let firstARead = true;
   const aroundReads: string[] = [];
   const unexpected: string[] = [];
-  window.piDesktop = {
+  window.ocode = {
     channels: IPC, platform: "win32", on: () => () => {},
     invoke: async <T,>(channel: string, ...args: unknown[]): Promise<Result<T>> => {
       let data: unknown;
@@ -138,7 +138,7 @@ globalThis.sessionReadingPositionProbe = async () => {
   } finally {
     flushSync(() => root.unmount());
     host.remove();
-    window.piDesktop = bridge;
+    window.ocode = bridge;
     useAppStore.setState(initial);
   }
 };

@@ -16,8 +16,8 @@ import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const APP_NAME = "PI-Desktop";
-const DEV_BUNDLE_ID = "net.aiuo.pi-desktop.dev";
+const APP_NAME = "Ocode";
+const DEV_BUNDLE_ID = "com.ocode.desktop.dev";
 const BRANDING_SCHEMA = "v4";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DESKTOP_ROOT = join(ROOT, "apps", "desktop");
@@ -151,7 +151,7 @@ export function prepareMacDevelopmentBundle({
 }
 
 function run() {
-  const env = { ...process.env, PI_DESKTOP_DEV: "1" };
+  const env = { ...process.env, OCODE_DEV: "1" };
   // Electron 43+ downloads its platform binary when its package is resolved.
   // electron-vite requires the resulting path.txt marker on every platform.
   const electron = resolveElectronInstallation();

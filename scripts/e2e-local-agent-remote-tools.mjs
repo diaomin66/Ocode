@@ -13,17 +13,17 @@ const { DesktopAgentRuntime } = await import("../packages/agent-runtime/dist/ind
 const { HostProcess, createHostSessionPort } = await import("../packages/host-runtime/dist/index.js");
 const { AgentHost } = await import("../packages/agent-host/dist/index.js");
 const { bindRacpWebSocket, RacpServer, MemoryCredentialStore, DeviceTokenAuthenticator, hashToken, newDeviceToken } = await import("../packages/racp/dist/index.js");
-const { createWorkspaceTools } = await import("../apps/pi-host/dist/workspace-tools.js");
-const { createWorkspaceFiles } = await import("../apps/pi-host/dist/workspace-files.js");
-const { createHostOperations } = await import("../apps/pi-host/dist/host-operations.js");
+const { createWorkspaceTools } = await import("../apps/ocode-host/dist/workspace-tools.js");
+const { createWorkspaceFiles } = await import("../apps/ocode-host/dist/workspace-files.js");
+const { createHostOperations } = await import("../apps/ocode-host/dist/host-operations.js");
 const OWNER_TOKEN = newDeviceToken();
 const { createRemoteHostsBoot } = await import("../apps/desktop/electron/main/bootstrap/remote-hosts.ts");
 const { createRemoteWorkspaceToolRelay } = await import("../apps/desktop/electron/main/remote/remote-workspace-tools.ts");
 const { loadRemoteWorkspaceInstructions } = await import("../apps/desktop/electron/main/remote/remote-workspace-instructions.ts");
 const { createBackendRouter } = await import("../apps/desktop/electron/main/remote/backend-router.ts");
 
-assert.ok(process.env.PI_HOST_CORE_BINARY, "PI_HOST_CORE_BINARY must name the current candidate Rust binary");
-const root = await mkdtemp(join(process.env.PI_SCRATCH_DIR ?? tmpdir(), "local-agent-remote-tools-"));
+assert.ok(process.env.OCODE_HOST_CORE_BINARY, "OCODE_HOST_CORE_BINARY must name the current candidate Rust binary");
+const root = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR ?? tmpdir(), "local-agent-remote-tools-"));
 const remoteRoot = join(root, "remote-workspace");
 await mkdir(remoteRoot); await mkdir(join(root, "desktop"));
 await writeFile(join(remoteRoot, "README.md"), "REMOTE_READ_FIXTURE\n");
@@ -71,7 +71,7 @@ const model = createServer(async (req, res) => {
 model.listen(0, "127.0.0.1"); await once(model, "listening");
 const deadline = setTimeout(() => { console.error("local-Agent remote-tool acceptance exceeded 60s"); process.exit(1); }, 60_000);
 try {
-  host = new HostProcess({ binaryPath: resolve(process.env.PI_HOST_CORE_BINARY), dataDir: join(root, "host"), onStderr: () => {} });
+  host = new HostProcess({ binaryPath: resolve(process.env.OCODE_HOST_CORE_BINARY), dataDir: join(root, "host"), onStderr: () => {} });
   await host.handshake();
   const tools = createWorkspaceTools(() => host);
   let remotePrompts = 0;
@@ -92,7 +92,7 @@ try {
   const shell = await boot.workspaceCommandShell("fixture");
   const projectInstructions = await loadRemoteWorkspaceInstructions(boot.workspaceFiles,
     { hostKey: "fixture", path: remoteRoot }, { entries: [{ source: "local-global", content: "LOCAL_GLOBAL_INSTRUCTIONS_FIXTURE" }] });
-  localHost = new HostProcess({ binaryPath: resolve(process.env.PI_HOST_CORE_BINARY), dataDir: join(root, "local-host"), onStderr: () => {} });
+  localHost = new HostProcess({ binaryPath: resolve(process.env.OCODE_HOST_CORE_BINARY), dataDir: join(root, "local-host"), onStderr: () => {} });
   await localHost.handshake();
   const created = await localHost.call("project.group.createRemote", { name: "Locally named remote project", remote: { hostKey: "fixture", path: remoteRoot } });
   const localSession = await localHost.call("session.create", { projectPath: created.group.primaryPath, mode: "agent" });

@@ -44,7 +44,7 @@ Plugins → Marketplace always uses the official plugin center catalog at
 `https://plugins.aiuo.net/catalog.json`. The page has no source selector.
 Persisted `pluginMarketSource` and `pluginMarketCustomUrl` values from older
 versions are retained for settings compatibility but ignored; no data migration
-is needed. `PI_DESKTOP_PLUGIN_MARKET_URL` remains available to development and
+is needed. `OCODE_PLUGIN_MARKET_URL` remains available to development and
 test runs without making the catalog configurable in the shipped interface.
 
 Marketplace catalog and package downloads follow Settings → General → Network.
@@ -80,7 +80,7 @@ from the machine identity the operating system exposes: the Windows
 `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`, the macOS platform UUID, or
 Linux `/etc/machine-id` (falling back to `/var/lib/dbus/machine-id` and
 `/sys/class/dmi/id/product_uuid`). What is sent is
-`sha256("pi-desktop.device.v1:" + <machine id>)` as 64-character lowercase hex,
+`sha256("ocode.device.v1:" + <machine id>)` as 64-character lowercase hex,
 so the machine code itself never leaves the machine and the digest is
 domain-separated from every other hash the app computes. When no machine
 identity is readable, host-core generates one random 64-hex id and persists it
@@ -216,7 +216,7 @@ interface MarketProvider {
 ```
 
 The shipped client currently exposes the `official` provider only. The
-development-only `PI_DESKTOP_PLUGIN_MARKET_URL` override supports local test
+development-only `OCODE_PLUGIN_MARKET_URL` override supports local test
 catalogs without adding a source control to the product UI.
 
 ## 4. Data model
@@ -569,7 +569,7 @@ maintainers.
 ## 9. Private sources (future enterprise support)
 
 The shipped client does not expose or persist a private catalog source. The
-`PI_DESKTOP_PLUGIN_MARKET_URL` override is limited to local development and
+`OCODE_PLUGIN_MARKET_URL` override is limited to local development and
 tests; it is not a product setting. Enterprise source support requires a
 future product decision and explicit security and authorization design.
 
@@ -664,7 +664,7 @@ header refresh action remains the explicit remote-refresh path.
 Override catalog URL with env:
 
 ```text
-PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
+OCODE_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
 ```
 
 

@@ -1,7 +1,7 @@
 import "./session-reading-position";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@ocode/shared";
 import { useTranscriptScroll } from "../../apps/desktop/src/features/chat/transcript/hooks/useTranscriptScroll";
 import { transcriptEntryMessages } from "../../apps/desktop/src/lib/assistant-turns";
 import { retainSessionPane, type RetainedPanes } from "../../apps/desktop/src/lib/session-panes";

@@ -25,15 +25,15 @@ export async function launchLiveVoiceDesktop({ root, dataDir, profile, home, cer
   const env = { ...process.env };
   for (const name of Object.keys(env)) {
     if (/TOKEN|API_KEY|SECRET|PASSWORD/.test(name) ||
-      /^(?:NODE_OPTIONS|NODE_EXTRA_CA_CERTS|NODE_TLS_REJECT_UNAUTHORIZED|ELECTRON_RUN_AS_NODE|HTTPS?_PROXY|ALL_PROXY|PI_DESKTOP_PROXY_JSON|PI_DESKTOP_CAPTURE|DEBUG_HOST)$/i.test(name)) {
+      /^(?:NODE_OPTIONS|NODE_EXTRA_CA_CERTS|NODE_TLS_REJECT_UNAUTHORIZED|ELECTRON_RUN_AS_NODE|HTTPS?_PROXY|ALL_PROXY|OCODE_PROXY_JSON|OCODE_CAPTURE|DEBUG_HOST)$/i.test(name)) {
       delete env[name];
     }
   }
   Object.assign(env, {
     HOME: home,
     USERPROFILE: home,
-    PI_DESKTOP_DATA_DIR: dataDir,
-    PI_DESKTOP_START_MAXIMIZED: "0",
+    OCODE_DATA_DIR: dataDir,
+    OCODE_START_MAXIMIZED: "0",
     ELECTRON_RENDERER_URL: "",
     ...(certificate ? { NODE_EXTRA_CA_CERTS: certificate } : {}),
   });
@@ -154,7 +154,7 @@ export async function launchLiveVoiceDesktop({ root, dataDir, profile, home, cer
         }
       };
       const invoke = async (channel, ...args) => {
-        const result = await evaluate(`window.piDesktop.invoke(window.piDesktop.channels.invoke[${JSON.stringify(channel)}], ...${JSON.stringify(args)})`);
+        const result = await evaluate(`window.ocode.invoke(window.ocode.channels.invoke[${JSON.stringify(channel)}], ...${JSON.stringify(args)})`);
         if (!result.ok) {
           const code = typeof result.error?.code === "string" && /^[A-Z][A-Z0-9_]{0,80}$/.test(result.error.code)
             ? result.error.code : "UNKNOWN";

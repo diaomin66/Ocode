@@ -42,7 +42,7 @@ model-composed title moves to the plugin.
   plugin updates set `generated`; a placeholder or a first-prompt fallback
   remains `default`. The title update compares the exact expected title and
   source so manual changes win races and survive renderer restarts.
-- Ship title generation as the standalone `pi-desktop-session-title-plugin`
+- Ship title generation as the standalone `ocode-session-title-plugin`
   repository. The plugin listens for completed turns and uses the existing
   `agent.complete` and `models.list` APIs. Its settings panel exposes an
   editable prompt template, model selection, and thinking level.

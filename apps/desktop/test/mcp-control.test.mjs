@@ -25,8 +25,8 @@ test("the plugin and MCP paths share desktop operation validation", async () => 
   const calls = [];
   const controller = createMcpControlController({
     channels: {
-      projectSet: "pi-desktop/project/set",
-      sessionDelete: "pi-desktop/session/delete",
+      projectSet: "ocode/project/set",
+      sessionDelete: "ocode/session/delete",
     },
     invoke: async (channel, args) => {
       calls.push({ channel, args });
@@ -45,8 +45,8 @@ test("the plugin and MCP paths share desktop operation validation", async () => 
   await controller.invoke({ operation: "project/set", args: ["/tmp/project"] });
   await controller.invoke({ operation: "session/delete", args: ["s1"], confirm: true });
   assert.deepEqual(calls, [
-    { channel: "pi-desktop/project/set", args: ["/tmp/project"] },
-    { channel: "pi-desktop/session/delete", args: ["s1"] },
+    { channel: "ocode/project/set", args: ["/tmp/project"] },
+    { channel: "ocode/session/delete", args: ["s1"] },
   ]);
 });
 
@@ -68,14 +68,14 @@ async function post(url, token, body, headers = {}) {
 }
 
 const fixtureChannels = {
-  appGetVersion: "pi-desktop/app/getVersion",
-  projectSet: "pi-desktop/project/set",
-  sessionGet: "pi-desktop/session/get",
-  sessionCreate: "pi-desktop/session/create",
-  sessionDelete: "pi-desktop/session/delete",
-  sessionConfigure: "pi-desktop/session/configure",
-  plansResolve: "pi-desktop/plans/resolve",
-  agentPrompt: "pi-desktop/agent/prompt",
+  appGetVersion: "ocode/app/getVersion",
+  projectSet: "ocode/project/set",
+  sessionGet: "ocode/session/get",
+  sessionCreate: "ocode/session/create",
+  sessionDelete: "ocode/session/delete",
+  sessionConfigure: "ocode/session/configure",
+  plansResolve: "ocode/plans/resolve",
+  agentPrompt: "ocode/agent/prompt",
 };
 
 test("local MCP control server authenticates, discovers, and invokes desktop operations", async (t) => {
@@ -119,16 +119,16 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     channels: fixtureChannels,
     invoke: async (channel, args) => {
       calls.push({ channel, args });
-      if (channel === "pi-desktop/app/getVersion") {
-        return { name: "PI-Desktop", version: "test" };
+      if (channel === "ocode/app/getVersion") {
+        return { name: "Ocode", version: "test" };
       }
-      if (channel === "pi-desktop/project/set") {
+      if (channel === "ocode/project/set") {
         return { workspace: { path: args[0], name: "fixture" } };
       }
-      if (channel === "pi-desktop/session/create") {
+      if (channel === "ocode/session/create") {
         return { session: { id: "session-created", projectPath: args[0]?.projectPath ?? null } };
       }
-      if (channel === "pi-desktop/session/get") {
+      if (channel === "ocode/session/get") {
         if (args[0]?.id === largeSession.session.id) return largeSession;
         if (args[0]?.id === smallSession.session.id) return smallSession;
       }
@@ -176,7 +176,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     params: { protocolVersion: "2099-01-01" },
   });
   assert.equal(initialized.response.status, 200);
-  assert.equal(initialized.body.result.serverInfo.name, "pi-desktop");
+  assert.equal(initialized.body.result.serverInfo.name, "ocode");
   assert.equal(initialized.body.result.serverInfo.version, "test");
   assert.equal(initialized.body.result.protocolVersion, "2025-06-18");
   const sessionId = initialized.response.headers.get("mcp-session-id");
@@ -204,7 +204,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   const toolNames = listed.body.result.tools.map((tool) => tool.name);
-  assert.ok(toolNames.includes("pi_desktop_invoke"));
+  assert.ok(toolNames.includes("ocode_invoke"));
   assert.ok(toolNames.includes("pi_control_describe"));
   assert.ok(toolNames.includes("pi_project_open"));
   assert.ok(toolNames.includes("pi_plans_resolve"));
@@ -223,7 +223,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
   );
   assert.equal(opened.body.result.structuredContent.workspace.path, "/tmp/project");
   assert.deepEqual(calls.at(-1), {
-    channel: "pi-desktop/project/set",
+    channel: "ocode/project/set",
     args: ["/tmp/project"],
   });
 
@@ -235,7 +235,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
       id: 4,
       method: "tools/call",
       params: {
-        name: "pi_desktop_invoke",
+        name: "ocode_invoke",
         arguments: { operation: "app/getVersion", args: [] },
       },
     },
@@ -251,14 +251,14 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
       id: 5,
       method: "tools/call",
       params: {
-        name: "pi_desktop_invoke",
+        name: "ocode_invoke",
         arguments: { operation: "session/delete", args: ["session-1"] },
       },
     },
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(refusedDelete.body.result.isError, true);
-  assert.equal(calls.some((call) => call.channel === "pi-desktop/session/delete"), false);
+  assert.equal(calls.some((call) => call.channel === "ocode/session/delete"), false);
 
   await post(
     info.url,
@@ -268,7 +268,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
       id: 6,
       method: "tools/call",
       params: {
-        name: "pi_desktop_invoke",
+        name: "ocode_invoke",
         arguments: {
           operation: "session/delete",
           args: ["session-1"],
@@ -278,7 +278,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     },
     { "Mcp-Session-Id": sessionId },
   );
-  assert.equal(calls.at(-1).channel, "pi-desktop/session/delete");
+  assert.equal(calls.at(-1).channel, "ocode/session/delete");
 
   const refusedPlan = await post(
     info.url,
@@ -301,7 +301,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(refusedPlan.body.result.isError, true);
-  assert.equal(calls.some((call) => call.channel === "pi-desktop/plans/resolve"), false);
+  assert.equal(calls.some((call) => call.channel === "ocode/plans/resolve"), false);
 
   await post(
     info.url,
@@ -325,7 +325,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.deepEqual(calls.at(-1), {
-    channel: "pi-desktop/plans/resolve",
+    channel: "ocode/plans/resolve",
     args: [{
       proposalId: "proposal-1",
       sessionId: "session-1",
@@ -354,7 +354,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(refusedConfigure.body.result.isError, true);
-  assert.equal(calls.some((call) => call.channel === "pi-desktop/session/configure"), false);
+  assert.equal(calls.some((call) => call.channel === "ocode/session/configure"), false);
 
   await post(
     info.url,
@@ -376,7 +376,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.deepEqual(calls.at(-1), {
-    channel: "pi-desktop/session/configure",
+    channel: "ocode/session/configure",
     args: ["session-1", { mode: "agent", permissionMode: "auto" }],
   });
 
@@ -503,7 +503,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     headers: {
       "Content-Type": "application/json",
       "Mcp-Session-Id": sessionId,
-      "X-Pi-Desktop-Token": info.token,
+      "X-Ocode-Token": info.token,
     },
     body: JSON.stringify({ jsonrpc: "2.0", id: 15, method: "ping" }),
   });
@@ -521,7 +521,7 @@ test("the MCP control connection file is marked inactive on shutdown", async () 
   const server = new McpControlServer({
     dataDir,
     port: 0,
-    channels: { appGetVersion: "pi-desktop/app/getVersion" },
+    channels: { appGetVersion: "ocode/app/getVersion" },
     invoke: async () => ({}),
   });
   const info = await server.start();
@@ -537,7 +537,7 @@ test("the MCP control server refuses a non-loopback bind address", async () => {
     dataDir,
     host: "0.0.0.0",
     port: 0,
-    channels: { appGetVersion: "pi-desktop/app/getVersion" },
+    channels: { appGetVersion: "ocode/app/getVersion" },
     invoke: async () => ({}),
   });
   await assert.rejects(() => server.start(), /loopback/);
@@ -731,7 +731,7 @@ test("session/get projection leaves a small session untouched (mocode #495)", ()
 test("renderer refresh events fire only for mutating control operations", () => {
   const sessionOp = (id) => ({
     id,
-    channel: `pi-desktop/${id}`,
+    channel: `ocode/${id}`,
     description: id,
     risk: "write",
     argumentShape: [],
@@ -781,15 +781,15 @@ test("renderer refresh events fire only for mutating control operations", () => 
 
 test("the reviewed catalog never includes picker or secret-write channels", () => {
   const operations = createMcpControlOperations({
-    appGetVersion: "pi-desktop/app/getVersion",
-    pluginLoadDev: "pi-desktop/plugin/loadDev",
-    pluginCreateFromTemplate: "pi-desktop/plugin/createFromTemplate",
-    secretsSet: "pi-desktop/secrets/set",
-    providersCreate: "pi-desktop/providers/create",
-    settingsSet: "pi-desktop/settings/set",
-    mcpUpsert: "pi-desktop/mcp/upsert",
-    sessionConfigure: "pi-desktop/session/configure",
-    projectSet: "pi-desktop/project/set",
+    appGetVersion: "ocode/app/getVersion",
+    pluginLoadDev: "ocode/plugin/loadDev",
+    pluginCreateFromTemplate: "ocode/plugin/createFromTemplate",
+    secretsSet: "ocode/secrets/set",
+    providersCreate: "ocode/providers/create",
+    settingsSet: "ocode/settings/set",
+    mcpUpsert: "ocode/mcp/upsert",
+    sessionConfigure: "ocode/session/configure",
+    projectSet: "ocode/project/set",
   });
   const ids = operations.map((operation) => operation.id).sort();
   assert.deepEqual(ids, ["app/getVersion", "project/set", "session/configure"].sort());
@@ -868,7 +868,7 @@ test("plugin-only session collaboration operations stay off the external MCP sur
   for (const id of collaborationIds) {
     assert.equal(toolNames.includes(id), false);
   }
-  const invokeTool = listed.body.result.tools.find((tool) => tool.name === "pi_desktop_invoke");
+  const invokeTool = listed.body.result.tools.find((tool) => tool.name === "ocode_invoke");
   const exposedIds = invokeTool.inputSchema.properties.operation.enum;
   for (const id of collaborationIds) {
     assert.equal(exposedIds.includes(id), false);
@@ -894,7 +894,7 @@ test("plugin-only session collaboration operations stay off the external MCP sur
       jsonrpc: "2.0",
       id: 4,
       method: "tools/call",
-      params: { name: "pi_desktop_invoke", arguments: { operation: "session/collaboration/list", args: [] } },
+      params: { name: "ocode_invoke", arguments: { operation: "session/collaboration/list", args: [] } },
     },
     { "Mcp-Session-Id": sessionId },
   );
@@ -913,14 +913,14 @@ test("plugin-only session collaboration operations stay off the external MCP sur
       jsonrpc: "2.0",
       id: 5,
       method: "tools/call",
-      params: { name: "pi_desktop_invoke", arguments: { operation: "app/getVersion", args: [] } },
+      params: { name: "ocode_invoke", arguments: { operation: "app/getVersion", args: [] } },
     },
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(known.body.result.isError, undefined);
   assert.deepEqual(known.body.result.structuredContent, {
     operation: "app/getVersion",
-    result: { ok: true, channel: "pi-desktop/app/getVersion" },
+    result: { ok: true, channel: "ocode/app/getVersion" },
   });
-  assert.deepEqual(calls.at(-1), { channel: "pi-desktop/app/getVersion", args: [] });
+  assert.deepEqual(calls.at(-1), { channel: "ocode/app/getVersion", args: [] });
 });

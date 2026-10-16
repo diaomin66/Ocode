@@ -106,7 +106,7 @@ const OUTPUT_NOTIFICATION_MAX_CHUNK_BYTES: usize = 16 * 1024;
 const MAX_OUTPUT_NOTIFICATIONS: usize = 1024;
 const RUNNER_CONFIG_MAX_BYTES: usize = 64 * 1024;
 const RUNNER_SPAWN_BACKOFFS_MS: [u64; 3] = [50, 100, 250];
-const INTERNAL_RUNNER_ERROR_PREFIX: &str = "PI_DESKTOP_RUNNER_ERROR\t";
+const INTERNAL_RUNNER_ERROR_PREFIX: &str = "OCODE_RUNNER_ERROR\t";
 
 #[cfg(windows)]
 use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
@@ -272,7 +272,7 @@ pub(crate) struct ToolRunnerStartConfig {
     pub(crate) scratch_dir: Option<PathBuf>,
     #[serde(default)]
     pub(crate) env_path: Option<String>,
-    /// Session-scoped variables such as `PI_PORT` for an isolated worktree
+    /// Session-scoped variables such as `OCODE_PORT` for an isolated worktree
     /// (ADR 0329). Empty for every other call.
     #[serde(default)]
     pub(crate) extra_env: Vec<(String, String)>,
@@ -454,7 +454,7 @@ pub async fn run_internal_tool_runner() -> Result<i32> {
         .stderr(Stdio::inherit())
         .kill_on_drop(true);
     if let Some(scratch_dir) = config.scratch_dir.as_deref() {
-        command.env("PI_SCRATCH_DIR", scratch_dir);
+        command.env("OCODE_SCRATCH_DIR", scratch_dir);
     }
     if let Some(path) = config.env_path.as_deref() {
         command.env("PATH", path);
@@ -831,7 +831,7 @@ pub struct BashExecutionOptions {
     pub timeout_ms: Option<u64>,
     pub cancellation: Option<watch::Receiver<bool>>,
     pub output_tx: Option<mpsc::UnboundedSender<String>>,
-    /// Extra environment for the command, e.g. `PI_PORT` (ADR 0329).
+    /// Extra environment for the command, e.g. `OCODE_PORT` (ADR 0329).
     pub extra_env: Vec<(String, String)>,
     /// Start as a background task detached from the turn: no timeout, no
     /// abort wiring. The caller owns the registry; see `background_tasks`.
@@ -2655,7 +2655,7 @@ pub(crate) async fn spawn_tool_runner(
     {
         command.args(&config.args).current_dir(&config.workspace);
         if let Some(scratch_dir) = config.scratch_dir.as_deref() {
-            command.env("PI_SCRATCH_DIR", scratch_dir);
+            command.env("OCODE_SCRATCH_DIR", scratch_dir);
         }
         if let Some(path) = config.env_path.as_deref() {
             command.env("PATH", path);
@@ -4029,7 +4029,7 @@ mod tests {
         std::fs::write(dir.path().join("generated/out.txt"), "needle\n").unwrap();
         std::fs::write(dir.path().join("debug.log"), "needle\n").unwrap();
         std::fs::write(dir.path().join("src.txt"), "needle\n").unwrap();
-        std::fs::write(dir.path().join(".pi-desktopignore"), "generated/\n").unwrap();
+        std::fs::write(dir.path().join(".ocodeignore"), "generated/\n").unwrap();
 
         let unscoped = execute_tool(
             Some(dir.path()),
@@ -4047,7 +4047,7 @@ mod tests {
         );
         assert!(
             !shown.contains("generated"),
-            ".pi-desktopignore is honored: {shown}"
+            ".ocodeignore is honored: {shown}"
         );
         assert!(
             !shown.contains("debug.log"),
@@ -4874,7 +4874,7 @@ mod tests {
             Some(ws.path()),
             Some(&scratch),
             "Bash",
-            &serde_json::json!({ "command": "printf %s \"$PI_SCRATCH_DIR\"" }),
+            &serde_json::json!({ "command": "printf %s \"$OCODE_SCRATCH_DIR\"" }),
             15_000,
         )
         .await;
@@ -4947,7 +4947,7 @@ mod tests {
             Some(ws.path()),
             Some(&scratch),
             "Bash",
-            &serde_json::json!({ "command": "printf %s \"$PI_SCRATCH_DIR\"" }),
+            &serde_json::json!({ "command": "printf %s \"$OCODE_SCRATCH_DIR\"" }),
             Some(15_000),
             Some(BashExecutionOptions {
                 session_id: "dialect-session".into(),
@@ -4967,7 +4967,7 @@ mod tests {
         let expected = scratch.to_str().unwrap().replace('\\', "/");
         assert_eq!(
             stdout, expected,
-            "PI_SCRATCH_DIR must be a path the posix shell can use directly"
+            "OCODE_SCRATCH_DIR must be a path the posix shell can use directly"
         );
     }
 

@@ -38,13 +38,13 @@
 
 ## 2. 文件布局
 
-正式打包版把上述目录树放在 `~/.pi-desktop`；开发构建放在 `~/.pi-desktop-dev`，
+正式打包版把上述目录树放在 `~/.ocode`；开发构建放在 `~/.ocode-dev`，
 因为正式版与 `pnpm dev` 是两个需要同时运行的安装（D599、ADR 0094）。
-`PI_DESKTOP_DATA_DIR` 会整体替换任一默认根目录，并在作为子进程环境变量传给
+`OCODE_DATA_DIR` 会整体替换任一默认根目录，并在作为子进程环境变量传给
 host-core 之前被解析为绝对路径。
 
 ```text
-~/.pi-desktop/
+~/.ocode/
  ├── pi.sqlite            # index database (WAL: + -wal/-shm) — host-core only
  ├── pi.sqlite.v6.bak     # archived pre-v7 database (D119 breaking reset)
  ├── pi.sqlite.v8.bak     # exact readable backup before v8→v15 destructive work
@@ -221,7 +221,7 @@ CREATE TABLE kv (
 
 侧边栏组织是非权威的呈现状态存储
 渲染器 localStorage 键下的尽力而为
-`pi.desktop.sidebarPreferences`：
+`ocode.desktop.sidebarPreferences`：
 
 ```ts
 type SidebarPreferences = {

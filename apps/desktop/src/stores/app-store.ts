@@ -3,12 +3,12 @@ import type {
   AppSettings,
   ModelInfo,
   PlanningState,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   migrateKeybindingOverrides,
   normalizeMode,
   PROTOCOL_VERSION,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { api } from "../lib/api";
 import { rememberProject } from "../lib/recent-projects";
 import {

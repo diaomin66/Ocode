@@ -43,29 +43,29 @@
 ## 3. 通道约定
 
 ```text
-invoke: pi-desktop/<domain>/<action>
-event: pi-desktop/<domain>/event/<name>
+invoke: ocode/<domain>/<action>
+event: ocode/<domain>/event/<name>
 ```
 
 示例：
 
-- `pi-desktop/agent/prompt`
-- `pi-desktop/agent/steer`
-- `pi-desktop/agent/abort`
-- `pi-desktop/agent/event/message`
-- `pi-desktop/agent/askTool/resolve`
-- `pi-desktop/session/list`
-- `pi-desktop/project/open`
-- `pi-desktop/project/clone`
-- `pi-desktop/project/cloneCheckout`
-- `pi-desktop/project/openFolder`
-- `pi-desktop/project-group/list`
-- `pi-desktop/project-group/create`
-- `pi-desktop/project-group/rename`
-- `pi-desktop/project-group/update`
-- `pi-desktop/project-group/memory/get` / `save`
-- `pi-desktop/project-group/instructions/get` / `save`
-- `pi-desktop/session/collaboration`
+- `ocode/agent/prompt`
+- `ocode/agent/steer`
+- `ocode/agent/abort`
+- `ocode/agent/event/message`
+- `ocode/agent/askTool/resolve`
+- `ocode/session/list`
+- `ocode/project/open`
+- `ocode/project/clone`
+- `ocode/project/cloneCheckout`
+- `ocode/project/openFolder`
+- `ocode/project-group/list`
+- `ocode/project-group/create`
+- `ocode/project-group/rename`
+- `ocode/project-group/update`
+- `ocode/project-group/memory/get` / `save`
+- `ocode/project-group/instructions/get` / `save`
+- `ocode/session/collaboration`
 
 ## 3.1 逻辑项目组
 
@@ -144,7 +144,7 @@ type AgentPromptResponse = {
 从持久会话记录和快照中获取有效的命令 shell ID 和
 Bash 的方言。
 渲染器通过以下方式更改这些值
-会话空闲时的 `pi-desktop/session/configure`：
+会话空闲时的 `ocode/session/configure`：
 
 ```ts
 type ThinkingLevel =
@@ -176,9 +176,9 @@ Plan/Goal `content = expanded text`/`command: string`/`content` 记录存在。�
 
 重新生成历史记录 (D109) 也使用会话通道：
 
-- `pi-desktop/session/saveRevision`
-- `pi-desktop/session/listRevisions`
-- `pi-desktop/session/activateRevision`
+- `ocode/session/saveRevision`
+- `ocode/session/listRevisions`
+- `ocode/session/activateRevision`
 
 Root 用户轮次可能包括 `revisionRootId`、`revisionCount` 和
 `activeRevision`。激活修订版将实时尾部替换为
@@ -191,7 +191,7 @@ Root 用户轮次可能包括 `revisionRootId`、`revisionCount` 和
 
 ### 5.1a 向当前回合补充指令
 
-`pi-desktop/agent/steer` 接受 `AgentSteerRequest`：
+`ocode/agent/steer` 接受 `AgentSteerRequest`：
 
 ```ts
 type AgentSteerRequest = {
@@ -233,7 +233,7 @@ type AgentStopResponse = {
 };
 ```
 
-`pi-desktop/agent/stop` 为活动运行时请求一次优雅停止。sidecar 在当前助手
+`ocode/agent/stop` 为活动运行时请求一次优雅停止。sidecar 在当前助手
 响应和已完成的工具批次之后评估这个一次性请求，也就是它本来会发起下一次
 模型请求的同一个边界。当前的持久回合随后发出 `agent_end` 并被终结为
 `completed`；该请求不会中止提供商流、取消正在运行的工具，也不会开启第二个
@@ -269,7 +269,7 @@ type AgentCompactRequest = { sessionId: string };
 type AgentCompactResponse = { accepted: boolean };
 ```
 
-`pi-desktop/agent/compact` 为空闲创建模型上下文检查点
+`ocode/agent/compact` 为空闲创建模型上下文检查点
 会话。即使自动上下文保护被禁用，它也可用。
 缺少 provider/session 配置无法通过正常的 `AppError`
 信封；主动转向或压实返回 `AGENT_BUSY`。
@@ -413,12 +413,12 @@ type PlanResolutionResult = {
 
 预加载方法：
 
-- `pi-desktop/plans/pending({ sessionId? }) -> PlansPendingResult`
-- `pi-desktop/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
+- `ocode/plans/pending({ sessionId? }) -> PlansPendingResult`
+- `ocode/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
 
 Electron 将每个主机 `plans.changed` 通知原封不动地转发到
 通过稳定的共享 `IPC.event.plansChanged` 通道渲染器
-（`pi-desktop/plans/event/changed`）。这是 Plan/Goal 更改事件表面；
+（`ocode/plans/event/changed`）。这是 Plan/Goal 更改事件表面；
 的
 渲染器不会接收作为 AgentEvent 变体的合同批准转换。
 `plans.pending` 仅返回当前待批准的行。终端
@@ -469,8 +469,8 @@ type AgentStatus = {
 ### 5.6 回合队列（D375 / D386）
 
 Host 拥有每会话的 prompt 队列，renderer 只做镜像。运行中发送经
-`pi-desktop/agent/queue/push` 推入，无头 Agent Host 模块负责准入、排序并释放持久
-条目（`turn_queue`，架构 v18）。每次变化都以 `pi-desktop/agent/event/queueChanged`
+`ocode/agent/queue/push` 推入，无头 Agent Host 模块负责准入、排序并释放持久
+条目（`turn_queue`，架构 v18）。每次变化都以 `ocode/agent/event/queueChanged`
 扇出。
 
 ```ts
@@ -489,7 +489,7 @@ renderer 的“立即发送”随后请求优雅停止，使该条目在下一�
 的队列在桌面以 owner 身份接入之前保持挂起，因此重启绝不无人值守地启动工作。
 
 优先区块以**相邻消息**的形式投递，而不是拆成多个回合：第一个已优先条目在边界处启动回合，
-其后每个已优先条目都通过引导通道（`pi-desktop/agent/steer`，携带运行中回合的 id）注入同一
+其后每个已优先条目都通过引导通道（`ocode/agent/steer`，携带运行中回合的 id）注入同一
 回合，因此转录里用户行紧挨着出现、模型只回复一次。被注入的条目离开队列，它自己的回合被标记
 为已取消，因为它从不单独运行。运行时拒绝接收的条目仍留在队列中，在下一个边界作为自己的回合
 启动。
@@ -503,7 +503,7 @@ renderer 的“立即发送”随后请求优雅停止，使该条目在下一�
 渲染器通过一个只读 Electron 通道为侧边栏悬浮卡片读取协作状态：
 
 ```ts
-// pi-desktop/session/collaboration({ sessionId }) -> SessionCollaborationSummary
+// ocode/session/collaboration({ sessionId }) -> SessionCollaborationSummary
 type SessionCollaborationSummary = {
  sessionId: string;
  title: string;
@@ -645,20 +645,20 @@ type AgentEvent =
 持久收件箱请求已列入允许名单 preload 调用 Electron 转发
 到单一主机 RPC 域，无需渲染器访问 SQLite：
 
-- `pi-desktop/notification/list({ unreadOnly?, limit? })`
-- `pi-desktop/notification/markRead({ id })`
-- `pi-desktop/notification/markAllRead()`
-- `pi-desktop/notification/clear()`
+- `ocode/notification/list({ unreadOnly?, limit? })`
+- `ocode/notification/markRead({ id })`
+- `ocode/notification/markAllRead()`
+- `ocode/notification/clear()`
 
 渲染器调用
-`pi-desktop/notification/setViewingSession({ sessionId })` 每当聊天时
+`ocode/notification/setViewingSession({ sessionId })` 每当聊天时
 页面的活动会话发生变化； `sessionId: null` 清除查看上下文
 非聊天页面。渲染器发起的 `agent/prompt` 也会携带匹配的
 `viewingSessionId` 快照，Electron 会在异步回合初始化之前安装它，
 避免快速完成先于查看上下文更新。Electron 将此提示与 Main 拥有的窗口
 visibility/focus 结合起来，在终态事件边界进行判断。缺失、null 或不匹配的
 上下文都会安全地创建公告。它还调用
-`pi-desktop/notification/showNative({ id, sessionId, title, body, source?, createdAt? })` 之后
+`ocode/notification/showNative({ id, sessionId, title, body, source?, createdAt? })` 之后
 本地化新记录。可选的 `source` 对终端任务结果使用 `"task"`，对 asktool、
 工具权限和 Plan 审批询问使用 `"interactive"`；省略或未知值默认为
 `"task"`。任务通知带有持久记录的 `createdAt` 时，Main 会在成功的“全部已读”
@@ -701,7 +701,7 @@ type SessionsChangedEvent = {
 
 Main 发送两个事件：
 
-- `session.endTurn` 返回后的 `pi-desktop/notification/event/changed`
+- `session.endTurn` 返回后的 `ocode/notification/event/changed`
   新插入的记录。 Renderer 将记录合并到其有界本地列表中
   并重新计算确切的未读计数。最终结果已经可见
   聚焦的当前聊天、重复的终端更新和中止的回合会发出
@@ -709,12 +709,12 @@ Main 发送两个事件：
 - 持久 `id` 是 Renderer 和 Electron 本机投递的幂等键。对于本地列表中
   已存在 id 的重复 `notification.changed` 负载必须无操作；已确认或已清除
   行的延迟负载会被忽略，不得重新创建行或侧边栏结果。
-- 用户点击 Electron 后的 `pi-desktop/notification/event/activated`
+- 用户点击 Electron 后的 `ocode/notification/event/activated`
   本机系统通知。 Renderer 遵循其现有的会话选择
   路径，包括项目绑定会话的项目激活。
 
 插件会话变更成功后还会发送
-`pi-desktop/session/event/changed`。渲染器通过现有的 `refreshSessions()` 链处理
+`ocode/session/event/changed`。渲染器通过现有的 `refreshSessions()` 链处理
 该宿主事件；插件不发送侧栏事件，跳过的导入也不会发送该事件。
 
 渲染器 store 的 `refreshSessions()` 会话列表刷新路径在每个 store 实例中，
@@ -736,10 +736,10 @@ Electron 拥有本机表面，而渲染器则派生本地化表面
 `activated` 之前恢复/显示并聚焦窗口。交互询问不会创建持久任务收件箱行；
 计划提醒和插件本机通知仍是独立合约。本机交付是尽力而为；耐用的
 收件箱仍是操作系统抑制横幅时的权威来源。在 Windows 上，
-Electron 主将 `net.aiuo.pi-desktop` 注册为进程 AppUserModelID
+Electron 主将 `com.ocode.desktop` 注册为进程 AppUserModelID
 在准备就绪之前和创建任何窗口之前。 ID 与 NSIS 匹配
 包标识所以通知属性、通知设置、任务栏
-分组，安装的快捷方式解析为 `PI-Desktop`，而不是库存
+分组，安装的快捷方式解析为 `Ocode`，而不是库存
 Electron 主机。
 
 任务本机对象按持久 notification id 保留，每个 id 最多一个活动对象。
@@ -841,9 +841,9 @@ ID、或会话无法解析出默认目标时，得到 `supportsReasoning: false`
 
 全局插件启动器使用仅 Electron 允许的通道：
 
-- `pi-desktop/pluginLauncher/toggle` 显示或隐藏居中的实用程序窗口
-- `pi-desktop/pluginLauncher/dismiss` 仅在被该窗口调用时才隐藏它
-- `pi-desktop/pluginLauncher/event/shown` 重置其查询，重新加载安装
+- `ocode/pluginLauncher/toggle` 显示或隐藏居中的实用程序窗口
+- `ocode/pluginLauncher/dismiss` 仅在被该窗口调用时才隐藏它
+- `ocode/pluginLauncher/event/shown` 重置其查询，重新加载安装
   插件，并在每次调用后恢复输入焦点
 
 启动器重用 `plugin/list` 和 `plugin/openPanel`；它不添加 host-core
@@ -860,7 +860,7 @@ ID、或会话无法解析出默认目标时，得到 `supportsReasoning: false`
 设置字体选择器（ADR 0083）通过一个仅 Electron 的允许通道读取
 系统已安装字体：
 
-- `pi-desktop/app/systemFonts` 返回 `string[]`，即系统已安装字体的
+- `ocode/app/systemFonts` 返回 `string[]`，即系统已安装字体的
   字体系列名称（Electron 主进程使用平台工具——macOS 用
   `system_profiler`、Windows 用 PowerShell、Linux 用 `fc-list`），
   去重、排序并排除隐藏的 `.` 前缀字体系列。主进程将结果缓存
@@ -927,7 +927,7 @@ Electron拥有本地化并提供面向用户的分支名称；主机
 直播 stdout/stderr 事件。 v7 或更旧的主机，以及任何不兼容的 v8
 对等方，握手必须失败，以便桌面无法静默显示 Plan
 丢失工件、队列、shell 或策略边界。
-`pi-desktop/agent/compact` 和 `session.appendCompaction` 仍然是 v9 的一部分
+`ocode/agent/compact` 和 `session.appendCompaction` 仍然是 v9 的一部分
 合同。 Goal 合约在 v9 (**D198**) 中是附加的：`kind` 是可选的
 在线且缺席意味着 `plan`，因此早于 Goal 的对等点继续工作
 并且根本不进行谈判。
@@ -952,7 +952,7 @@ Electron拥有本地化并提供面向用户的分支名称；主机
 
 ### stats
 
-- `pi-desktop/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
+- `ocode/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
 
 `bucket` 取 `day` | `week` | `month`。省略日期时使用主机默认窗口
 （53 周 / 52 周 / 24 个月），按主机本地日历计算。`week` 的键使用 ISO 周年
@@ -1014,8 +1014,8 @@ type CommandShellCatalog = {
 
 预加载方法：
 
-- `pi-desktop/commandShell/list() -> CommandShellCatalog`
-- `pi-desktop/settings/set({ defaultCommandShell }) -> { ok: true }`
+- `ocode/commandShell/list() -> CommandShellCatalog`
+- `ocode/settings/set({ defaultCommandShell }) -> { ok: true }`
 
 设置 shell 写入仅接受当前平台的可用 ID，并且
 拒绝未知、不可用或错误的平台 ID。真正有效的外壳
@@ -1041,13 +1041,13 @@ type CommandShellCatalog = {
 用厂商订阅账户登录是 Electron 主进程内的会话，因此只走 IPC —— 主机协议
 版本不变。五条调用通道加一条事件通道：
 
-- `pi-desktop/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
-- `pi-desktop/providers/oauth/start({ vendorId }) -> { loginId }`
-- `pi-desktop/providers/oauth/respond({ loginId, promptId, value? })` ——
+- `ocode/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
+- `ocode/providers/oauth/start({ vendorId }) -> { loginId }`
+- `ocode/providers/oauth/respond({ loginId, promptId, value? })` ——
   不带 `value` 表示取消该提问，从而中止整个流程
-- `pi-desktop/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
-- `pi-desktop/providers/oauth/logout({ vendorId }) -> { ok: true }`
-- `pi-desktop/providers/oauth/event` 推送 `OAuthLoginEvent`
+- `ocode/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
+- `ocode/providers/oauth/logout({ vendorId }) -> { ok: true }`
+- `ocode/providers/oauth/event` 推送 `OAuthLoginEvent`
 
 ```ts
 type OAuthLoginEvent = { loginId: string; vendorId: string } & (
@@ -1289,29 +1289,29 @@ ASCII slug：frontmatter `name` 能 slugify 时用它，否则 `SKILL.md` 用技
 
 桌面专用技能市场通道（不是 host RPC）走 Electron IPC：
 
-- `pi-desktop/skill/market/search` — `{ query, sources[] }` →
+- `ocode/skill/market/search` — `{ query, sources[] }` →
   `{ entries, failedSources, failureKinds, failureDetails }`。
   主进程聚合目录 JSON 与 GitHub 仓库 SKILL.md 扫描。源 URL 必须通过公网 HTTPS 策略（ADR 0243）。单源失败只丢掉该源。
   `failureKinds` 把 `failedSources` 中的每个名字映射到 `policy`（守卫判定了目标自身的非公网地址并拒绝）、`fake-ip`（判定的是本地代理伪造的 fake-IP 占位地址，如 Clash 默认的 `198.18.0.0/15`；在直连或读不出线路时默认仍被拒绝，显式 `allowFakeIp` 只可为透明路由器/TUN 部署放行 benchmark 占位地址）、`unresolved`（本地 DNS 解析没有返回答案，因此没有判定任何地址）或 `network`。`failureDetails` 以同样的键携带真正失败的主机、解析到的地址、守卫自己的 `reason`、地址类别以及判定该地址的线路（`proxied`、`direct` 或传输层读不出线路时的 `unknown`，ADR 0272）；面板据此说明**被拒的是什么**，而不只是哪个源没出结果。
   判定型拒绝与 fake-IP 拒绝都以 `NETWORK_POLICY_BLOCKED` 暴露（两者都是守卫作出的拒绝）,解析器无应答以 `NETWORK_RESOLVE_FAILED` 暴露（spec 08 §3.1）；安装面板正是按这些错误码与结构化 `reason` 分类。
-- `pi-desktop/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`。
+- `ocode/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`。
   主进程按同一策略拉取文档、拆 frontmatter，并可能附上 jsDelivr 目录中的兄弟 `.md`。渲染层通过现有 `skills.create` 安装。该策略即主进程公网网络客户端：语法 URL 防护、按承载 `net.fetch` 的会话线路判定的逐跳 DNS 分类（ADR 0272）、逐跳重定向复核与响应上限——渲染层绝不直接触网。目录 id 会净化为 host `valid_capability_id`。
 
 
 桌面专用 MCP 市场通道（不是 host RPC）走 Electron IPC：
 
-- `pi-desktop/mcp/market/search` — `{ query?, sources[], more? }` →
+- `ocode/mcp/market/search` — `{ query?, sources[], more? }` →
   `{ entries, failedSources, exhausted }`。Main 校验源 URL，并在每一跳向 Electron session 询问线路。完整代理线路使用 session 传输；直连和未知线路默认固定解析出的公网地址，显式 `allowFakeIp` 仅限 benchmark 占位地址。重定向仍是有界 HTTPS，browse 与服务端搜索保留 cursor 状态；单个源失败不会丢弃成功源，响应和缓存均有界。
 
 ### MCP OAuth（ADR 0283）
 
 HTTP MCP 服务的基于浏览器的 OAuth 2.1 认证在 Electron 主进程中通过非阻塞 IPC 与事件流处理：
 
-- `pi-desktop/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
+- `ocode/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
   启动 OAuth 元数据发现与 PKCE 授权码流程。立即返回，用户的浏览器交互与回调交换在后台异步执行。
-- `pi-desktop/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
+- `ocode/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
   中止正在进行的授权尝试，关闭本地回环 HTTP 服务并清理定时器。
-- `pi-desktop/mcp/oauth/event` 向渲染层推送 `McpOAuthLoginEvent`：
+- `ocode/mcp/oauth/event` 向渲染层推送 `McpOAuthLoginEvent`：
 
 ```ts
 type McpOAuthLoginEvent = {
@@ -1527,10 +1527,10 @@ window/closeBehavior/set({ behavior: "tray" | "quit" })
 需要它。
 
 关闭行为与退出确认通过新增的、仅限主窗口的 Electron IPC 在应用内呈现。主进程
-在 renderer 确认 `pi-desktop/window/lifecycleDialog/ready` 后发送
-`pi-desktop/window/event/lifecycleDialogRequest`（`{ requestId, kind }`）；renderer
-通过 `pi-desktop/window/lifecycleDialog/respond` 返回 `{ requestId, choice }`。主进程
-回退时会通过 `pi-desktop/window/event/lifecycleDialogDismiss` 发送 request ID，令 renderer
+在 renderer 确认 `ocode/window/lifecycleDialog/ready` 后发送
+`ocode/window/event/lifecycleDialogRequest`（`{ requestId, kind }`）；renderer
+通过 `ocode/window/lifecycleDialog/respond` 返回 `{ requestId, choice }`。主进程
+回退时会通过 `ocode/window/event/lifecycleDialogDismiss` 发送 request ID，令 renderer
 移除残留遮罩。主进程校验发送方和待处理的 request ID。renderer 缺失或无响应时，超时后
 回退到原生弹窗；原生弹窗也失败时允许关机继续，不会卡住。托盘退出会先恢复隐藏的主窗口再显示应用内
 确认框。此改动不影响 host RPC 或存储协议。
@@ -1597,14 +1597,14 @@ Electron 报告的右侧角）改变的是面板目标。Main 通过
 
 ### Tray session shortcuts (ADR tray-session-shortcuts)
 
-- `pi-desktop/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
+- `ocode/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
   returns `{ ok: true }`. `sessionMeta` maps IDs to optional boolean `pinned`
   and `archived` flags plus a non-negative safe integer `order`. `sort` is
   `recent`, `created`, `oldest`, `name`, or `manual`; the renderer mirrors the
   sidebar's effective sort. Main validates the payload, strips unrelated
   metadata, and rejects senders other than the current main window. The setter
   is excluded from the local MCP catalog and persists nothing.
-- Main emits `pi-desktop/tray/event/sessionActivated { sessionId: string | null }`
+- Main emits `ocode/tray/event/sessionActivated { sessionId: string | null }`
   after restoring/focusing the window, waiting for post-bootstrap
   `menu/rendererReady`, and checking that the session still exists and is not
   archived. Renderer enters normal session selection, including cross-project
@@ -1768,19 +1768,19 @@ app/openFeedback() -> { ok: true }
 ```
 
 Electron Main 构造固定的 GitHub bug 表单 URL
-（`https://github.com/vastsa/PI-Desktop/issues/new?template=bug_report.yml`），
+（`https://github.com/diaomin66/Ocode/issues/new?template=bug_report.yml`），
 并用 `shell.openExternal` 打开。查询字段 `app-version`、`os` 和 `environment`
 由主进程版本信息填充。渲染器不能提供 URL。离开该 origin 或模板的构造会被拒绝。
 此通道不进入 host-core，也不改变 host RPC 协议版本。
 
 ## 13d. 本地 MCP 控制 API（D370）
 
-PI-Desktop 可以为外部 Agent 暴露本地自动化接口，而不改变渲染器 preload
+Ocode 可以为外部 Agent 暴露本地自动化接口，而不改变渲染器 preload
 契约或 host RPC 协议。服务默认关闭，只有 Electron 进程收到以下配置时才启动：
 
 ```text
-PI_DESKTOP_MCP_CONTROL=1
-PI_DESKTOP_MCP_PORT=37123       # 可选；默认 37123
+OCODE_MCP_CONTROL=1
+OCODE_MCP_PORT=37123       # 可选；默认 37123
 ```
 
 Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP。
@@ -1800,7 +1800,7 @@ Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP�
 ```json
 {
   "active": true,
-  "serverName": "pi-desktop",
+  "serverName": "ocode",
   "protocol": "streamable-http",
   "url": "http://127.0.0.1:37123/mcp",
   "token": "<redacted>",
@@ -1810,7 +1810,7 @@ Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP�
 ```
 
 在支持 POSIX 权限的平台上，两个文件都以 `0600` 模式写入。每个请求都必须包含
-`Authorization: Bearer <token>`（保留 `X-Pi-Desktop-Token` 头，方便简单的本地客户端）。
+`Authorization: Bearer <token>`（保留 `X-Ocode-Token` 头，方便简单的本地客户端）。
 其他路径、缺少 token 的请求，以及除 POST/DELETE/OPTIONS 以外的方法都会被拒绝。
 Electron 等待主机关闭之前会停止服务，并将清单标记为非活动。
 
@@ -1833,7 +1833,7 @@ Electron 等待主机关闭之前会停止服务，并将清单标记为非活�
 - `pi_plans_pending`、`pi_plans_resolve`
 - `pi_workspace_diff`、`pi_fs_list`、`pi_fs_read`
 
-`pi_control_describe` 返回经过审查的操作目录。`pi_desktop_invoke` 接受操作 id
+`pi_control_describe` 返回经过审查的操作目录。`ocode_invoke` 接受操作 id
 和位置参数形式的 IPC 参数：
 
 ```json
@@ -1860,12 +1860,12 @@ Electron 等待主机关闭之前会停止服务，并将清单标记为非活�
 保持不变。
 
 六个 `session/collaboration/*` 操作仅限第一方插件：它们要求经过认证的插件工具调用上下文，
-因此会出现在 `pi.desktop.listOperations` 中并可通过 `pi.desktop.invoke` 调用，但被排除在
-MCP 可见目录（`tools/list`、`pi_control_describe` 以及 `pi_desktop_invoke` 的操作枚举）之外，
+因此会出现在 `ocode.desktop.listOperations` 中并可通过 `ocode.desktop.invoke` 调用，但被排除在
+MCP 可见目录（`tools/list`、`pi_control_describe` 以及 `ocode_invoke` 的操作枚举）之外，
 MCP 调用方无法调用它们。
 
 **变更性** 外部调用成功后，Electron Main 可以通过现有的
-`pi-desktop/session/event/changed` 事件发送附加字段：
+`ocode/session/event/changed` 事件发送附加字段：
 
 ```ts
 {
@@ -1895,7 +1895,7 @@ MCP 调用方无法调用它们。
 
 ### Provider ordering
 
-`pi-desktop/providers/reorder({ id, targetId, placement: "before" | "after" })`
+`ocode/providers/reorder({ id, targetId, placement: "before" | "after" })`
 returns `{ ok: true }` and forwards to host `providers.reorder`. The sandboxed
 preload permits this channel through the shared IPC registry. Invalid placement
 or missing providers returns `INVALID_PARAMS`; configuration and defaults are
@@ -1909,18 +1909,18 @@ names stay stable. Inputs and results use the S3-only contract in
 
 | IPC 通道 | Host 方法 | 契约 |
 |---|---|---|
-| `pi-desktop/configSync/getState` | `configSync.getState` | 脱敏状态、类别选择、预览计数和待审批摘要 |
-| `pi-desktop/configSync/test` | `configSync.test` | S3 conditional-write probe with verified cleanup; returns `{ ok: true, conditionalWrites: true }` without persisting configuration |
-| `pi-desktop/configSync/configure` | `configSync.configure` | 校验 endpoint、保存加密的本地同步元数据并启用 vault |
-| `pi-desktop/configSync/syncNow` | `configSync.syncNow` | runs the saved sync or backup mode |
-| `pi-desktop/configSync/pause` | `configSync.pause` | 仅暂停或恢复本设备 |
-| `pi-desktop/configSync/unlock` | `configSync.unlock` | 为当前进程/设备解锁本地 vault |
-| `pi-desktop/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | 记录绑定 digest 的本地激活决定 |
-| `pi-desktop/configSync/mapProject` | `configSync.mapProject` | 将一个不透明项目/组身份绑定到一个或多个明确选择的本地文件夹，并保留 primary-root 顺序 |
-| `pi-desktop/configSync/listHistory` | `configSync.listHistory` | latest 30 indexed revisions for the saved mode; never broadcast as state |
-| `pi-desktop/configSync/restore` | `configSync.restore` | sync publishes with propagation acknowledgment; backup restores locally; both retain recovery and approvals |
-| `pi-desktop/configSync/changePassword` | `configSync.changePassword` | CAS 重新包裹 vault key header，不返回 key 或秘密值 |
-| `pi-desktop/configSync/disconnect` | `configSync.disconnect` | 移除本地同步元数据和 key；不会删除远端 vault 数据 |
+| `ocode/configSync/getState` | `configSync.getState` | 脱敏状态、类别选择、预览计数和待审批摘要 |
+| `ocode/configSync/test` | `configSync.test` | S3 conditional-write probe with verified cleanup; returns `{ ok: true, conditionalWrites: true }` without persisting configuration |
+| `ocode/configSync/configure` | `configSync.configure` | 校验 endpoint、保存加密的本地同步元数据并启用 vault |
+| `ocode/configSync/syncNow` | `configSync.syncNow` | runs the saved sync or backup mode |
+| `ocode/configSync/pause` | `configSync.pause` | 仅暂停或恢复本设备 |
+| `ocode/configSync/unlock` | `configSync.unlock` | 为当前进程/设备解锁本地 vault |
+| `ocode/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | 记录绑定 digest 的本地激活决定 |
+| `ocode/configSync/mapProject` | `configSync.mapProject` | 将一个不透明项目/组身份绑定到一个或多个明确选择的本地文件夹，并保留 primary-root 顺序 |
+| `ocode/configSync/listHistory` | `configSync.listHistory` | latest 30 indexed revisions for the saved mode; never broadcast as state |
+| `ocode/configSync/restore` | `configSync.restore` | sync publishes with propagation acknowledgment; backup restores locally; both retain recovery and approvals |
+| `ocode/configSync/changePassword` | `configSync.changePassword` | CAS 重新包裹 vault key header，不返回 key 或秘密值 |
+| `ocode/configSync/disconnect` | `configSync.disconnect` | 移除本地同步元数据和 key；不会删除远端 vault 数据 |
 
 输入密码只会被传给需要它的操作。原始秘密、vault key、解密资源或远端 archive 不会返回到 Renderer。`configSync.changed` 事件携带相同的脱敏状态，并由 Host 发起的变更（包括 Host scheduler）触发。Main 只是传输/生命周期协调器，不负责调度、合并、加密或应用配置。
 
@@ -1933,25 +1933,25 @@ unit and byte counts. There is no cleanup phase. Background polls stay silent.
 
 | IPC 通道 | 方向 | 契约 |
 |---|---|---|
-| `pi-desktop/voice/live/status` | Renderer → Main | 脱敏功能状态、绑定就绪情况和设置版本 |
-| `pi-desktop/voice/live/prepare` | Renderer → Main | 按 request ID 幂等准备通话；同步保留共享麦克风租约 |
-| `pi-desktop/voice/live/connect` | Renderer → Main | 连接已准备的通话；Codex 可附带有界 SDP offer |
-| `pi-desktop/voice/live/setMuted` | Renderer → Main | 通过单调递增的 capture epoch 设置静音 |
-| `pi-desktop/voice/live/reportMedia` | Renderer → Main | 报告采集、连接和释放生命周期；只有确认释放后才能复用租约 |
-| `pi-desktop/voice/live/reportPlayback` | Renderer → Main | 有界的 PCM 已播放游标列表，供中断/截断使用 |
-| `pi-desktop/voice/live/reportDelegation` | Renderer → Main | 报告 Provider 请求的 delegation；v1 会拒绝执行，也不会转发给 Agent/MCP |
-| `pi-desktop/voice/live/reportControlApplied` | Renderer → Main | 确认受支持的 Provider 控制，或报告拒绝了不支持的操作 |
-| `pi-desktop/voice/live/end` | Renderer → Main | 幂等结束活动通话，或取消等待中的请求 |
-| `pi-desktop/voice/live/heartbeat` | Renderer → Main | Renderer 正常响应时维持 owner 通话 |
-| `pi-desktop/voice/live/event/changed` | Main → Renderer | 脱敏通话阶段、错误、提示和活动状态 |
-| `pi-desktop/voice/live/event/port` | Main → Renderer | 转交一个通话专用 `MessagePort`，附带 call ID 和一次性 nonce |
-| `pi-desktop/voice/live/event/control` | Main → Renderer | Provider 控制请求，仅包含 v1 明确允许的控制类型 |
-| `pi-desktop/voice/live/event/transcript` | Main → Renderer | 当前通话的临时、有界字幕事件 |
-| `pi-desktop/voice/live/widget/visibility` | 挂件 → Main | 挂件自身的展示决定与所需内容盒尺寸；Main 据此显示或隐藏该窗口 |
-| `pi-desktop/voice/live/widget/action` | 挂件 → Main | 在挂件中按下的通话操作；Main 校验发送方后转发给 owner frame 执行 |
-| `pi-desktop/voice/live/widget/ownerState` | 主窗口 → Main | 只有 owner frame 才知道的信息：它自身的错误码（例如被拒绝的静音）以及绑定工作会话是否在等待决策；两者都不在通话视图中 |
-| `pi-desktop/voice/live/event/widgetState` | Main → 挂件 | 权威通话视图加上 owner 自身的错误码与等待决策标记，推送给停靠挂件窗口 |
-| `pi-desktop/voice/live/event/widgetAction` | Main → 主窗口 | 需要 owner frame 执行的挂件操作 |
+| `ocode/voice/live/status` | Renderer → Main | 脱敏功能状态、绑定就绪情况和设置版本 |
+| `ocode/voice/live/prepare` | Renderer → Main | 按 request ID 幂等准备通话；同步保留共享麦克风租约 |
+| `ocode/voice/live/connect` | Renderer → Main | 连接已准备的通话；Codex 可附带有界 SDP offer |
+| `ocode/voice/live/setMuted` | Renderer → Main | 通过单调递增的 capture epoch 设置静音 |
+| `ocode/voice/live/reportMedia` | Renderer → Main | 报告采集、连接和释放生命周期；只有确认释放后才能复用租约 |
+| `ocode/voice/live/reportPlayback` | Renderer → Main | 有界的 PCM 已播放游标列表，供中断/截断使用 |
+| `ocode/voice/live/reportDelegation` | Renderer → Main | 报告 Provider 请求的 delegation；v1 会拒绝执行，也不会转发给 Agent/MCP |
+| `ocode/voice/live/reportControlApplied` | Renderer → Main | 确认受支持的 Provider 控制，或报告拒绝了不支持的操作 |
+| `ocode/voice/live/end` | Renderer → Main | 幂等结束活动通话，或取消等待中的请求 |
+| `ocode/voice/live/heartbeat` | Renderer → Main | Renderer 正常响应时维持 owner 通话 |
+| `ocode/voice/live/event/changed` | Main → Renderer | 脱敏通话阶段、错误、提示和活动状态 |
+| `ocode/voice/live/event/port` | Main → Renderer | 转交一个通话专用 `MessagePort`，附带 call ID 和一次性 nonce |
+| `ocode/voice/live/event/control` | Main → Renderer | Provider 控制请求，仅包含 v1 明确允许的控制类型 |
+| `ocode/voice/live/event/transcript` | Main → Renderer | 当前通话的临时、有界字幕事件 |
+| `ocode/voice/live/widget/visibility` | 挂件 → Main | 挂件自身的展示决定与所需内容盒尺寸；Main 据此显示或隐藏该窗口 |
+| `ocode/voice/live/widget/action` | 挂件 → Main | 在挂件中按下的通话操作；Main 校验发送方后转发给 owner frame 执行 |
+| `ocode/voice/live/widget/ownerState` | 主窗口 → Main | 只有 owner frame 才知道的信息：它自身的错误码（例如被拒绝的静音）以及绑定工作会话是否在等待决策；两者都不在通话视图中 |
+| `ocode/voice/live/event/widgetState` | Main → 挂件 | 权威通话视图加上 owner 自身的错误码与等待决策标记，推送给停靠挂件窗口 |
+| `ocode/voice/live/event/widgetAction` | Main → 主窗口 | 需要 owner frame 执行的挂件操作 |
 
 只有 owner 验证成功后才会创建 `MessagePort`，之后由 preload 中继到 renderer 窗口。owner 在首个 `hello` 中回送每通电话独有的 nonce；Main 仅在 call ID 和 nonce 均匹配时接受该端口一次。二进制帧包含有界 PCM 音频、采集 epoch、释放确认、播放游标和协议就绪信号。它不是通用 IPC 隧道：不会传输 Provider 凭证、任意命令、工作区路径、Agent 消息或持久化字幕。通话结束或 owner 丢失时会关闭端口。
 

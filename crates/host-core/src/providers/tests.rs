@@ -1770,7 +1770,7 @@ fn header_values_fold_fullwidth_and_reject_non_latin1() {
     )
     .unwrap();
     let stored = provider.headers.unwrap();
-    assert_eq!(stored["X-Title"], "PI Desktop");
+    assert_eq!(stored["X-Title"], "Ocode");
     assert_eq!(stored["X-Key"], "12345670");
 
     // A value with no ASCII counterpart is refused at the boundary and names
@@ -1826,8 +1826,8 @@ fn header_values_fold_fullwidth_and_reject_non_latin1() {
     // editor showed as clean: a pasted byte-order mark is whitespace to both,
     // and U+0085 is whitespace to neither (it travels as Latin-1).
     assert_eq!(
-        normalize_one_header("X-Title", "\u{FEFF}pi-desktop\u{FEFF}").unwrap(),
-        Some(("X-Title".to_string(), "pi-desktop".to_string()))
+        normalize_one_header("X-Title", "\u{FEFF}ocode\u{FEFF}").unwrap(),
+        Some(("X-Title".to_string(), "ocode".to_string()))
     );
     assert_eq!(
         normalize_one_header("X-Title", "\u{85}abc").unwrap(),
@@ -1951,7 +1951,7 @@ fn sync_payloads_keep_only_storable_headers() {
         }
     });
     retain_storable_headers(&mut payload);
-    assert_eq!(payload["headers"]["X-Title"], "PI Desktop");
+    assert_eq!(payload["headers"]["X-Title"], "Ocode");
     assert_eq!(payload["headers"]["X-Key"], "12345670");
     assert!(payload["headers"].get("X-CJK").is_none());
     assert!(payload["headers"].get("Authorization").is_none());

@@ -1,4 +1,4 @@
-import type { ProjectGroupRecord, RemoteWorkspace } from "@pi-desktop/shared";
+import type { ProjectGroupRecord, RemoteWorkspace } from "@ocode/shared";
 
 type FileHost = { call<T>(method: string, input?: unknown): Promise<T> };
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IPC, type AppSettings, type LiveCallView, type LiveVoiceWidgetAction } from "@pi-desktop/shared";
+import { IPC, type AppSettings, type LiveCallView, type LiveVoiceWidgetAction } from "@ocode/shared";
 import { LiveVoiceCallBar } from "./LiveVoiceCallBar";
 import { liveVoiceApi } from "./live-voice-api";
 import { applyAppLanguage } from "../../../lib/app-language";
@@ -41,7 +41,7 @@ export function LiveVoiceWidget() {
     if (!visible) return;
     let cancelled = false;
     void (async () => {
-      const result = await window.piDesktop
+      const result = await window.ocode
         ?.invoke<AppSettings>(IPC.invoke.settingsGet)
         .catch(() => null);
       if (cancelled || !result?.ok) return;

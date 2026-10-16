@@ -9,7 +9,7 @@ import {
   resolveFontScale,
   resolveKeybinding,
   type ShortcutPlatform,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { installRendererApi } from "../../capture/renderer-api";
@@ -47,7 +47,7 @@ const PLUGIN_THEME_STYLE_ID = "pi-plugin-theme";
 
 export function useAppShellRuntime() {
   const { t } = useTranslation();
-  const platform = window.piDesktop?.platform ?? "darwin";
+  const platform = window.ocode?.platform ?? "darwin";
   const bootstrap = useAppStore((s) => s.bootstrap);
   const ready = useAppStore((s) => s.ready);
   const page = useAppStore((s) => s.page);

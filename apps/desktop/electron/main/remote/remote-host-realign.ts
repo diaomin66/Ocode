@@ -23,7 +23,7 @@
  * restarted again on every app launch; failures cool down before retry. A user
  * action that explicitly asks for a reconnect bypasses the throttle.
  */
-import type { RemoteHostBootstrapRequest, RemoteHostSshMetadata } from "@pi-desktop/shared";
+import type { RemoteHostBootstrapRequest, RemoteHostSshMetadata } from "@ocode/shared";
 import { sshMetadataOf } from "./remote-host-metadata.js";
 import type { RemoteHostRecord } from "./remote-host-registry.js";
 import type { SshBootstrapOutcome } from "./ssh-bootstrap.js";
@@ -102,7 +102,7 @@ function bootstrapRequestFor(
 }
 
 type RealignAttempt = { version: string; at: number; succeeded: boolean };
-const REALIGNMENT_METADATA_KEY = "piHostRealignment";
+const REALIGNMENT_METADATA_KEY = "ocodeHostRealignment";
 
 /** Read a bounded, non-secret realignment receipt from the extensible record metadata. */
 function persistedAttempt(record: RemoteHostRecord): RealignAttempt | undefined {

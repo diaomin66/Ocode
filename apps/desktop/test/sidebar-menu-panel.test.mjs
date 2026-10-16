@@ -72,7 +72,7 @@ test("submenu flips left and clamps against viewport edges", () => {
   a missing key would silently fall back to English.
 */
 test("every locale ships the sidebar menu keys", async () => {
-  const { catalogs } = await import("@pi-desktop/i18n");
+  const { catalogs } = await import("@ocode/i18n");
   for (const [locale, catalog] of Object.entries(catalogs)) {
     const nav = catalog.nav ?? {};
     assert.equal(typeof nav.dangerZone, "string", `${locale}: nav.dangerZone`);

@@ -14,11 +14,11 @@ import {
   type LiveWorkCancelQueuedOperationResult,
   type LiveWorkStopOperationResult,
   type LiveVoiceWidgetAction,
-} from "@pi-desktop/shared";
-import type { LiveCallView } from "@pi-desktop/shared";
+} from "@ocode/shared";
+import type { LiveCallView } from "@ocode/shared";
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
-  const bridge = window.piDesktop;
+  const bridge = window.ocode;
   if (!bridge) throw liveError("LIVE_INVALID_OWNER", "Live Voice bridge unavailable");
   const result = await bridge.invoke<T>(channel, ...args);
   if (!result.ok) {
@@ -62,7 +62,7 @@ export const liveVoiceApi = {
 };
 
 function subscribe<T>(channel: string, listener: (value: T) => void): () => void {
-  const bridge = window.piDesktop;
+  const bridge = window.ocode;
   if (!bridge) return () => undefined;
   return bridge.on(channel, (value) => listener(value as T));
 }

@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const require = createRequire(join(root, "packages/agent-runtime/package.json"));
 const { build } = require("esbuild");
-const temp = await mkdtemp(join(process.env.PI_SCRATCH_DIR || tmpdir(), "remote-mvp-"));
+const temp = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR || tmpdir(), "remote-mvp-"));
 const output = join(temp, "fixture.mjs");
 await build({
   stdin: { contents: `
@@ -22,7 +22,7 @@ await build({
     export { sessionAllows, safeSessionSummary } from './apps/desktop/src/lib/remote-session-safety';
     export { sessionMatchesProject, projectPathsForNewSessions } from './apps/desktop/src/lib/sidebar-session-groups';
     export { visibleSettingsNav } from './apps/desktop/src/lib/settings-search';
-    export { IPC } from '@pi-desktop/shared';
+    export { IPC } from '@ocode/shared';
     import React from 'react';
     import { renderToStaticMarkup } from 'react-dom/server';
     import i18n from 'i18next';
@@ -30,7 +30,7 @@ await build({
     import { remoteEn } from './apps/desktop/src/locales/remote';
     import { RemoteHostSessions } from './apps/desktop/src/components/settings/RemoteHostSessions';
     import { ChatSurface } from './apps/desktop/src/components/ChatSurface';
-    import { catalogs } from '@pi-desktop/i18n';
+    import { catalogs } from '@ocode/i18n';
     export async function render(kind, props) {
       await i18n.use(initReactI18next).init({lng:'en', fallbackLng:'en', resources:{en:{remote:remoteEn, translation:catalogs.en}}, interpolation:{escapeValue:false}});
       Object.assign(useAppStore.getInitialState(), useAppStore.getState(), kind === 'host' ? {} : {sessions:[props.session], activeSessionId:props.session.id, retainedSessionIds:[props.session.id], messages:[]});
@@ -38,7 +38,7 @@ await build({
     }
   `, resolveDir: root, loader: "tsx" },
   outfile: output, bundle: true, platform: "node", format: "esm", jsx: "automatic",
-  alias: { "@pi-desktop/shared": join(root, "packages/shared/src/index.ts"), "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"), react: join(root, "apps/desktop/node_modules/react"), "react-dom": join(root, "apps/desktop/node_modules/react-dom"), "react-i18next": join(root, "apps/desktop/node_modules/react-i18next"), i18next: join(root, "apps/desktop/node_modules/i18next") },
+  alias: { "@ocode/shared": join(root, "packages/shared/src/index.ts"), "@ocode/i18n": join(root, "packages/i18n/src/index.ts"), react: join(root, "apps/desktop/node_modules/react"), "react-dom": join(root, "apps/desktop/node_modules/react-dom"), "react-i18next": join(root, "apps/desktop/node_modules/react-i18next"), i18next: join(root, "apps/desktop/node_modules/i18next") },
   loader: { ".css": "empty", ".gif": "dataurl", ".png": "dataurl" },
     plugins: [{ name: "fixture-vite-url", setup(builder) {
       builder.onResolve({ filter: /\?url$/ }, ({ path }) => ({ path, namespace: "fixture-url" }));
@@ -56,7 +56,7 @@ const provider = { id: "api-provider", name: "Network provider", enabled: true, 
 function deferred() { let resolve; const promise = new Promise((done) => { resolve = done; }); return { promise, resolve }; }
 function bridge(handler) {
   const calls = [];
-  globalThis.window = { matchMedia: () => ({ matches: false }), piDesktop: { platform: "linux", on: () => () => {}, invoke: async (channel, ...args) => {
+  globalThis.window = { matchMedia: () => ({ matches: false }), ocode: { platform: "linux", on: () => () => {}, invoke: async (channel, ...args) => {
     calls.push({ channel, input: args[0] }); return { ok: true, data: await handler(channel, args[0]) };
   } } };
   return calls;
@@ -223,7 +223,7 @@ test("remote interaction IPC reconciles real queues and detaches without touchin
   const local = { ...permission, sessionId: "local", requestId: "local-permission" };
   useAppStore.setState({ pendingPermissions: { local: [local] } });
   const listeners = new Map();
-  globalThis.window = { matchMedia: () => ({ matches: false }), piDesktop: { on(channel, handler) { listeners.set(channel, handler); return () => listeners.delete(channel); } } };
+  globalThis.window = { matchMedia: () => ({ matches: false }), ocode: { on(channel, handler) { listeners.set(channel, handler); return () => listeners.delete(channel); } } };
   const unsubscribe = fixture.subscribeRemoteInteractions();
   const send = (event) => listeners.get(IPC.event.remoteInteractions)(event);
   const pending = { kind: "snapshot", sessionId: session.id, permissions: [permission], asks: [ask] };

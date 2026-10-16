@@ -5,12 +5,25 @@
 set -euo pipefail
 
 RELEASE_DIR="${1:-apps/desktop/release}"
-PRODUCT_NAME="PI-Desktop"
-# Accepts either the bare common name ("XingYu Liu (DUV63RKYTW)") or the full
-# certificate label ("Developer ID Application: XingYu Liu (DUV63RKYTW)").
-IDENTITY_NAME="${MAC_SIGNING_IDENTITY:-XingYu Liu (DUV63RKYTW)}"
+PRODUCT_NAME="Ocode"
+# Accept either the configured bare common name or full certificate label.
+IDENTITY_NAME="${MAC_SIGNING_IDENTITY:-}"
 IDENTITY_NAME="${IDENTITY_NAME#Developer ID Application: }"
 EXPECTED_IDENTITY="Developer ID Application: ${IDENTITY_NAME}"
+APPLE_TEAM_ID="${APPLE_TEAM_ID:-}"
+
+if [[ -z "${IDENTITY_NAME//[[:space:]]/}" ]]; then
+  echo "error: MAC_SIGNING_IDENTITY is required to verify a signed release." >&2
+  exit 1
+fi
+if [[ ! "$APPLE_TEAM_ID" =~ ^[A-Z0-9]{10}$ ]]; then
+  echo "error: APPLE_TEAM_ID must be 10 uppercase alphanumeric characters." >&2
+  exit 1
+fi
+if [[ "$IDENTITY_NAME" != *" ($APPLE_TEAM_ID)" || "$IDENTITY_NAME" == *$'\n'* || "$IDENTITY_NAME" == *$'\r'* ]]; then
+  echo "error: MAC_SIGNING_IDENTITY must name a Developer ID certificate in APPLE_TEAM_ID." >&2
+  exit 1
+fi
 
 if [[ ! -d "$RELEASE_DIR" ]]; then
   echo "error: release directory does not exist: $RELEASE_DIR" >&2
@@ -33,13 +46,17 @@ fi
 
 APP="${APPS[0]}"
 DMG="${DMGS[0]}"
-HOST_CORE="$APP/Contents/Resources/bin/pi-desktop-host-core"
+HOST_CORE="$APP/Contents/Resources/bin/ocode-host-core"
 
 echo "==> Inspecting Developer ID signature: $APP"
 SIGNATURE_INFO="$(codesign -dv --verbose=4 "$APP" 2>&1)"
 printf '%s\n' "$SIGNATURE_INFO"
-if [[ "$SIGNATURE_INFO" != *"Authority=${EXPECTED_IDENTITY}"* ]]; then
+if ! grep -Fqx -- "Authority=${EXPECTED_IDENTITY}" <<< "$SIGNATURE_INFO"; then
   echo "error: $APP is not signed with $EXPECTED_IDENTITY." >&2
+  exit 1
+fi
+if ! grep -Fqx -- "TeamIdentifier=${APPLE_TEAM_ID}" <<< "$SIGNATURE_INFO"; then
+  echo "error: $APP signature does not match APPLE_TEAM_ID." >&2
   exit 1
 fi
 if [[ "$SIGNATURE_INFO" != *"flags=0x10000(runtime)"* && "$SIGNATURE_INFO" != *"flags=runtime"* && "$SIGNATURE_INFO" != *"runtime"* ]]; then

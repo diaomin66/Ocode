@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 // release gate has to read: the center serves the same document with a package
 // base filled in.
 const DEFAULT_URL =
-  process.env.PI_DESKTOP_PLUGIN_MARKET_URL ||
+  process.env.OCODE_PLUGIN_MARKET_URL ||
   "https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/catalog.json";
 
 /**
@@ -47,7 +47,7 @@ function parseArgs(argv) {
 async function readCatalog(source) {
   if (/^https?:\/\//i.test(source)) {
     const response = await fetch(source, {
-      headers: { "user-agent": "pi-desktop-marketplace-preflight" },
+      headers: { "user-agent": "ocode-marketplace-preflight" },
     });
     if (!response.ok) throw new Error(`catalog fetch failed: HTTP ${response.status}`);
     return JSON.parse(await response.text());

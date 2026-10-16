@@ -6,7 +6,7 @@ app.whenReady().then(async () => {
   const win = new BrowserWindow({ show: false, width: 1100, height: 800, useContentSize: true,
     webPreferences: { sandbox: true, nodeIntegration: false, contextIsolation: true, backgroundThrottling: false } });
   win.webContents.on('console-message', (_event, level, message) => { if (level >= 3) console.error(message); });
-  await win.loadURL(process.env.PI_DIALOG_FIXTURE_URL);
+  await win.loadURL(process.env.OCODE_DIALOG_FIXTURE_URL);
   const evaluate = (code) => win.webContents.executeJavaScript(code);
   await evaluate(`new Promise((resolve, reject) => { const deadline = Date.now() + 10000; function check() { if (window.dialogFixture) return resolve(); if (Date.now() > deadline) return reject(new Error('fixture did not mount')); requestAnimationFrame(check); } check(); })`);
   const results = [];
@@ -43,7 +43,7 @@ app.whenReady().then(async () => {
   check('extension source fits and close is reachable', original.contained && original.overflow <= 1 && original.closeContained && original.closeHit, original);
   check('full source path wraps without clipping or changing dialog width', original.sourceWrapped && original.width <= 420, original);
   check('extension prompt suppresses native preview while open', await evaluate('window.dialogFixture.isBlockingOverlayActive()'));
-  writeFileSync(join(process.env.PI_DIALOG_ARTIFACT_DIR, 'extension-path.png'), (await win.webContents.capturePage()).toPNG());
+  writeFileSync(join(process.env.OCODE_DIALOG_ARTIFACT_DIR, 'extension-path.png'), (await win.webContents.capturePage()).toPNG());
   await click('.session-rename-dialog-close');
   check('close dismisses the extension prompt', await evaluate('!document.querySelector("[role=dialog]") && window.dialogFixture.responses.length === 1'));
   check('extension prompt releases native preview after close', await evaluate('!window.dialogFixture.isBlockingOverlayActive()'));
@@ -104,7 +104,7 @@ app.whenReady().then(async () => {
   check('chosen model names are visible before Advanced opens',
     modelRows.ids.length === 4 && modelRows.ids.every(Boolean) && modelRows.expanded === 0 && modelRows.allVisible,
     modelRows);
-  writeFileSync(join(process.env.PI_DIALOG_ARTIFACT_DIR, 'chosen-models-collapsed.png'), (await win.webContents.capturePage()).toPNG());
+  writeFileSync(join(process.env.OCODE_DIALOG_ARTIFACT_DIR, 'chosen-models-collapsed.png'), (await win.webContents.capturePage()).toPNG());
   await click('.provider-chosen-advanced-toggle');
   check('Advanced still expands one selected model on demand',
     await evaluate(`document.querySelectorAll('.provider-chosen-row-body:not([hidden])').length === 1 && document.querySelector('.provider-chosen-advanced-toggle').getAttribute('aria-expanded') === 'true'`));
@@ -129,7 +129,7 @@ app.whenReady().then(async () => {
   await click('.provider-chosen-advanced-toggle');
   check('Advanced stays operable after the narrow viewport stacks the panes',
     await evaluate(`document.querySelectorAll('.provider-chosen-row-body:not([hidden])').length === 1`));
-  writeFileSync(join(process.env.PI_DIALOG_ARTIFACT_DIR, 'results.json'), JSON.stringify(results, null, 2));
+  writeFileSync(join(process.env.OCODE_DIALOG_ARTIFACT_DIR, 'results.json'), JSON.stringify(results, null, 2));
   const failed = results.filter(r => !r.ok).length;
   console.log('SUMMARY ' + (results.length-failed) + '/' + results.length + ' passed');
   win.destroy();app.exit(failed ? 1 : 0);

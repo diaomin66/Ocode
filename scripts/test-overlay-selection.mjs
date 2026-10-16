@@ -8,7 +8,7 @@ import { repositoryRoot, resolveElectronBinary, assertDesktopBuild } from "./e2e
 
 const root = repositoryRoot();
 assertDesktopBuild(root);
-const temp = await mkdtemp(join(process.env.PI_SCRATCH_DIR ?? tmpdir(), "pi-overlay-selection-"));
+const temp = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR ?? tmpdir(), "pi-overlay-selection-"));
 try {
   const { build } = createRequire(join(root, "packages/agent-runtime/package.json"))("esbuild");
   await build({
@@ -23,7 +23,7 @@ try {
   if (!csp || !styles.length) throw new Error("Built renderer CSP/styles missing");
   await cp(join(renderer, "assets"), join(temp, "assets"), { recursive: true });
   await writeFile(join(temp, "index.html"), `<!doctype html><html><head><meta charset="utf-8">${csp}${styles.map((path) => `<link rel="stylesheet" href="${path}">`).join("")}<link rel="stylesheet" href="./fixture.css"></head><body><div id="root"></div><script type="module" src="./fixture.js"></script></body></html>`);
-  const env = { ...process.env, PI_OVERLAY_TEST_DIR: temp };
+  const env = { ...process.env, OCODE_OVERLAY_TEST_DIR: temp };
   delete env.ELECTRON_RUN_AS_NODE;
   const child = spawn(resolveElectronBinary(root).electronBinary, [
     `--user-data-dir=${join(temp, "profile")}`,

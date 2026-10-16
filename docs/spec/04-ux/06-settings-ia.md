@@ -23,7 +23,7 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
   titlebar remain opaque. Only a nested settings content enter wrapper plays a
   route animation; the scrolling inner pane, rail, and backing never fade or
   translate. That entrance is opacity-only. Settings dialogs and sheets portal
-  to a viewport-fixed `#pi-desktop-overlays` host on the document element and
+  to a viewport-fixed `#ocode-overlays` host on the document element and
   cover the full window, including the rail.
 - Returning to the app restores the prior sidebar collapsed/expanded state
   without a sidebar entrance animation or a width ramp. Real toggle and
@@ -767,7 +767,7 @@ system while preserving their different data ownership:
   form state is announced from the shared error region.
 
 ### Instructions (`instructions` tab)
-- Edit the global instruction Markdown used by every PI-Desktop Agent session.
+- Edit the global instruction Markdown used by every Ocode Agent session.
 - Show the resolved instruction-file path and save through the host-backed
   instruction API; project instructions remain managed from the active project
   menu and are resolved after the global layer.
@@ -863,7 +863,7 @@ system while preserving their different data ownership:
 ### Info
 - app/host/protocol versions + open logs
 - **Report a problem** row: one action opens the GitHub bug issue form in
-  the system browser. Electron Main owns the URL (`pi-desktop/app/openFeedback`),
+  the system browser. Electron Main owns the URL (`ocode/app/openFeedback`),
   prefills app version, OS, and environment from Main-owned version info, and
   never accepts a renderer-supplied destination (D313 / ADR 0157)
 - Updates row with the current delivery state and one applicable action:

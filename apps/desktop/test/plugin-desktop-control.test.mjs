@@ -23,7 +23,7 @@ function forkPluginProcess({ entry }) {
 }
 
 function writePlugin(id, permissions, main) {
-  const dir = mkdtempSync(join(tmpdir(), "pi-desktop-control-plugin-"));
+  const dir = mkdtempSync(join(tmpdir(), "ocode-control-plugin-"));
   writeFileSync(join(dir, "manifest.json"), JSON.stringify({
     schemaVersion: 1,
     id,
@@ -63,7 +63,7 @@ const DANGEROUS_PLUGIN = `
   module.exports = {
     onPanelInvoke: async (channel, payload) => {
       try {
-        return { ok: true, result: await pi.desktop.invoke({ operation: "session/delete", args: ["s1"], confirm: payload?.confirm !== false }) };
+        return { ok: true, result: await ocode.desktop.invoke({ operation: "session/delete", args: ["s1"], confirm: payload?.confirm !== false }) };
       } catch (error) {
         return { ok: false, code: error.code, message: error.message };
       }
@@ -122,8 +122,8 @@ test("desktop control is permission-gated and uses the shared controller", async
   const dir = writePlugin("demo.desktop", ["desktop.control"], `
     module.exports = {
       onPanelInvoke: async () => ({
-        operations: await pi.desktop.listOperations(),
-        result: await pi.desktop.invoke({ operation: "project/set", args: ["/tmp/project"] }),
+        operations: await ocode.desktop.listOperations(),
+        result: await ocode.desktop.invoke({ operation: "project/set", args: ["/tmp/project"] }),
       }),
     };
   `);
@@ -147,7 +147,7 @@ test("permission inheritance is bound to the current plugin tool session", async
         description: "Create a worker",
         risk: "high",
         schema: { type: "object" },
-        execute: async () => pi.desktop.invoke({
+        execute: async () => ocode.desktop.invoke({
           operation: "session/create",
           args: [{ inheritPermissionFromSessionId: "parent" }],
         }),
@@ -183,7 +183,7 @@ test("desktop control fails closed without its permission", async (t) => {
   const runtime = createRuntime(t, []);
   const dir = writePlugin("demo.denied", [], `
     module.exports = {
-      onPanelInvoke: async () => pi.desktop.listOperations(),
+      onPanelInvoke: async () => ocode.desktop.listOperations(),
     };
   `);
   await runtime.loadFromPath(dir, []);

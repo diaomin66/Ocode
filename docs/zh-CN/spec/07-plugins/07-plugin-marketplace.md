@@ -43,7 +43,7 @@
 「插件 → 市场」始终使用插件中心的官方目录
 `https://plugins.aiuo.net/catalog.json`，页面不提供来源选择器。旧版本持久化的
 `pluginMarketSource` 和 `pluginMarketCustomUrl` 仍保留以兼容设置读取，但会被忽略；
-无需迁移数据。开发与测试仍可通过 `PI_DESKTOP_PLUGIN_MARKET_URL` 指向本地目录，
+无需迁移数据。开发与测试仍可通过 `OCODE_PLUGIN_MARKET_URL` 指向本地目录，
 但已发布界面不会因此开放目录配置。
 
 市场目录与安装包下载遵循设置 → 常规 → 网络。系统模式会让 host-core 的 `curl`
@@ -65,7 +65,7 @@
 官方渠道的 resolve 请求携带 `deviceId`。host-core 从操作系统暴露的机器标识派生：
 Windows 的 `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`、macOS 的平台 UUID，
 或 Linux 的 `/etc/machine-id`（回退 `/var/lib/dbus/machine-id` 与
-`/sys/class/dmi/id/product_uuid`）。上报的是 `sha256("pi-desktop.device.v1:" + 机器码)`
+`/sys/class/dmi/id/product_uuid`）。上报的是 `sha256("ocode.device.v1:" + 机器码)`
 的 64 位小写十六进制，因此机器码原文不出本机，该摘要也与应用计算的其他哈希做了域
 分隔。读不到机器标识时，host-core 生成一个随机 64 位十六进制 ID，持久化在应用数据
 目录（`plugins/market/device.json`），之后一直复用。该值每个进程只读取一次，跨重启
@@ -168,7 +168,7 @@ interface MarketProvider {
 ```
 
 已发布客户端目前只提供 `official` 提供商。开发专用的
-`PI_DESKTOP_PLUGIN_MARKET_URL` 覆盖允许本地测试目录，但不会在产品界面增加来源控制。
+`OCODE_PLUGIN_MARKET_URL` 覆盖允许本地测试目录，但不会在产品界面增加来源控制。
 
 ## 4. 数据模型
 
@@ -454,7 +454,7 @@ UI 必须使信任级别可见。
 
 ## 9. 私有来源（未来的企业支持）
 
-已发布客户端不提供或持久化私有目录来源。`PI_DESKTOP_PLUGIN_MARKET_URL` 覆盖仅供本地
+已发布客户端不提供或持久化私有目录来源。`OCODE_PLUGIN_MARKET_URL` 覆盖仅供本地
 开发与测试使用，不是产品设置。企业来源支持需要未来的产品决策，并需明确设计安全与授权。
 
 ## 10. 远程 API 草稿 (HTTP)
@@ -519,7 +519,7 @@ scripts/rebuild_catalog.py
 2.`python3 scripts/pack_plugin.py plugins/<id>`
 3.`python3 scripts/rebuild_catalog.py`
 4. 提交 + 推送至 `main`
-5. PI-Desktop 通过 `market.refresh`/市场 UI 刷新
+5. Ocode 通过 `market.refresh`/市场 UI 刷新
 
 目前由维护者就地编辑源码、打包、手工重建目录。下面要变的正是这一点，而地址不变。
 
@@ -540,7 +540,7 @@ API 不可用，浏览、安装和更新依然可用。
 使用 env 覆盖目录 URL：
 
 ```text
-PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
+OCODE_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
 ```
 
 

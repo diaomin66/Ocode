@@ -216,7 +216,7 @@ importers:
       '@biomejs/biome':
         specifier: ^2.5.13
         version: 2.5.13
-      '@pi-desktop/plugin-devkit':
+      '@ocode/plugin-devkit':
         specifier: workspace:*
         version: link:packages/plugin-devkit
 
@@ -238,31 +238,31 @@ importers:
       '@earendil-works/pi-mcp':
         specifier: 1.1.0
         version: 1.1.0
-      '@pi-desktop/agent-host':
+      '@ocode/agent-host':
         specifier: workspace:*
         version: link:../../packages/agent-host
-      '@pi-desktop/agent-runtime':
+      '@ocode/agent-runtime':
         specifier: workspace:*
         version: link:../../packages/agent-runtime
-      '@pi-desktop/host-runtime':
+      '@ocode/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
-      '@pi-desktop/i18n':
+      '@ocode/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
-      '@pi-desktop/plugin-devkit':
+      '@ocode/plugin-devkit':
         specifier: workspace:*
         version: link:../../packages/plugin-devkit
-      '@pi-desktop/plugin-sdk':
+      '@ocode/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      '@pi-desktop/racp':
+      '@ocode/racp':
         specifier: workspace:*
         version: link:../../packages/racp
-      '@pi-desktop/shared':
+      '@ocode/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@pi-desktop/voice-runtime':
+      '@ocode/voice-runtime':
         specifier: workspace:*
         version: link:../../packages/voice-runtime
       '@tailwindcss/vite':
@@ -359,21 +359,21 @@ importers:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(react@19.2.8)
 
-  apps/pi-host:
+  apps/ocode-host:
     dependencies:
-      '@pi-desktop/agent-host':
+      '@ocode/agent-host':
         specifier: workspace:*
         version: link:../../packages/agent-host
-      '@pi-desktop/agent-runtime':
+      '@ocode/agent-runtime':
         specifier: workspace:*
         version: link:../../packages/agent-runtime
-      '@pi-desktop/host-runtime':
+      '@ocode/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
-      '@pi-desktop/racp':
+      '@ocode/racp':
         specifier: workspace:*
         version: link:../../packages/racp
-      '@pi-desktop/shared':
+      '@ocode/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       ws:
@@ -408,7 +408,7 @@ importers:
 
   packages/agent-host:
     dependencies:
-      '@pi-desktop/shared':
+      '@ocode/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -433,7 +433,7 @@ importers:
       '@earendil-works/pi-coding-agent':
         specifier: 1.1.0
         version: 1.1.0(patch_hash=73b8776451352deeaa307306b1aaa3a22e2c2cfd6e06c802fcd390409912f60a)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(ws@8.21.1)(zod@4.4.3)
-      '@pi-desktop/shared':
+      '@ocode/shared':
         specifier: workspace:*
         version: link:../shared
       jiti:
@@ -464,13 +464,13 @@ importers:
 
   packages/host-runtime:
     dependencies:
-      '@pi-desktop/agent-host':
+      '@ocode/agent-host':
         specifier: workspace:*
         version: link:../agent-host
-      '@pi-desktop/agent-runtime':
+      '@ocode/agent-runtime':
         specifier: workspace:*
         version: link:../agent-runtime
-      '@pi-desktop/shared':
+      '@ocode/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -495,7 +495,7 @@ importers:
 
   packages/plugin-devkit:
     dependencies:
-      '@pi-desktop/plugin-sdk':
+      '@ocode/plugin-sdk':
         specifier: workspace:*
         version: link:../plugin-sdk
     devDependencies:
@@ -524,10 +524,10 @@ importers:
 
   packages/racp:
     dependencies:
-      '@pi-desktop/agent-host':
+      '@ocode/agent-host':
         specifier: workspace:*
         version: link:../agent-host
-      '@pi-desktop/shared':
+      '@ocode/shared':
         specifier: workspace:*
         version: link:../shared
       typebox:

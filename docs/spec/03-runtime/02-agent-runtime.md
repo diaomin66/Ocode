@@ -140,7 +140,7 @@ transcript-read API. The core runs no title completion of its own.
    the durable user message. Only an image that is within the 10 MB inline
    bound for a vision model is read into memory; larger images use streamed
    hashing/copying and the existing safe path fallback
-   A `pi-desktop://session/<id>` link in the draft is resolved in the same step
+   A `ocode://session/<id>` link in the draft is resolved in the same step
    into a bounded excerpt attachment: the same project only, the current
    conversation dropped before any read, and the runtime quotes it to the model
    as one `<session_reference name="…" session="…">` block ahead of the user's
@@ -398,7 +398,7 @@ The complete visible transcript and the model context are separate views of
 the same session. A durable checkpoint summarizes older model context while
 the renderer continues to show every original user, assistant, and tool row.
 
-PI-Desktop uses pi-agent-core for the agent loop and stable agent/event/tool
+Ocode uses pi-agent-core for the agent loop and stable agent/event/tool
 types, and pi-ai for provider-facing requests and message estimation. The
 runtime owns its context projection, LLM-message conversion, token-estimation
 adapter, compaction cut-point selection, and summary generation because the
@@ -422,7 +422,7 @@ For every pi loop turn:
 
 1. pi emits and awaits `turn_end` after the assistant message and all tool
    results for that turn are complete
-2. PI-Desktop rebuilds the context from the full transcript plus the newest
+2. Ocode rebuilds the context from the full transcript plus the newest
    valid checkpoint and estimates the next request budget
 3. below 90% of `hardLimit`, and with no pending model request, the next turn
    proceeds unchanged (a budget reminder may be added to that request)
@@ -509,7 +509,7 @@ re-estimation, host-core append, `compaction_end`, transcript row, warning:
   being summarized.
 
 The family is resolved from a construction option, then
-`PI_DESKTOP_COMPACTION_STRATEGY`. It is not a setting, is absent from
+`OCODE_COMPACTION_STRATEGY`. It is not a setting, is absent from
 `AppSettings` and i18n, and exists so the no-summary mechanism is implemented
 and testable.
 
@@ -614,7 +614,7 @@ counts as running state until durable persistence completes.
 
 The file list a checkpoint carries is read out of the summarized range by pi's
 own collector, which recognizes the lowercase spellings `read` / `write` /
-`edit` — the names pi's tools carry. PI-Desktop registers `Read` / `Write` /
+`edit` — the names pi's tools carry. Ocode registers `Read` / `Write` /
 `Edit`, so the runtime converts exactly those three on the way into pi's
 preparation (`withPiFileOpToolNames`): nothing stored changes, and every other
 tool name is left spelled the way we register it. Without that conversion a
@@ -1320,8 +1320,8 @@ those values, or whose base URL host is `opencode.ai` send:
 
 - `x-opencode-session`: the durable conversation id, or a per-call UUID when
   the caller has no session
-- `x-opencode-client: pi-desktop`
-- `User-Agent: pi-desktop/<APP_VERSION>`
+- `x-opencode-client: ocode`
+- `User-Agent: ocode/<APP_VERSION>`
 
 Caller-supplied headers override the client and User-Agent defaults. An empty
 session header is restored from the conversation id so OpenCode Go cannot
@@ -1700,7 +1700,7 @@ out-of-root files are skipped. The global file and the combined project
 entries have independent 32 KiB UTF-8 budgets, so an oversized global file
 never removes project instructions. A file that exceeds its remaining budget is
 cut on a UTF-8 character boundary and followed by a
-`[PI-Desktop truncated <source>: loaded the first <n> of <total> bytes; ...]`
+`[Ocode truncated <source>: loaded the first <n> of <total> bytes; ...]`
 notice; project files after a truncated one are not loaded. Source paths are
 labelled under `# Project instructions`.
 The sidecar never reads workspace instructions directly. A changed root chain
@@ -1719,7 +1719,7 @@ resolution are rooted there, so the agent follows the worktree's own
 `AGENTS.md` files. `projectPath` stays the project identity for memory,
 skills, plugins, MCP servers, subagent definitions, the custom system prompt,
 and group context. The system prompt adds a short isolated-workspace note
-(work only in the worktree, use the `PI_PORT` block, leave branch changes and
+(work only in the worktree, use the `OCODE_PORT` block, leave branch changes and
 merging to the user, and how to resolve a merge conflict).
 
 ## 8. Concurrency
@@ -1852,7 +1852,7 @@ build applies that flag by replacing the bundled roots instead of adding them
 and its system enumeration misses public anchors (issue #1187), so the
 launcher omits the flag and the sidecar merges the three sets into the default
 CA set itself at startup (`agent-runtime system-ca`). Restart after updating
-local trust or the extra-CA startup environment. Headless pi-host launch
+local trust or the extra-CA startup environment. Headless ocode-host launch
 behavior and System/Direct/Custom proxy routing are unchanged.
 
 Explicit certificate verification errors are terminal for both setup and

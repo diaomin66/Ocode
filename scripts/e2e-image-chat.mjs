@@ -16,7 +16,7 @@ const root = mkdtempSync(join(tmpdir(), "pi-image-chat-e2e-"));
 const dataDir = join(root, "data"),
   project = join(root, "project");
 mkdirSync(project);
-const evidence = process.env.PI_IMAGE_CHAT_EVIDENCE_DIR;
+const evidence = process.env.OCODE_IMAGE_CHAT_EVIDENCE_DIR;
 if (evidence) mkdirSync(evidence, { recursive: true });
 const model = imageChatModel();
 const server = createServer(model.handler);
@@ -50,7 +50,7 @@ await host.call("settings.set", { imageGeneration: { providerId: imageProvider.i
 await host.stop();
 
 const { appDir, electronBinary } = resolveElectronBinary();
-const port = Number(process.env.PI_IMAGE_CHAT_CDP_PORT || 9386);
+const port = Number(process.env.OCODE_IMAGE_CHAT_CDP_PORT || 9386);
 // CDP viewport emulation only changes the renderer's CSS viewport. It does not
 // resize the native window created by the desktop bootstrap (1200x800), so the
 // full-size image-chat scenario must keep those dimensions in sync or the
@@ -58,8 +58,8 @@ const port = Number(process.env.PI_IMAGE_CHAT_CDP_PORT || 9386);
 const desktopViewport = { width: 1200, height: 800 };
 const env = {
   ...process.env,
-  PI_DESKTOP_DATA_DIR: dataDir,
-  PI_DESKTOP_START_MAXIMIZED: "0",
+  OCODE_DATA_DIR: dataDir,
+  OCODE_START_MAXIMIZED: "0",
   ELECTRON_RENDERER_URL: "",
 };
 delete env.ELECTRON_RUN_AS_NODE;
@@ -172,7 +172,7 @@ try {
   })()`);
   const invoke = (name, ...args) =>
     evaluate(
-      `(async () => { const r = await window.piDesktop.invoke(window.piDesktop.channels.invoke[${JSON.stringify(name)}], ...${JSON.stringify(args)}); if (!r.ok) throw new Error(JSON.stringify(r.error)); return r.data; })()`,
+      `(async () => { const r = await window.ocode.invoke(window.ocode.channels.invoke[${JSON.stringify(name)}], ...${JSON.stringify(args)}); if (!r.ok) throw new Error(JSON.stringify(r.error)); return r.data; })()`,
     );
   await send("Page.enable");
   const click = async (text, selector = "button", byLabel = false) => {

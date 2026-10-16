@@ -8,9 +8,9 @@ import {
   type RemoteHostConnectionStatus, type RemoteHostSyncProvidersRequest, type RemoteHostSyncProvidersResult, type SessionSummary,
   type CommandShellOption, isCommandShellOption,
   type WorkspaceFilesRequest,
-} from "@pi-desktop/shared";
-import { wsClientTransport } from "@pi-desktop/racp";
-import type { HostRpcPort } from "@pi-desktop/agent-host";
+} from "@ocode/shared";
+import { wsClientTransport } from "@ocode/racp";
+import type { HostRpcPort } from "@ocode/agent-host";
 import type { BackendRouter } from "../remote/backend-router.js";
 import { makeRemoteSessionId, parseRemoteSessionId } from "../remote/backend-router.js";
 import { createRacpRemoteHostClient, exchangePairingToken, type RacpRemoteHostClient } from "../remote/racp-remote-host-client.js";

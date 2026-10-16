@@ -3,7 +3,7 @@ import test from "node:test";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@ocode/shared";
 
 const here = dirname(fileURLToPath(import.meta.url));
 

@@ -69,7 +69,7 @@ function sshRecord({ version = OLD_VERSION, sshSecret = "login-secret", auth = "
 }
 
 function readyLine(version, port, hostId = "host-id") {
-  return `PI_HOST_READY ${JSON.stringify({ hostId, host: "127.0.0.1", port, version })}`;
+  return `OCODE_HOST_READY ${JSON.stringify({ hostId, host: "127.0.0.1", port, version })}`;
 }
 
 function fakeAdapter({ capabilities, failConnect } = {}) {
@@ -147,7 +147,7 @@ test("a same-release failure cooldown survives restarts and a new release retrie
 
   const realigner = createRealigner(DESKTOP_VERSION);
   assert.equal(await realigner.realign(persisted), null, "a failed attempt resolves to null");
-  assert.equal(persisted.metadata.piHostRealignment.succeeded, false);
+  assert.equal(persisted.metadata.ocodeHostRealignment.succeeded, false);
   assert.equal(realigner.decide(persisted), "cooldown", "the same release must not retry immediately");
 
   const restarted = createRealigner(DESKTOP_VERSION);
@@ -191,7 +191,7 @@ test("a realignment replaces the record with the re-paired host and closes a fai
   assert.deepEqual(stored, [result.record], "the refreshed record is persisted before the caller reconnects");
   assert.deepEqual(closed, []);
   assert.equal(realigner.decide(sshRecord()), "aligned", "an aligned release is not attempted again");
-  assert.equal(result.record.metadata.piHostRealignment.succeeded, true);
+  assert.equal(result.record.metadata.ocodeHostRealignment.succeeded, true);
   const restarted = createRemoteHostRealigner({
     version: DESKTOP_VERSION,
     bootstrap: async () => { throw new Error("the successful marker must prevent another install"); },
@@ -244,7 +244,7 @@ function sshFixture() {
       return {
         code: 0,
         stderr: "",
-        stdout: `${readyLine(DESKTOP_VERSION, state.ports)}\nPI_HOST_PAIRING_TOKEN ${JSON.stringify({ token: "ppt1.fixture", expiresAt: 1893456000000 })}`,
+        stdout: `${readyLine(DESKTOP_VERSION, state.ports)}\nOCODE_HOST_PAIRING_TOKEN ${JSON.stringify({ token: "ppt1.fixture", expiresAt: 1893456000000 })}`,
       };
     },
     forward: async ({ localPort }) => ({ localPort, close: async () => undefined }),
@@ -268,7 +268,7 @@ function bootFor(dir, fixture, { capabilities, router } = {}) {
     }),
     sshBootstrap: {
       buildTransport: () => fixture.bootstrap(),
-      fetchChecksum: async () => `${"a".repeat(64)}  pi-host-${DESKTOP_VERSION}-linux-x64.tar.gz`,
+      fetchChecksum: async () => `${"a".repeat(64)}  ocode-host-${DESKTOP_VERSION}-linux-x64.tar.gz`,
       reservePort: async () => (port += 1),
       exchangePairing: async () => "realigned-device-token",
     },

@@ -1,6 +1,6 @@
-import type { ProjectWorkspace, SessionSort } from "@pi-desktop/shared";
-export type { SessionSort } from "@pi-desktop/shared";
-export { sortSessions, sessionIsPinned, sessionIsArchived } from "@pi-desktop/shared";
+import type { ProjectWorkspace, SessionSort } from "@ocode/shared";
+export type { SessionSort } from "@ocode/shared";
+export { sortSessions, sessionIsPinned, sessionIsArchived } from "@ocode/shared";
 
 /** Local copy keeps this pure module runnable in Node's TS test loader. */
 export function normalizeProjectPath(projectPath?: string | null): string | null {
@@ -41,8 +41,8 @@ export type SidebarPreferences = {
   openProjectPaths: string[];
 };
 
-export const SIDEBAR_PREFERENCES_KEY = "pi.desktop.sidebarPreferences";
-export const SIDEBAR_WIDTH_KEY = "pi.desktop.sidebarWidth";
+export const SIDEBAR_PREFERENCES_KEY = "ocode.desktop.sidebarPreferences";
+export const SIDEBAR_WIDTH_KEY = "ocode.desktop.sidebarWidth";
 export const SIDEBAR_WIDTH_MIN = 240;
 export const SIDEBAR_WIDTH_DEFAULT = 275;
 export const SIDEBAR_WIDTH_MAX = 520;
@@ -186,7 +186,7 @@ export function loadSidebarPreferences(): SidebarPreferences {
   // Migrate the old pin-only preferences once. Do not re-apply them after
   // the new record has been written, otherwise an explicit unpin is lost.
   if (!object(raw)) {
-    const oldSessionPins = read("pi.desktop.pinnedSessions");
+    const oldSessionPins = read("ocode.desktop.pinnedSessions");
     if (Array.isArray(oldSessionPins)) {
       for (const id of oldSessionPins) {
         if (typeof id === "string" && id) {
@@ -194,7 +194,7 @@ export function loadSidebarPreferences(): SidebarPreferences {
         }
       }
     }
-    const oldProjectPins = read("pi.desktop.pinnedProjects");
+    const oldProjectPins = read("ocode.desktop.pinnedProjects");
     if (Array.isArray(oldProjectPins)) {
       for (const rawPath of oldProjectPins) {
         if (typeof rawPath !== "string") continue;

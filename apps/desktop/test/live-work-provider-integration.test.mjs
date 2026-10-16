@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { AgentHost, MemoryQueueStore } from "@pi-desktop/agent-host";
-import { LiveWorkCoordinator } from "@pi-desktop/host-runtime";
+import { AgentHost, MemoryQueueStore } from "@ocode/agent-host";
+import { LiveWorkCoordinator } from "@ocode/host-runtime";
 import {
   LIVE_WORK_TOOL_NAME,
   codexDelegationFeedback,
@@ -13,7 +13,7 @@ import {
   parseRealtimeMessage,
   realtimeToolReceiptMessage,
   realtimeWorkFeedbackMessages,
-} from "@pi-desktop/voice-runtime/live";
+} from "@ocode/voice-runtime/live";
 
 const SESSION_ID = "live-work-fixture-session";
 const CALL_ID = "live-work-fixture-call";

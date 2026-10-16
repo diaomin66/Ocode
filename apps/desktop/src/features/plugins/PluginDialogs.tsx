@@ -176,7 +176,7 @@ export function PluginDialogs({
       {settingsPlugin ? (
         <PluginSettingsSheet
           plugin={settingsPlugin}
-          platform={(window.piDesktop?.platform ?? "darwin") as "darwin" | "win32" | "linux"}
+          platform={(window.ocode?.platform ?? "darwin") as "darwin" | "win32" | "linux"}
           onClose={() => setSettingsPlugin(null)}
           onSaved={async () => {
             await refreshPlugins();

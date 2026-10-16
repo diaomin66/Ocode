@@ -1,4 +1,4 @@
-# PI-Desktop Project Board
+# Ocode Project Board
 
 > Historical record. The status tables below were last refreshed on
 > 2026-08-11 for the 0.5.x line and are kept for milestone traceability.
@@ -53,7 +53,7 @@ Open issue:
 - M2 Pi Chat Runtime (provider/secrets, streaming chat, session persistence)
 - M3 Workspace Tools (Read/Glob/Grep/Write/Edit/Bash, permissions, path sandbox)
 - M4 Plugin Foundation (dev load, command palette, plugin tool registration)
-- M5 packaging: unsigned DMG builds locally (`PI-Desktop-0.1.0-arm64.dmg`)
+- M5 packaging: unsigned DMG builds locally (`Ocode-0.1.0-arm64.dmg`)
   with custom icon, host binary + sidecar resources; signed/notarized lane
   scripted (`scripts/release-macos.sh`, D078)
 - M5 hardening: renderer sandbox + prod CSP (D081), NDJSON log channels
@@ -114,15 +114,15 @@ The M6 checkpoint is complete. The current application also includes:
 ## Validation snapshot (2026-08-05 — M6 Plan acceptance)
 
 - `cargo test -p host-core --locked` — 139/139 passed; 15 focused DB tests passed
-- `pnpm --filter @pi-desktop/desktop test` — 353 passed, one
+- `pnpm --filter @ocode/desktop test` — 353 passed, one
   platform-conditional skip
-- `pnpm --filter @pi-desktop/agent-runtime test` — 97 passed
-- `pnpm --filter @pi-desktop/shared test` — 114 passed after building `dist`
+- `pnpm --filter @ocode/agent-runtime test` — 97 passed
+- `pnpm --filter @ocode/shared test` — 114 passed after building `dist`
   (57 source cases executed in source and built form)
-- `pnpm --filter @pi-desktop/i18n test` — 7 passed
+- `pnpm --filter @ocode/i18n test` — 7 passed
 - `pnpm build:js`, `pnpm typecheck`, `pnpm lint`, and
   `cargo fmt --all -- --check` — passed
-- `PI_DESKTOP_E2E_LONG_TIMEOUT=1 pnpm test:e2e:plan` — 13 passed; the two
+- `OCODE_E2E_LONG_TIMEOUT=1 pnpm test:e2e:plan` — 13 passed; the two
   public-RPC fixture skips have direct deterministic Rust coverage
 - `pnpm test:e2e:plan-ui` — default no-key run 5/5 passed at 1280×800 and
   900×700 with the live case explicitly skipped; the optional env-gated live
@@ -139,5 +139,5 @@ The M6 checkpoint is complete. The current application also includes:
 
 ```bash
 gh auth refresh -s read:project,project
-gh project create --owner vastsa --title "PI-Desktop Roadmap"
+gh project create --owner vastsa --title "Ocode Roadmap"
 ```

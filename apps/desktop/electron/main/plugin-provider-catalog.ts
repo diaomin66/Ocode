@@ -1,8 +1,8 @@
-import type { PluginProviderCatalogMeta } from "@pi-desktop/shared";
+import type { PluginProviderCatalogMeta } from "@ocode/shared";
 import {
   resolvePluginLocalizedString,
   type PluginManifest,
-} from "@pi-desktop/plugin-sdk";
+} from "@ocode/plugin-sdk";
 
 type PluginProviderCatalogSource = {
   manifest: PluginManifest;

@@ -29,7 +29,7 @@ const server = createServer({ key, cert }, (_request, response) => {
 server.on("connection", () => { handshakes++; });
 async function run(host, expected, extra) {
   const env = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
-  for (const name of ["NODE_EXTRA_CA_CERTS", "NODE_OPTIONS", "NODE_USE_ENV_PROXY", "NODE_TLS_REJECT_UNAUTHORIZED", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "PI_DESKTOP_PROXY_JSON"])
+  for (const name of ["NODE_EXTRA_CA_CERTS", "NODE_OPTIONS", "NODE_USE_ENV_PROXY", "NODE_TLS_REJECT_UNAUTHORIZED", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "OCODE_PROXY_JSON"])
     delete env[name];
   if (extra) env.NODE_EXTRA_CA_CERTS = join(fixture, "localhost-cert.pem");
   const before = handshakes;
@@ -51,7 +51,7 @@ try {
   await writeFile(join(temp, "agent-runtime/package.json"), '{"type":"module"}');
   await build({ entryPoints: [join(root, "packages/agent-runtime/src/sidecar.ts")],
     outfile: join(temp, "agent-runtime/sidecar.js"), bundle: true, platform: "node", format: "esm",
-    define: { PI_BUNDLED_NODE: "true" },
+    define: { OCODE_BUNDLED_NODE: "true" },
     banner: { js: `import { createRequire as __piCreateRequire } from 'node:module'; const require = __piCreateRequire(import.meta.url);
 import __certificateProbeTls from 'node:tls';
 { const tls = __certificateProbeTls; const defaults = new Set(tls.getCACertificates('default'));
@@ -59,7 +59,7 @@ process.stdout.write(JSON.stringify({jsonrpc:'2.0',method:'test.trust',params:{s
   });
   await build({ entryPoints: [join(root, "scripts/e2e/provider-certificate-sidecar.ts")],
     outfile: join(temp, "parent.mjs"), bundle: true, platform: "node", format: "esm",
-    alias: { "@pi-desktop/host-runtime": join(root, "packages/host-runtime/src/agent-sidecar.ts") },
+    alias: { "@ocode/host-runtime": join(root, "packages/host-runtime/src/agent-sidecar.ts") },
     // Inject only the cjs interop the ESM bundle still needs. `dirname` and
     // `fileURLToPath` stay out of the banner: the bundled main sources import
     // them from `node:path` / `node:url` themselves, and a same-scope redeclare

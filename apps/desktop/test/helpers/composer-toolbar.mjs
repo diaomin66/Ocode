@@ -74,7 +74,7 @@ export async function composerToolbar(t, ssr, overrides = {}) {
   // transcript renders in this same test read `matchMedia` for reduced
   // motion, so the stand-in window answers it too.
   globalThis.window = {
-    piDesktop: { platform: "darwin", invoke: unavailable, on: () => noop },
+    ocode: { platform: "darwin", invoke: unavailable, on: () => noop },
     matchMedia: () => ({ matches: false }),
     addEventListener: noop,
     removeEventListener: noop,

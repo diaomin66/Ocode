@@ -49,8 +49,8 @@ coverage/
 .turbo/
 
 # Local runtime data
-.pi-desktop/
-.pi-desktop-test/
+.ocode/
+.ocode-test/
 .pi/
 .cc-connect/
 

@@ -1,4 +1,4 @@
-import type { SessionSummary, UiMessage } from "@pi-desktop/shared";
+import type { SessionSummary, UiMessage } from "@ocode/shared";
 
 /**
  * A forked session's transcript window.

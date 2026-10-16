@@ -5,7 +5,7 @@ import {
   rememberPluginLaunch,
 } from "../src/lib/plugin-launcher-history.ts";
 
-const KEY = "pi.desktop.pluginLaunchHistory";
+const KEY = "ocode.desktop.pluginLaunchHistory";
 
 function installStorage(values = new Map()) {
   const previousStorage = globalThis.localStorage;

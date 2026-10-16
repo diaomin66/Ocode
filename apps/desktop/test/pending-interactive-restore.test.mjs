@@ -221,7 +221,7 @@ test("a newer restore result wins over an older overlapping read", async (t) => 
 test("a rejected read leaves the queues exactly as the live stream left them", async (t) => {
   for (const failure of [
     () => Promise.reject(new Error("host RPC timeout: agent.pendingInteractive")),
-    () => Promise.reject(new Error("piDesktop preload bridge unavailable")),
+    () => Promise.reject(new Error("ocode preload bridge unavailable")),
     () => Promise.reject({ code: "HOST_UNAVAILABLE" }),
   ]) {
     const liveAsk = askFor("session-a", "ask-live");

@@ -40,7 +40,7 @@ application. Electron Main is a thin IPC bridge; Agent Runtime owns no sync.
 
 S3 uses origin-only endpoints, region, bucket, prefix, access key ID, secret
 access key, optional session token and path-style/virtual-hosted addressing.
-Defaults: `us-east-1`, `pi-desktop/config`, path style, and `sync` mode.
+Defaults: `us-east-1`, `ocode/config`, path style, and `sync` mode.
 The private bucket must already exist; Host does not create it or change ACLs.
 
 ```text
@@ -93,7 +93,7 @@ atomic replacement and import journaling are not a filesystem-wide transaction.
 Settings exposes S3 fields, vault password, device label, modes, automatic runs,
 categories, probing, manual run, pause, unlock, approvals, mappings, history,
 restore, password rewrap and disconnect. Existing distinct status codes remain.
-The S3 draft key is `pi.desktop.configSyncS3Draft.v1`; old drafts are ignored,
+The S3 draft key is `ocode.desktop.configSyncS3Draft.v1`; old drafts are ignored,
 not deleted. Persist only typed non-secret choices. Secrets and passwords stay
 in transient input memory and are cleared after save. A replacement secret with
 a blank token clears the old token. Saved destination/mode changes invalidate

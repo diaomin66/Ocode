@@ -22,7 +22,7 @@ const hostProcessEntry = join(desktopRoot, "electron/main/plugin-host-process.mj
 
 // Set before the runtime is imported so the write ledger and per-plugin data
 // land in a throwaway directory instead of the developer's real one.
-process.env.PI_DESKTOP_DATA_DIR = mkdtempSync(join(tmpdir(), "pi-fs-scope-data-"));
+process.env.OCODE_DATA_DIR = mkdtempSync(join(tmpdir(), "pi-fs-scope-data-"));
 
 register(pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")));
 const { MAX_DELETES_PER_WINDOW, PluginRuntime } = await import(
@@ -92,7 +92,7 @@ function makeWorkspace(files = {}) {
     "docs/a.md": "a",
     "notes.txt": "notes",
     "dist/build.js": "built",
-    ".env": "PI_TOKEN=secret",
+    ".env": "OCODE_TOKEN=secret",
     ".git/config": "[core]",
     ...files,
   };
@@ -659,7 +659,7 @@ test("a host action reaches a file in another folder of the open project", async
 
 test("the project's other folders are not an escape hatch", async (t) => {
   const other = makeWorkspace({
-    ".env": "PI_TOKEN=secret",
+    ".env": "OCODE_TOKEN=secret",
     "docs/a.md": "a",
     "notes.txt": "notes",
   });

@@ -1,5 +1,5 @@
 /**
- * SSH bootstrap: install and pair a `pi-host` on a machine the user already
+ * SSH bootstrap: install and pair a `ocode-host` on a machine the user already
  * reaches over SSH (spec `02-architecture/05-remote-agent-control.md` §5.2,
  * security `05-security/02-remote-control-security.md` §3.4).
  *
@@ -22,22 +22,22 @@ import {
   ErrorCodes,
   type RemoteHostBootstrapRequest,
   type RemoteHostSshMetadata,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
-  type PiHostBootstrapScriptInput,
+  type OcodeHostBootstrapScriptInput,
   parseBootstrapOutput,
   redactBootstrapOutput,
-} from "./pi-host-bootstrap-script.js";
+} from "./ocode-host-bootstrap-script.js";
 import {
   isPublishedTarget,
   parseChecksumFile,
-  piHostArtifactName,
-  piHostArtifactUrls,
-  piHostBundleDir,
+  ocodeHostArtifactName,
+  ocodeHostArtifactUrls,
+  ocodeHostBundleDir,
   resolveTarget,
   targetKey,
   versionsMatch,
-} from "./pi-host-release.js";
+} from "./ocode-host-release.js";
 import {
   assertSshArgument,
   createSystemSshTransport,
@@ -49,7 +49,7 @@ import {
 } from "./ssh-transport.js";
 import { assertSshPassword } from "./ssh-askpass.js";
 import { racpUrlForLocalPort } from "./ssh-tunnel.js";
-import { installPiHost } from "./pi-host-installer.js";
+import { installOcodeHost } from "./ocode-host-installer.js";
 import type { uploadSshArtifact } from "./ssh-artifact-transfer.js";
 
 /** Progress the Settings surface can render while a bootstrap runs. */
@@ -128,15 +128,15 @@ function fail(message: string, errorCode: string, data?: Record<string, unknown>
 }
 
 const REMOTE_STEP_MESSAGES: Record<string, string> = {
-  "missing-node": "the remote machine has no Node.js; pi-host needs Node.js 22 or newer",
-  "node-too-old": "the remote Node.js is too old; pi-host needs Node.js 22 or newer",
-  "download-failed": "the remote machine could not download the pi-host bundle from GitHub",
-  "checksum-mismatch": "the downloaded pi-host bundle did not match the published SHA-256",
+  "missing-node": "the remote machine has no Node.js; ocode-host needs Node.js 22 or newer",
+  "node-too-old": "the remote Node.js is too old; ocode-host needs Node.js 22 or newer",
+  "download-failed": "the remote machine could not download the ocode-host bundle from GitHub",
+  "checksum-mismatch": "the downloaded ocode-host bundle did not match the published SHA-256",
   "missing-tar": "the remote machine has no tar",
-  "install-failed": "the remote pi-host install.sh failed",
-  "ready-timeout": "the remote pi-host started but did not become ready in time",
-  "host-exited": "the remote pi-host process exited before it became ready",
-  "host-start-failed": "the remote pi-host process failed to start",
+  "install-failed": "the remote ocode-host install.sh failed",
+  "ready-timeout": "the remote ocode-host started but did not become ready in time",
+  "host-exited": "the remote ocode-host process exited before it became ready",
+  "host-start-failed": "the remote ocode-host process failed to start",
 };
 
 function remoteStepMessage(step: string): string {
@@ -217,7 +217,7 @@ function validateTarget(request: RemoteHostBootstrapRequest): SshTarget {
 }
 
 /**
- * The port `pi-host` binds on the remote machine. Absent or `0` means "pick a
+ * The port `ocode-host` binds on the remote machine. Absent or `0` means "pick a
  * free one and report it", which is what the bootstrap normally wants; a
  * pinned port is range-checked here so it cannot reach the script as an
  * argument like `--port -5`.
@@ -285,7 +285,7 @@ export function createSshBootstrap(deps: SshBootstrapDeps): SshBootstrap {
         }
         if (!isPublishedTarget(remoteTarget)) {
           throw fail(
-            `no pi-host bundle is published for ${targetKey(remoteTarget)}`,
+            `no ocode-host bundle is published for ${targetKey(remoteTarget)}`,
             ErrorCodes.HOST_BOOTSTRAP_FAILED,
             { target: targetKey(remoteTarget) },
           );
@@ -293,8 +293,8 @@ export function createSshBootstrap(deps: SshBootstrapDeps): SshBootstrap {
 
         // 2. Resolve the artifact and the digest the release published for it.
         mark("resolve-release");
-        const urls = piHostArtifactUrls(deps.version, remoteTarget);
-        const artifactName = piHostArtifactName(deps.version, remoteTarget);
+        const urls = ocodeHostArtifactUrls(deps.version, remoteTarget);
+        const artifactName = ocodeHostArtifactName(deps.version, remoteTarget);
         mark("download-checksum");
         const expectedSha256 = parseChecksumFile(await fetchChecksum(urls.checksum, signal), artifactName);
         signal?.throwIfAborted();
@@ -308,11 +308,11 @@ export function createSshBootstrap(deps: SshBootstrapDeps): SshBootstrap {
 
         // 3. Prefer remote download; use a verified upload only if that download fails.
         mark("install");
-        const scriptInput: PiHostBootstrapScriptInput = {
+        const scriptInput: OcodeHostBootstrapScriptInput = {
           version: deps.version,
           artifactUrl: urls.tarball,
           artifactName,
-          bundleDir: piHostBundleDir(deps.version, remoteTarget),
+          bundleDir: ocodeHostBundleDir(deps.version, remoteTarget),
           expectedSha256,
           port: resolveRemotePort(request),
           pairingLifetimeMs: 600_000,
@@ -320,7 +320,7 @@ export function createSshBootstrap(deps: SshBootstrapDeps): SshBootstrap {
         };
         let result: SshExecResult;
         try {
-          result = await installPiHost(transport, scriptInput, {
+          result = await installOcodeHost(transport, scriptInput, {
             timeoutMs: installTimeoutMs, signal, uploadArtifact: deps.uploadArtifact,
             onUpload: () => mark("upload"), log,
           });

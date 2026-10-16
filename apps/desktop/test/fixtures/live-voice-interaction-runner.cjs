@@ -8,7 +8,7 @@ const results = [];
 const deniedRequests = [];
 let permissionRequests = 0;
 let win;
-const artifact = (name) => join(process.env.PI_LIVE_VOICE_ARTIFACT_DIR, name);
+const artifact = (name) => join(process.env.OCODE_LIVE_VOICE_ARTIFACT_DIR, name);
 const prep = '[role="dialog"][aria-label="Prepare Live voice"]';
 const details = '[role="dialog"][aria-label="Call details"]';
 const bar = ".live-voice-call-bar";
@@ -47,7 +47,7 @@ async function check(name, predicate) {
   console.log(`PASS ${name}`);
 }
 async function capture(name) {
-  if (process.env.PI_LIVE_VOICE_CAPTURE_UI !== "1") return;
+  if (process.env.OCODE_LIVE_VOICE_CAPTURE_UI !== "1") return;
   await frame();
   writeFileSync(artifact(`${name}.png`), (await win.webContents.capturePage()).toPNG());
 }
@@ -90,7 +90,7 @@ async function selectOption(expression, value) {
 }
 
 async function fresh(enabled = true) {
-  await win.loadURL(process.env.PI_LIVE_VOICE_FIXTURE_URL);
+  await win.loadURL(process.env.OCODE_LIVE_VOICE_FIXTURE_URL);
   if (!win.isVisible()) win.show();
   win.focus();
   win.webContents.focus();
@@ -369,7 +369,7 @@ app.whenReady().then(async () => {
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => { permissionRequests += 1; callback(false); });
   win.webContents.session.setPermissionCheckHandler(() => false);
-  const origin = new URL(process.env.PI_LIVE_VOICE_FIXTURE_URL).origin;
+  const origin = new URL(process.env.OCODE_LIVE_VOICE_FIXTURE_URL).origin;
   win.webContents.session.webRequest.onBeforeRequest((request, callback) => {
     const allowed = new URL(request.url).origin === origin || /^(data|blob):/.test(request.url);
     if (!allowed) deniedRequests.push(request.url);

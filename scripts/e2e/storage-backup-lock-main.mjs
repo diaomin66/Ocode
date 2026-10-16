@@ -4,7 +4,7 @@ import { promises as fs } from "original-fs";
 import { join } from "node:path";
 import { removeBackups } from "../../apps/desktop/electron/main/storage/files.ts";
 
-const directory = process.env.PI_STORAGE_BACKUP_ARTIFACTS;
+const directory = process.env.OCODE_STORAGE_BACKUP_ARTIFACTS;
 const anchor = join(directory, "installation");
 app.setPath("userData", anchor);
 const result = { electron: process.versions.electron, passed: false };

@@ -25,7 +25,7 @@ import {
 import type { AppState } from "../app-state";
 import type { StoreAccess } from "./types";
 
-const WORK_PANEL_STORAGE_KEY = "pi.desktop.workPanel";
+const WORK_PANEL_STORAGE_KEY = "ocode.desktop.workPanel";
 
 export function loadWorkPanelWidth(): number {
   try {

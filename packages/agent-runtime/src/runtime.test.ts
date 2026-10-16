@@ -10,7 +10,7 @@ import {
   toToolDeclaration,
   type AssistantMessage,
 } from "@earendil-works/pi-ai";
-import { formatSessionMessage, type SessionMessageOrigin } from "@pi-desktop/shared";
+import { formatSessionMessage, type SessionMessageOrigin } from "@ocode/shared";
 import { estimateContextTokens as estimateTranscriptTokens } from "@earendil-works/pi-ai/utils/estimate";
 import { buildSessionContext } from "./session-context.js";
 import { estimateContextTokens as estimateAgentContextTokens, estimateTokens } from "./pi-runtime-estimates.js";
@@ -116,7 +116,7 @@ import {
   DEFAULT_SUBAGENT_IDLE_TIMEOUT_SECONDS,
   MAX_RESUMABLE_CHAINS_PER_AGENT,
   MAX_SUBAGENT_CONCURRENCY,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type {
   AgentEventEnvelope,
   ContextCompactionRecord,
@@ -127,7 +127,7 @@ import type {
   SessionThinkingLevel,
   SubagentDefinition,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 const provider: RuntimeProviderConfig = {
   id: "local",
@@ -373,7 +373,7 @@ describe("custom system prompt files (issue #542)", () => {
     const prompt = promptOf(runtime);
 
     expect(prompt).toContain(persona);
-    expect(prompt).not.toContain("You are PI-Desktop");
+    expect(prompt).not.toContain("You are Ocode");
     // Operational rules from the default prompt must survive the replacement.
     expect(prompt).toContain("Complete the requested work and relevant checks");
     expect(prompt).toContain("Before each tool batch, briefly state its purpose");
@@ -393,10 +393,10 @@ describe("custom system prompt files (issue #542)", () => {
     const prompt = promptOf(runtime);
 
     expect(prompt).toContain(appendix);
-    expect(prompt).toContain("You are PI-Desktop");
+    expect(prompt).toContain("You are Ocode");
     expect(prompt).toContain("Run unit tests.");
     expect(prompt.indexOf(appendix)).toBeGreaterThan(
-      prompt.indexOf("You are PI-Desktop"),
+      prompt.indexOf("You are Ocode"),
     );
     expect(prompt.indexOf("Run unit tests.")).toBeGreaterThan(
       prompt.indexOf(appendix),
@@ -413,7 +413,7 @@ describe("custom system prompt files (issue #542)", () => {
 
     expect(prompt).toContain(persona);
     expect(prompt).toContain(appendix);
-    expect(prompt).not.toContain("You are PI-Desktop");
+    expect(prompt).not.toContain("You are Ocode");
 
     await runtime.dispose();
   });
@@ -422,7 +422,7 @@ describe("custom system prompt files (issue #542)", () => {
     const runtime = createRuntime();
     const prompt = promptOf(runtime);
 
-    expect(prompt).toContain("You are PI-Desktop");
+    expect(prompt).toContain("You are Ocode");
     expect(prompt).not.toContain("MARKER-XYZ-123");
 
     await runtime.dispose();
@@ -1157,8 +1157,8 @@ describe("DesktopAgentRuntime configuration matching", () => {
   });
 
   it("keeps the root prompt after reading a file outside the project", async () => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
-    const outside = await mkdtemp(join(tmpdir(), "pi-desktop-attachment-"));
+    const root = await mkdtemp(join(tmpdir(), "ocode-instructions-"));
+    const outside = await mkdtemp(join(tmpdir(), "ocode-attachment-"));
     try {
       await mkdir(join(root, "nested"));
       await writeFile(join(root, "AGENTS.md"), "Use root rules.");
@@ -1414,7 +1414,7 @@ describe("DesktopAgentRuntime configuration matching", () => {
     );
 
     expect(systemPrompt).toContain("Windows PowerShell");
-    expect(systemPrompt).toContain("$env:PI_SCRATCH_DIR");
+    expect(systemPrompt).toContain("$env:OCODE_SCRATCH_DIR");
     expect(systemPrompt).not.toContain("Git Bash (POSIX bash on Windows)");
     expect(bash.description).toContain("Windows PowerShell");
     expect((bash.parameters as any).properties.timeout).toMatchObject({
@@ -1437,7 +1437,7 @@ describe("DesktopAgentRuntime configuration matching", () => {
       available: true,
       isDefault: false,
     };
-    const windowsScratch = "C:\\Users\\User\\.pi-desktop\\scratch\\sess-123";
+    const windowsScratch = "C:\\Users\\User\\.ocode\\scratch\\sess-123";
     const runtime = createRuntime({
       commandShell: gitBash,
       scratchDir: windowsScratch,
@@ -1447,9 +1447,9 @@ describe("DesktopAgentRuntime configuration matching", () => {
       (tool: any) => tool.name === "Bash",
     );
 
-    const posixScratch = "C:/Users/User/.pi-desktop/scratch/sess-123";
+    const posixScratch = "C:/Users/User/.ocode/scratch/sess-123";
     expect(systemPrompt).toContain(`\`${posixScratch}\``);
-    expect(systemPrompt).toContain("in Bash: $PI_SCRATCH_DIR");
+    expect(systemPrompt).toContain("in Bash: $OCODE_SCRATCH_DIR");
     expect(systemPrompt).not.toContain(windowsScratch);
     expect(bash.description).toContain(posixScratch);
 
@@ -10199,7 +10199,7 @@ describe("DesktopAgentRuntime compaction request headers", () => {
     expect(calls[0]?.sessionId).toBe("session-1");
     expect(calls[0]?.headers).toMatchObject({
       "x-opencode-session": "session-1",
-      "x-opencode-client": "pi-desktop",
+      "x-opencode-client": "ocode",
       "X-Team": "platform",
     });
     await runtime.dispose();
@@ -12089,7 +12089,7 @@ describe("isolated session workspace (ADR 0329)", () => {
     const isolated = createRuntime({ projectPath: "/work/app", workspaceRoot: "/data/wt/app/s1" });
     const ordinary = createRuntime({ projectPath: "/work/app" });
     expect(systemPrompt(isolated)).toContain(isolatedWorkspaceGuidance());
-    expect(systemPrompt(isolated)).toContain("PI_PORT");
+    expect(systemPrompt(isolated)).toContain("OCODE_PORT");
     expect(systemPrompt(ordinary)).not.toContain("Isolated session:");
   });
 
@@ -12135,7 +12135,7 @@ describe("isolated-session subagent worktrees (ADR 0329)", () => {
       call: vi.fn(async (method: string, _params?: unknown) => {
         if (method === "worktree.delegate.create") {
           if (createError) throw createError;
-          return { worktree: { branch: "pi-desktop/s-d", status: "active" } };
+          return { worktree: { branch: "ocode/s-d", status: "active" } };
         }
         if (method === "worktree.delegate.settle") return { settlement };
         if (method === "tools.execute") return { ok: true, content: {} };

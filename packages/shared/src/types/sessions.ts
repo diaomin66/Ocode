@@ -13,7 +13,7 @@ import type { SessionWorktreeSummary } from "./worktree.js";
  * - `desktop`: this desktop's own host-core (the default; older hosts omit the
  *   field and it is normalized to `desktop`).
  * - `pi-native`: an imported Pi CLI session, read-mostly.
- * - `remote`: a session that lives on a paired remote `pi-host` and is driven
+ * - `remote`: a session that lives on a paired remote `ocode-host` and is driven
  *   over RACP-WS. The renderer treats it exactly like a `desktop` session apart
  *   from a display badge; the local/remote split is resolved in Electron main.
  */

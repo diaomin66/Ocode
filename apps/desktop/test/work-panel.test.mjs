@@ -399,7 +399,7 @@ test("work panel width is renderer-owned inside the fixed window", () => {
 test("work panel keeps its compatibility IPC seams without native geometry", () => {
   assert.match(
     protocolSource,
-    /windowSetWorkPanelReservation:\s*"pi-desktop\/window\/setWorkPanelReservation"/,
+    /windowSetWorkPanelReservation:\s*"ocode\/window\/setWorkPanelReservation"/,
   );
   assert.match(
     apiSource,
@@ -410,11 +410,11 @@ test("work panel keeps its compatibility IPC seams without native geometry", () 
   assert.match(mainSource, /return \{ requested: 0, reserved: 0 \}/);
   assert.match(
     protocolSource,
-    /windowSetWorkPanelChatWidth:\s*"pi-desktop\/window\/setWorkPanelChatWidth"/,
+    /windowSetWorkPanelChatWidth:\s*"ocode\/window\/setWorkPanelChatWidth"/,
   );
   assert.match(
     protocolSource,
-    /windowWorkPanelResize:\s*"pi-desktop\/window\/event\/workPanelResize"/,
+    /windowWorkPanelResize:\s*"ocode\/window\/event\/workPanelResize"/,
   );
   assert.match(apiSource, /setWorkPanelChatWidth/);
   assert.match(apiSource, /onWorkPanelResize/);

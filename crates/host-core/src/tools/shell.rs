@@ -111,7 +111,7 @@ pub fn dialect_for_id(id: &str) -> Option<&'static str> {
     }
 }
 
-/// Format a scratch directory for the shell that will read `PI_SCRATCH_DIR`.
+/// Format a scratch directory for the shell that will read `OCODE_SCRATCH_DIR`.
 ///
 /// Mirrors `formatScratchDirForShell` in `agent-runtime`: POSIX shells
 /// (including Git Bash on Windows) can only consume forward-slash paths, so
@@ -331,13 +331,13 @@ fn choices_for_platform(platform: ShellPlatform) -> Vec<ShellOption> {
 }
 
 fn find_bash() -> Result<PathBuf, String> {
-    if let Some(overridden) = env::var_os("PI_DESKTOP_BASH") {
+    if let Some(overridden) = env::var_os("OCODE_BASH") {
         let path = PathBuf::from(&overridden);
         if is_executable(&path) {
             return Ok(path);
         }
         return Err(format!(
-            "PI_DESKTOP_BASH points to '{}', which is not an executable file",
+            "OCODE_BASH points to '{}', which is not an executable file",
             path.display()
         ));
     }
@@ -505,7 +505,7 @@ fn probe_user_login_path() -> Option<String> {
     // contaminate the result.
     let (tx, rx) = std::sync::mpsc::channel();
     let _probe = std::thread::Builder::new()
-        .name("pi-host-login-path".into())
+        .name("ocode-host-login-path".into())
         .spawn(move || {
             let output = std::process::Command::new(&shell)
                 .args(["-lic", "printf %s \"$PATH\""])
@@ -717,11 +717,11 @@ mod tests {
 
     #[test]
     fn scratch_dir_uses_posix_separators_only_for_posix_shells() {
-        let scratch = PathBuf::from(r"C:\Users\Lan\AppData\Local\PI Desktop\scratch");
+        let scratch = PathBuf::from(r"C:\Users\Lan\AppData\Local\Ocode\scratch");
 
         assert_eq!(
             format_scratch_dir_for_shell(Some("posix"), &scratch).to_string_lossy(),
-            "C:/Users/Lan/AppData/Local/PI Desktop/scratch"
+            "C:/Users/Lan/AppData/Local/Ocode/scratch"
         );
         assert_eq!(
             format_scratch_dir_for_shell(Some("powershell"), &scratch).to_string_lossy(),

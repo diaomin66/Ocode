@@ -193,11 +193,11 @@ mod tests {
     fn daylight_saving_skips_missing_and_duplicate_daily_times() {
         // Isolate TZ in a child; changing the process environment during
         // parallel Rust tests would race chrono and unrelated filesystem tests.
-        if std::env::var("PI_SCHEDULE_TZ_TEST").as_deref() != Ok("1") {
+        if std::env::var("OCODE_SCHEDULE_TZ_TEST").as_deref() != Ok("1") {
             let output = std::process::Command::new(std::env::current_exe().unwrap())
                 .args(["--exact", "scheduled::timing::tests::daylight_saving_skips_missing_and_duplicate_daily_times"])
                 .env("TZ", "America/New_York")
-                .env("PI_SCHEDULE_TZ_TEST", "1")
+                .env("OCODE_SCHEDULE_TZ_TEST", "1")
                 .output().unwrap();
             assert!(
                 output.status.success(),

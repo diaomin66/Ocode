@@ -13,7 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(join(root, "packages/agent-runtime/package.json"));
 const { build } = require("esbuild");
 const { electronBinary } = resolveElectronBinary(root);
-const temp = await mkdtemp(join(process.env.PI_SCRATCH_DIR ?? tmpdir(), "remote-mvp-ui-"));
+const temp = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR ?? tmpdir(), "remote-mvp-ui-"));
 try {
   await build({
     entryPoints: [join(root, "scripts/e2e/remote-mvp-ui.jsx")], outfile: join(temp, "renderer.js"),
@@ -25,8 +25,8 @@ try {
       builder.onLoad({ filter: /.*/, namespace: "fixture-url" }, ({ path }) => ({ contents: `export default ${JSON.stringify(path)};`, loader: "js" }));
     } }],
     alias: {
-      "@pi-desktop/shared": join(root, "packages/shared/src/index.ts"),
-      "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
+      "@ocode/shared": join(root, "packages/shared/src/index.ts"),
+      "@ocode/i18n": join(root, "packages/i18n/src/index.ts"),
       react: join(root, "apps/desktop/node_modules/react"),
       "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
       "react-i18next": join(root, "apps/desktop/node_modules/react-i18next"),

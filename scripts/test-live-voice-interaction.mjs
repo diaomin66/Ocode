@@ -13,8 +13,8 @@ const root = repositoryRoot();
 assertDesktopBuild(root);
 const { build } = createRequire(new URL("../packages/agent-runtime/package.json", import.meta.url))("esbuild");
 const temp = await mkdtemp(join(tmpdir(), "pi-live-voice-interaction-"));
-const artifacts = process.env.PI_LIVE_VOICE_ARTIFACT_DIR
-  ? resolve(process.env.PI_LIVE_VOICE_ARTIFACT_DIR)
+const artifacts = process.env.OCODE_LIVE_VOICE_ARTIFACT_DIR
+  ? resolve(process.env.OCODE_LIVE_VOICE_ARTIFACT_DIR)
   : await mkdtemp(join(tmpdir(), "pi-live-voice-results-"));
 let server;
 try {
@@ -27,9 +27,9 @@ try {
     outfile: join(temp, "fixture.js"), bundle: true, format: "esm", platform: "browser", jsx: "automatic",
     // Reused node_modules may link a primary-checkout dist; test candidate sources.
     alias: {
-      "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-      "@pi-desktop/shared": join(root, "packages/shared/src"),
-      "@pi-desktop/voice-runtime/live": join(root, "packages/voice-runtime/src/live/index.ts"),
+      "@ocode/i18n": join(root, "packages/i18n/src"),
+      "@ocode/shared": join(root, "packages/shared/src"),
+      "@ocode/voice-runtime/live": join(root, "packages/voice-runtime/src/live/index.ts"),
     },
     define: { "import.meta.env.DEV": "false", "process.env.NODE_ENV": '"production"' },
     plugins: [{
@@ -71,8 +71,8 @@ try {
   });
   const env = {
     ...process.env,
-    PI_LIVE_VOICE_FIXTURE_URL: `http://127.0.0.1:${server.address().port}`,
-    PI_LIVE_VOICE_ARTIFACT_DIR: artifacts,
+    OCODE_LIVE_VOICE_FIXTURE_URL: `http://127.0.0.1:${server.address().port}`,
+    OCODE_LIVE_VOICE_ARTIFACT_DIR: artifacts,
   };
   delete env.ELECTRON_RUN_AS_NODE;
   console.log(`Live Voice mounted interaction artifacts: ${artifacts}`);

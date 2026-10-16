@@ -245,7 +245,7 @@ pub fn resolve_external_path(workspace_root: &Path, input: &str) -> Result<PathB
 /// Resolve a tool path against the workspace root, falling back to the
 /// session scratch root (D114). Relative paths always resolve against the
 /// workspace; the scratch directory is addressed by absolute path only (the
-/// model learns it from the system prompt / `PI_SCRATCH_DIR`). Both roots get
+/// model learns it from the system prompt / `OCODE_SCRATCH_DIR`). Both roots get
 /// the same lexical + symlink containment defense.
 pub fn resolve_tool_path(
     workspace_root: &Path,

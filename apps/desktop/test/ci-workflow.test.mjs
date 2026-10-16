@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
+import { spawnSync } from "node:child_process";
+import { join } from "node:path";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
@@ -56,7 +58,7 @@ test("CI does not typecheck workspace dependencies twice", () => {
 
   assert.match(
     ciWorkflowSource,
-    /run: pnpm --filter @pi-desktop\/desktop typecheck/,
+    /run: pnpm --filter @ocode\/desktop typecheck/,
   );
   assert.doesNotMatch(ciWorkflowSource, /run: pnpm typecheck/);
 });
@@ -82,7 +84,7 @@ test("release preparation overlaps independent work and avoids duplicate builds"
   assert.match(releaseWorkflowSource, /wait "\$host_build_pid"/);
   assert.match(
     releaseWorkflowSource,
-    /pnpm --filter '@pi-desktop\/desktop\^\.\.\.' --fail-if-no-match build/,
+    /pnpm --filter '@ocode\/desktop\^\.\.\.' --fail-if-no-match build/,
   );
   // The full JS build belongs to the verify gate; the build matrix only
   // builds the desktop app's workspace dependencies.
@@ -99,7 +101,7 @@ test("release builds are gated on the CI checks and least-privilege permissions"
   assert.ok(verifyJob, "release verify job is missing");
   for (const step of [
     /run: pnpm build:js/,
-    /run: pnpm --filter @pi-desktop\/desktop typecheck/,
+    /run: pnpm --filter @ocode\/desktop typecheck/,
     /run: pnpm lint/,
     /run: pnpm -r --if-present test/,
     /run: cargo test -p host-core --locked/,
@@ -123,7 +125,7 @@ test("manual Linux package validation covers the RPM desktop identity", () => {
   assert.match(linuxPackageWorkflowSource, /runs-on: ubuntu-22\.04/);
   assert.match(
     linuxPackageWorkflowSource,
-    /run: pnpm --filter @pi-desktop\/desktop run dist:linux -- --x64/,
+    /run: pnpm --filter @ocode\/desktop run dist:linux -- --x64/,
   );
   assert.match(
     linuxPackageWorkflowSource,
@@ -137,10 +139,10 @@ test("manual Linux package validation covers the RPM desktop identity", () => {
   assert.match(linuxPackageWorkflowSource, /build-id/);
   assert.match(
     linuxPackageWorkflowSource,
-    /usr\/share\/applications\/pi-desktop\.desktop/,
+    /usr\/share\/applications\/ocode\.desktop/,
   );
-  assert.match(linuxPackageWorkflowSource, /Icon=pi-desktop/);
-  assert.match(linuxPackageWorkflowSource, /StartupWMClass=pi-desktop/);
+  assert.match(linuxPackageWorkflowSource, /Icon=ocode/);
+  assert.match(linuxPackageWorkflowSource, /StartupWMClass=ocode/);
   assert.match(
     linuxPackageWorkflowSource,
     /uses: actions\/upload-artifact@v7[\s\S]*path: apps\/desktop\/release\/\*\.rpm/,
@@ -159,7 +161,7 @@ test("release workflow publishes the Linux ASAR beside installers", () => {
   );
   assert.match(
     releaseAsarScriptSource,
-    /PI-Desktop-\$\{releaseVersion\}-linux-\$\{releaseArch\}\.asar/,
+    /Ocode-\$\{releaseVersion\}-linux-\$\{releaseArch\}\.asar/,
   );
 });
 
@@ -186,11 +188,11 @@ test("the release matrix ships native Linux x64 and arm64 lanes", () => {
   );
   assert.match(releaseWorkflowSource, /feed: latest-linux\.yml/);
   assert.match(releaseWorkflowSource, /feed: latest-linux-arm64\.yml/);
-  // The pi-host bundles the SSH bootstrap installs track the desktop's Linux
+  // The ocode-host bundles the SSH bootstrap installs track the desktop's Linux
   // lanes one for one.
   assert.match(
     releaseWorkflowSource,
-    /pi-host-bundle:[\s\S]*?- arch: x64[\s\S]*?os: ubuntu-22\.04[\s\S]*?- arch: arm64[\s\S]*?os: ubuntu-22\.04-arm/,
+    /ocode-host-bundle:[\s\S]*?- arch: x64[\s\S]*?os: ubuntu-22\.04[\s\S]*?- arch: arm64[\s\S]*?os: ubuntu-22\.04-arm/,
   );
 });
 
@@ -211,8 +213,8 @@ test("the Linux package config lets the workflow choose the architecture", () =>
     /-linux-\$\{arch\}\.\$\{ext\}$/,
     "the AppImage name carries its architecture",
   );
-  assert.equal(build.deb.artifactName, "pi-desktop_${version}_${arch}.${ext}");
-  assert.equal(build.rpm.artifactName, "pi-desktop-${version}-${arch}.${ext}");
+  assert.equal(build.deb.artifactName, "ocode_${version}_${arch}.${ext}");
+  assert.equal(build.rpm.artifactName, "ocode-${version}-${arch}.${ext}");
 });
 
 test("release matrix packages both native macOS architectures", () => {
@@ -226,21 +228,21 @@ test("release matrix packages both native macOS architectures", () => {
   );
   assert.match(
     releaseWorkflowSource,
-    /name: Package installers \(\$\{\{ matrix\.dist \}\}\)[\s\S]*?if: matrix\.platform != 'macos'[\s\S]*?run: pnpm --filter @pi-desktop\/desktop run \$\{\{ matrix\.dist \}\} -- --\$\{\{ matrix\.arch \}\}/,
+    /name: Package installers \(\$\{\{ matrix\.dist \}\}\)[\s\S]*?if: matrix\.platform != 'macos'[\s\S]*?run: pnpm --filter @ocode\/desktop run \$\{\{ matrix\.dist \}\} -- --\$\{\{ matrix\.arch \}\}/,
   );
   assert.equal(
     JSON.parse(desktopPackageSource).build.mac.artifactName,
-    "PI-Desktop-${version}-${arch}-mac.${ext}",
+    "Ocode-${version}-${arch}-mac.${ext}",
     "macOS ZIP names include the target architecture",
   );
   assert.equal(
     JSON.parse(desktopPackageSource).build.dmg.artifactName,
-    "PI-Desktop-${version}-${arch}.${ext}",
+    "Ocode-${version}-${arch}.${ext}",
     "macOS DMG names include the target architecture",
   );
   assert.match(
     releaseWorkflowSource,
-    /Package unsigned macOS installer[\s\S]*?pnpm --filter @pi-desktop\/desktop run dist:mac -- --\$\{\{ matrix\.arch \}\}/,
+    /Package unsigned macOS installer[\s\S]*?pnpm --filter @ocode\/desktop run dist:mac -- --\$\{\{ matrix\.arch \}\}/,
     "unsigned macOS builds use the shared artifact naming config",
   );
   assert.doesNotMatch(
@@ -284,7 +286,7 @@ test("macOS release signing is required on tag pushes", () => {
     releaseWorkflowSource,
     /Require macOS signing and notarization secrets[\s\S]*?Missing GitHub Actions secrets for macOS signing/,
   );
-  assert.match(releaseWorkflowSource, /APPLE_TEAM_ID must be DUV63RKYTW/);
+  assert.match(releaseWorkflowSource, /APPLE_TEAM_ID must be 10 uppercase alphanumeric characters/);
 
   const signedBlock = releaseWorkflowSource.match(
     /- name: Package signed and notarized macOS installer[\s\S]*?(?=\n      - name:)/,
@@ -294,6 +296,7 @@ test("macOS release signing is required on tag pushes", () => {
   for (const secret of [
     "CSC_LINK",
     "CSC_KEY_PASSWORD",
+    "MAC_SIGNING_IDENTITY",
     "APPLE_ID",
     "APPLE_APP_SPECIFIC_PASSWORD",
     "APPLE_TEAM_ID",
@@ -303,11 +306,13 @@ test("macOS release signing is required on tag pushes", () => {
   // electron-builder throws InvalidConfigurationError when an identity name
   // keeps the "Developer ID Application:" prefix, so CSC_NAME carries the bare
   // common name and the CLI must not pass -c.mac.identity.
-  assert.match(signedBlock, /CSC_NAME: "XingYu Liu \(DUV63RKYTW\)"/);
+  assert.match(signedBlock, /CSC_NAME: \$\{\{ secrets\.MAC_SIGNING_IDENTITY \}\}/);
+  assert.match(signedBlock, /export CSC_NAME="\$\{CSC_NAME#Developer ID Application: \}"/);
+  assert.match(signedBlock, /-c\.mac\.forceCodeSigning=true/);
   assert.doesNotMatch(signedBlock, /-c\.mac\.identity=/);
   assert.doesNotMatch(signedBlock, /CSC_NAME: "Developer ID Application:/);
   assert.match(signedBlock, /-c\.mac\.notarize=true/);
-  // The single "signing PI-Desktop.app" line electron-builder prints does not
+  // The single "signing Ocode.app" line electron-builder prints does not
   // tell walking, per-file codesign, silent retries, and the Apple
   // notarization wait apart; the signing trace and the watchdog carry the rest.
   assert.match(
@@ -318,13 +323,13 @@ test("macOS release signing is required on tag pushes", () => {
   // stem list that does not cover `security set-key-partition-list -k <p12
   // password>`, so electron-builder's namespace is deliberately excluded.
   assert.doesNotMatch(signedBlock, /DEBUG: ".*electron-builder.*"/);
-  assert.match(signedBlock, /PI_SIGNING_TIMEOUT_SECONDS: "1800"/);
-  assert.match(signedBlock, /PI_SIGNING_STALL_SECONDS: "300"/);
-  assert.match(signedBlock, /PI_STAPLER_MAX_ATTEMPTS: "6"/);
-  assert.match(signedBlock, /PI_STAPLER_RETRY_DELAY_SECONDS: "10"/);
+  assert.match(signedBlock, /OCODE_SIGNING_TIMEOUT_SECONDS: "1800"/);
+  assert.match(signedBlock, /OCODE_SIGNING_STALL_SECONDS: "300"/);
+  assert.match(signedBlock, /OCODE_STAPLER_MAX_ATTEMPTS: "6"/);
+  assert.match(signedBlock, /OCODE_STAPLER_RETRY_DELAY_SECONDS: "10"/);
   assert.match(
     signedBlock,
-    /node scripts\/macos-signing-watchdog\.mjs \\\n\s+--label "dist:mac-\$\{\{ matrix\.arch \}\}" \\\n\s+-- pnpm --filter @pi-desktop\/desktop run dist:mac/,
+    /node scripts\/macos-signing-watchdog\.mjs \\\n\s+--label "dist:mac-\$\{\{ matrix\.arch \}\}" \\\n\s+-- pnpm --filter @ocode\/desktop run dist:mac/,
     "the signed macOS packaging phase runs under the signing watchdog",
   );
   // electron-builder notarizes only the .app; the DMG needs its own
@@ -335,6 +340,7 @@ test("macOS release signing is required on tag pushes", () => {
   assert.ok(dmgBlock, "DMG notarization step is missing");
   assert.match(dmgBlock, /env\.MACOS_SIGN_RELEASE == 'true'/);
   for (const secret of [
+    "MAC_SIGNING_IDENTITY",
     "APPLE_ID",
     "APPLE_APP_SPECIFIC_PASSWORD",
     "APPLE_TEAM_ID",
@@ -349,7 +355,7 @@ test("macOS release signing is required on tag pushes", () => {
     /node scripts\/macos-signing-watchdog\.mjs[\s\S]*?-- scripts\/notarize-and-staple-macos-release-dmg\.sh apps\/desktop\/release/,
     "the DMG notarization wait runs under the signing watchdog",
   );
-  assert.match(dmgBlock, /PI_SIGNING_TIMEOUT_SECONDS: "1200"/);
+  assert.match(dmgBlock, /OCODE_SIGNING_TIMEOUT_SECONDS: "1200"/);
   assert.match(
     releaseWorkflowSource,
     /- name: Analyze the packaged macOS app bundle[\s\S]*?if: matrix\.platform == 'macos'[\s\S]*?continue-on-error: true[\s\S]*?run: node scripts\/macos-bundle-inventory\.mjs apps\/desktop\/release/,
@@ -367,7 +373,8 @@ test("the signed local macOS lane selects the native runner architecture", () =>
   assert.match(releaseMacScriptSource, /MAC_ARCH="\$\{MAC_ARCH:-\$DEFAULT_MAC_ARCH\}"/);
   assert.match(releaseMacScriptSource, /must match the host/);
   assert.match(releaseMacScriptSource, /electron-builder --mac "--\$\{MAC_ARCH\}"/);
-  assert.match(releaseMacScriptSource, /XingYu Liu \(DUV63RKYTW\)/);
+  assert.match(releaseMacScriptSource, /MAC_SIGNING_IDENTITY is required/);
+  assert.match(releaseMacScriptSource, /APPLE_TEAM_ID must be 10 uppercase alphanumeric characters/);
   assert.match(
     releaseMacScriptSource,
     /MAC_SIGNING_IDENTITY="\$\{MAC_SIGNING_IDENTITY#Developer ID Application: \}"/,
@@ -436,12 +443,13 @@ test("both macOS lanes only reference scripts that exist", async () => {
   assert.deepEqual(missing, []);
 });
 
+function stepBlock(name) {
+  return releaseWorkflowSource.match(new RegExp(`- name: ${name}[^]*?(?=\\n      - name:)`))?.[0] ?? "";
+}
+
 test("macOS signing instrumentation stays out of the Windows and Linux lanes", () => {
   const instrumentation =
     /macos-signing-watchdog|macos-signing-diagnostics|macos-bundle-inventory/;
-  const stepBlock = (name) =>
-    releaseWorkflowSource.match(new RegExp(`- name: ${name}[^]*?(?=\\n      - name:)`))?.[0] ??
-    "";
   assert.doesNotMatch(stepBlock("Package installers"), instrumentation);
   assert.doesNotMatch(stepBlock("Verify Linux host-core glibc floor"), instrumentation);
   assert.doesNotMatch(stepBlock("Export Linux ASAR release asset"), instrumentation);
@@ -463,7 +471,7 @@ test("GitHub releases trigger the CNB mirror pipeline with a JSON payload", () =
   );
   assert.match(
     mirrorToCnbWorkflowSource,
-    /if: github\.repository == 'vastsa\/PI-Desktop'/,
+    /if: github\.repository == 'diaomin66\/Ocode' && vars\.CNB_MIRROR_ENABLED == 'true' && vars\.CNB_BUILD_URL != ''/,
   );
   assert.match(
     mirrorToCnbWorkflowSource,
@@ -475,8 +483,9 @@ test("GitHub releases trigger the CNB mirror pipeline with a JSON payload", () =
   );
   assert.match(
     mirrorToCnbWorkflowSource,
-    /https:\/\/api\.cnb\.cool\/aixk\/Pi-Desktop\/-\/build\/start/,
+    /CNB_BUILD_URL: \$\{\{ vars\.CNB_BUILD_URL \}\}/,
   );
+  assert.match(mirrorToCnbWorkflowSource, /-X POST "\$CNB_BUILD_URL"/);
   assert.match(mirrorToCnbWorkflowSource, /event: "api_trigger_mirror"/);
   assert.match(mirrorToCnbWorkflowSource, /env: \{ MIRROR_TAGS: \$tag \}/);
   assert.match(mirrorToCnbWorkflowSource, /jq -n --arg tag "\$MIRROR_TAG"/);
@@ -486,4 +495,58 @@ test("GitHub releases trigger the CNB mirror pipeline with a JSON payload", () =
     /-d ".*github\.event\.release\.tag_name/,
     "JSON payload must not interpolate the release tag through YAML string escaping",
   );
+});
+
+test("macOS workflow passes maintainer signing configuration to every release phase", () => {
+  for (const name of [
+    "Diagnose macOS signing environment",
+    "Require macOS signing and notarization secrets",
+    "Package signed and notarized macOS installer",
+    "Notarize and staple the macOS DMG",
+    "Verify signed and notarized macOS installer",
+  ]) {
+    const block = stepBlock(name);
+    assert.ok(block, name);
+    for (const secret of ["MAC_SIGNING_IDENTITY", "APPLE_TEAM_ID"]) {
+      assert.ok(block.includes(secret + ": ${{ secrets." + secret + " }}"), `${name} receives ${secret}`);
+    }
+  }
+});
+
+test("macOS workflow preflight rejects absent or malformed configuration and accepts other teams", () => {
+  const block = stepBlock("Require macOS signing and notarization secrets");
+  const script = block.split("        run: |\n")[1].replace(/^          /gm, "");
+  const bash = process.platform === "win32"
+    ? join(process.env.ProgramFiles ?? "C:/Program Files", "Git/bin/bash.exe")
+    : "bash";
+  const env = {
+    ...process.env,
+    CSC_LINK: "fixture-certificate",
+    CSC_KEY_PASSWORD: "fixture-password",
+    APPLE_ID: "release@example.com",
+    APPLE_APP_SPECIFIC_PASSWORD: "app-specific-password",
+    APPLE_TEAM_ID: "ABCDE12345",
+    MAC_SIGNING_IDENTITY: "Ocode Developer (ABCDE12345)",
+  };
+  for (const override of [
+    { MAC_SIGNING_IDENTITY: "" },
+    { MAC_SIGNING_IDENTITY: "   " },
+    { MAC_SIGNING_IDENTITY: "Developer ID Application: " },
+    { APPLE_TEAM_ID: "" },
+    { APPLE_TEAM_ID: "abcde12345" },
+    { APPLE_TEAM_ID: "ABCDE1234!" },
+    { APPLE_TEAM_ID: "ABCDE123456" },
+    { APPLE_TEAM_ID: "FGHIJ67890" },
+  ]) {
+    const result = spawnSync(bash, ["-c", script], { encoding: "utf8", env: { ...env, ...override } });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /::error::/);
+  }
+  for (const team of ["ABCDE12345", "FGHIJ67890"]) {
+    const result = spawnSync(bash, ["-c", script], {
+      encoding: "utf8",
+      env: { ...env, APPLE_TEAM_ID: team, MAC_SIGNING_IDENTITY: `Developer ID Application: Ocode Developer (${team})` },
+    });
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  }
 });

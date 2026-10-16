@@ -3,7 +3,7 @@ export type PluginLaunchRecord = {
   usedAt: number;
 };
 
-const KEY = "pi.desktop.pluginLaunchHistory";
+const KEY = "ocode.desktop.pluginLaunchHistory";
 const MAX = 24;
 
 function historyStorage(): Storage | null {

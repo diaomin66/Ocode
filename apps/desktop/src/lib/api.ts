@@ -149,7 +149,7 @@ import type {
   TrustedExtensionUiPromptResponse,
   SessionTodoSnapshot,
   StorageInfo,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   defaultCommandShellForPlatform,
   IPC,
@@ -164,7 +164,7 @@ import {
   validateNetworkProxy,
   validateSpeechSettings,
   JEV_API_KEY_SECRET_REF,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 export type ImportSource = "claude-code" | "opencode" | "codex" | "pi";
 // One definition, owned by the shared package (the host and sidecar use the
@@ -172,7 +172,7 @@ export type ImportSource = "claude-code" | "opencode" | "codex" | "pi";
 import type {
   ModelConfigImportCandidate,
   ModelConfigImportSource,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 export type { ModelConfigImportCandidate, ModelConfigImportSource };
 
 export interface ImportCandidate {
@@ -322,7 +322,7 @@ export interface ExternalMcpImportRunResult {
 
 declare global {
   interface Window {
-    piDesktop?: {
+    ocode?: {
       invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<Result<T>>;
       on: (channel: string, listener: (...args: unknown[]) => void) => () => void;
       onLiveVoicePort?: () => () => void;
@@ -338,10 +338,10 @@ declare global {
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
   guardRemoteInvocation(channel, args[0]);
-  if (!window.piDesktop?.invoke) {
-    throw new Error("piDesktop preload bridge unavailable");
+  if (!window.ocode?.invoke) {
+    throw new Error("ocode preload bridge unavailable");
   }
-  const result = await window.piDesktop.invoke<T>(channel, ...args);
+  const result = await window.ocode.invoke<T>(channel, ...args);
   if (!result.ok) {
     const error = new Error(result.error.message) as Error & {
       code?: string;
@@ -426,7 +426,7 @@ export function normalizeSettings(settings: AppSettings): AppSettings {
     )
       ? (settings as { defaultCommandShell: AppSettings["defaultCommandShell"] })
           .defaultCommandShell
-      : defaultCommandShellForPlatform(window.piDesktop?.platform ?? ""),
+      : defaultCommandShellForPlatform(window.ocode?.platform ?? ""),
     largePasteThreshold: normalizeLargePasteThreshold(
       (settings as { largePasteThreshold?: unknown }).largePasteThreshold,
     ),
@@ -791,8 +791,8 @@ export const api = {
   backgroundTasksStop: (id: string) =>
     invoke<{ ok: boolean; found: boolean }>(IPC.invoke.backgroundTasksStop, { id }),
   onBackgroundTasksChanged: (listener: (payload: { version?: number }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.backgroundTasksChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.backgroundTasksChanged, (payload) =>
       listener((payload ?? {}) as { version?: number }),
     );
   },
@@ -996,7 +996,7 @@ export const api = {
   pickFiles: () =>
     invoke<{ token: string | null; canceled?: boolean }>(IPC.invoke.composerPickFiles),
   getDroppedFilePath: (file: File) =>
-    window.piDesktop?.getDroppedFilePath?.(file) ?? null,
+    window.ocode?.getDroppedFilePath?.(file) ?? null,
   pickPhotos: () =>
     invoke<{ token: string | null; canceled?: boolean }>(IPC.invoke.composerPickPhotos),
   importFiles: (sessionId: string, token: string) =>
@@ -1592,8 +1592,8 @@ export const api = {
   respondLifecycleDialog: (requestId: string, choice: LifecycleDialogChoice) =>
     invoke<{ accepted: boolean }>(IPC.invoke.lifecycleDialogRespond, { requestId, choice }),
   onLifecycleDialogRequest: (listener: (request: LifecycleDialogRequest) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.lifecycleDialogRequest, (payload) => {
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.lifecycleDialogRequest, (payload) => {
       if (!payload || typeof payload !== "object") return;
       const value = payload as Record<string, unknown>;
       if (
@@ -1605,15 +1605,15 @@ export const api = {
     });
   },
   onLifecycleDialogDismiss: (listener: (requestId: string) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.lifecycleDialogDismiss, (payload) => {
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.lifecycleDialogDismiss, (payload) => {
       if (!payload || typeof payload !== "object") return;
       const requestId = (payload as Record<string, unknown>).requestId;
       if (typeof requestId === "string" && requestId) listener(requestId);
     });
   },
   getTokenUsageHistory: (query?: { startDate?: number; endDate?: number; bucket?: "day" | "week" | "month" }) =>
-    invoke<import("@pi-desktop/shared").TokenUsageHistoryResult>(
+    invoke<import("@ocode/shared").TokenUsageHistoryResult>(
       IPC.invoke.statsGetTokenUsageHistory,
       query,
     ),
@@ -1622,8 +1622,8 @@ export const api = {
   setTraySessionPreferences: (preferences: TraySessionPreferences) =>
     invoke<{ ok: boolean }>(IPC.invoke.traySetSessionPreferences, preferences),
   onTraySessionActivated: (listener: (sessionId: string | null) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.traySessionActivated, (payload) => {
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.traySessionActivated, (payload) => {
       const sessionId = (payload as { sessionId?: unknown })?.sessionId;
       if (sessionId === null || (typeof sessionId === "string" && sessionId)) listener(sessionId);
     });
@@ -1634,14 +1634,14 @@ export const api = {
       { action },
     ),
   onWindowMaximized: (listener: (event: { maximized: boolean }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.windowMaximized, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.windowMaximized, (payload) =>
       listener(payload as { maximized: boolean }),
     );
   },
   onWindowFullScreen: (listener: (event: { fullScreen: boolean }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.windowFullScreen, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.windowFullScreen, (payload) =>
       listener(payload as { fullScreen: boolean }),
     );
   },
@@ -1651,8 +1651,8 @@ export const api = {
       panelWidth: number;
     }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.windowWorkPanelResize, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.windowWorkPanelResize, (payload) =>
       listener(
         payload as {
           phase: "preview" | "commit";
@@ -1662,14 +1662,14 @@ export const api = {
     );
   },
   onMenuCommand: (listener: (command: AppMenuCommand) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.menuCommand, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.menuCommand, (payload) =>
       listener((payload as { command: AppMenuCommand }).command),
     );
   },
   onBrowserState: (listener: (state: BrowserState) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.browserState, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.browserState, (payload) =>
       listener(payload as BrowserState),
     );
   },
@@ -1682,8 +1682,8 @@ export const api = {
       revealOnly?: boolean;
     }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.browserPreview, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.browserPreview, (payload) =>
       listener(payload as {
         sessionId: string;
         path?: string;
@@ -1694,102 +1694,102 @@ export const api = {
     );
   },
   onBrowserOpenFile: (listener: (event: { path: string }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.browserOpenFile, (payload) => {
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.browserOpenFile, (payload) => {
       const event = payload as { path?: unknown };
       if (typeof event?.path === "string") listener({ path: event.path });
     });
   },
   onAgentEvent: (listener: (event: AgentEventEnvelope) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.agentMessage, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.agentMessage, (payload) =>
       listener(payload as AgentEventEnvelope),
     );
   },
   onAgentQueueChanged: (listener: (event: AgentQueueChangedEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.agentQueueChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.agentQueueChanged, (payload) =>
       listener(payload as AgentQueueChangedEvent),
     );
   },
   onPlansChanged: (listener: (event: PlanningStateEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.plansChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.plansChanged, (payload) =>
       listener(normalizePlansChangedEvent(payload)),
     );
   },
   getTodos: (sessionId: string) =>
     invoke<SessionTodoSnapshot>(IPC.invoke.todosGet, { sessionId }),
   onTodosChanged: (listener: (snapshot: SessionTodoSnapshot) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.todosChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.todosChanged, (payload) =>
       listener(payload as SessionTodoSnapshot),
     );
   },
   onOauthLogin: (listener: (event: OAuthLoginEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.providersOauth, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.providersOauth, (payload) =>
       listener(payload as OAuthLoginEvent),
     );
   },
   onMcpOAuth: (listener: (event: McpOAuthLoginEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.mcpOauth, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.mcpOauth, (payload) =>
       listener(payload as McpOAuthLoginEvent),
     );
   },
   onExtensionPrompt: (listener: (prompt: TrustedExtensionUiPrompt) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.extensionsUiPrompt, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.extensionsUiPrompt, (payload) =>
       listener(payload as TrustedExtensionUiPrompt),
     );
   },
   onExtensionStatus: (listener: (event: TrustedExtensionStatusEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.extensionsStatus, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.extensionsStatus, (payload) =>
       listener(payload as TrustedExtensionStatusEvent),
     );
   },
   onToast: (listener: (message: string) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.toast, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.toast, (payload) =>
       listener((payload as { message: string }).message),
     );
   },
   onInsecureEndpointNotice: (listener: (payload: { host: string }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.insecureEndpointNotice, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.insecureEndpointNotice, (payload) =>
       listener(payload as { host: string }),
     );
   },
   onHostStatus: (listener: (status: HostStatusEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.hostStatus, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.hostStatus, (payload) =>
       listener(payload as HostStatusEvent),
     );
   },
   onNotificationChanged: (
     listener: (notification: AppNotification) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.notificationChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.notificationChanged, (payload) =>
       listener((payload as { notification: AppNotification }).notification),
     );
   },
   onNotificationSound: (listener: () => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.notificationSound, () => listener());
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.notificationSound, () => listener());
   },
 
   // --- Remote hosts (R2b pairing UX) -----------------------------------------
-  /** Paired remote `pi-host` list, redacted so no device token reaches here. */
+  /** Paired remote `ocode-host` list, redacted so no device token reaches here. */
   listRemoteHosts: () =>
     invoke<{ hosts: RemoteHostSummary[] }>(IPC.invoke.remoteHostList),
   /** Exchange `ppt1.` pairing token for a durable device token and connect. */
   pairRemoteHost: (request: RemoteHostPairRequest) =>
     invoke<RemoteHostPairResult>(IPC.invoke.remoteHostPair, request),
   /**
-   * Install and pair a `pi-host` over SSH on a machine the user already
+   * Install and pair a `ocode-host` over SSH on a machine the user already
    * reaches, then bring it online (spec §5.2). Credentials come from the
    * user's own SSH configuration and agent.
    */
@@ -1819,8 +1819,8 @@ export const api = {
   remoteWorkspaceDiff: (sessionId: string) =>
     invoke<WorkspaceDiff>(IPC.invoke.workspaceDiff, { sessionId }),
   onRemoteInteractions: (listener: (event: RemoteInteractionUpdate) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.remoteInteractions, (payload) => listener(payload as RemoteInteractionUpdate));
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.remoteInteractions, (payload) => listener(payload as RemoteInteractionUpdate));
   },
   onSessionsChanged: (
     listener: (event: {
@@ -1830,8 +1830,8 @@ export const api = {
       selectSessionId?: string;
     }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.sessionsChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.sessionsChanged, (payload) =>
       listener(
         (payload ?? {}) as {
           reason?: string;
@@ -1845,20 +1845,20 @@ export const api = {
   onNotificationActivated: (
     listener: (event: { id: string; sessionId: string }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.notificationActivated, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.notificationActivated, (payload) =>
       listener(payload as { id: string; sessionId: string }),
     );
   },
   onUpdateState: (listener: (state: UpdateState) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.updatesState, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.updatesState, (payload) =>
       listener(payload as UpdateState),
     );
   },
   onPluginInstallProgress: (listener: (event: PluginInstallProgress) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.pluginInstallProgress, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.pluginInstallProgress, (payload) =>
       listener(payload as PluginInstallProgress),
     );
   },
@@ -1866,31 +1866,31 @@ export const api = {
   onPluginChanged: (
     listener: (event: { reason?: string; pluginId?: string }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.pluginChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.pluginChanged, (payload) =>
       listener((payload ?? {}) as { reason?: string; pluginId?: string }),
     );
   },
   onSettingsChanged: (listener: (patch: Record<string, unknown>) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.settingsChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.settingsChanged, (payload) =>
       listener((payload ?? {}) as Record<string, unknown>),
     );
   },
   onConfigSyncChanged: (listener: (state: ConfigSyncState) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.configSyncChanged, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.configSyncChanged, (payload) =>
       listener(payload as ConfigSyncState),
     );
   },
   onConfigSyncProgress: (listener: (progress: ConfigSyncProgress) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.configSyncProgress, (payload) =>
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.configSyncProgress, (payload) =>
       listener(payload as ConfigSyncProgress),
     );
   },
   onPluginLauncherShown: (listener: () => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.pluginLauncherShown, () => listener());
+    if (!window.ocode?.on) return () => undefined;
+    return window.ocode.on(IPC.event.pluginLauncherShown, () => listener());
   },
 };

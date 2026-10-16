@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import type {
   ReviewChangeStatus,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { reviewChangeFromMessage } from "../lib/workspace-review";
 import { useAppStore } from "../stores/app-store";
 import { cx } from "./ui";

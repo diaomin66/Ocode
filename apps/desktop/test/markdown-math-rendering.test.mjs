@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { catalogs } from "@pi-desktop/i18n";
+import { catalogs } from "@ocode/i18n";
 import { createServer } from "vite";
 import { fileURLToPath } from "node:url";
 
@@ -55,7 +55,7 @@ test("TeX math and wrapped HTTP links render through the production Markdown pip
     );
     assert.match(
       wrappedLink,
-      /<a[^>]*href="https:\/\/github\.com\/vastsa\/PI-Desktop\/issues\/1106"/,
+      /<a[^>]*href="https:\/\/github\.com\/vastsa\/Ocode\/issues\/1106"/,
     );
     assert.match(wrappedLink, /target="_blank"/);
 

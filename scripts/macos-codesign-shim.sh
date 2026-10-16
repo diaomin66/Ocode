@@ -12,14 +12,14 @@
 #
 # This script is meant to be injected in front of the real `codesign` through
 # PATH (see scripts/macos-signing-watchdog.mjs). It appends tab separated
-# start/end records to $PI_CODESIGN_LOG and then behaves exactly like the real
+# start/end records to $OCODE_CODESIGN_LOG and then behaves exactly like the real
 # tool: stdout, stderr and the exit status pass through untouched, and with the
 # log unset it does nothing but one `exec`.
 #
 # Environment:
-#   PI_CODESIGN_LOG    Append timing records here. Unset or empty disables the
+#   OCODE_CODESIGN_LOG    Append timing records here. Unset or empty disables the
 #                      shim completely (single exec, no log I/O, no overhead).
-#   PI_CODESIGN_REAL   Absolute path of the real codesign
+#   OCODE_CODESIGN_REAL   Absolute path of the real codesign
 #                      (default: /usr/bin/codesign).
 #
 # Never prints its arguments: `--keychain <path>` would be noise and
@@ -28,11 +28,11 @@
 
 set -u
 
-PI_CODESIGN_REAL_PATH="${PI_CODESIGN_REAL:-/usr/bin/codesign}"
-PI_CODESIGN_LOG_PATH="${PI_CODESIGN_LOG:-}"
+OCODE_CODESIGN_REAL_PATH="${OCODE_CODESIGN_REAL:-/usr/bin/codesign}"
+OCODE_CODESIGN_LOG_PATH="${OCODE_CODESIGN_LOG:-}"
 
-if [ -z "$PI_CODESIGN_LOG_PATH" ]; then
-  exec "$PI_CODESIGN_REAL_PATH" "$@"
+if [ -z "$OCODE_CODESIGN_LOG_PATH" ]; then
+  exec "$OCODE_CODESIGN_REAL_PATH" "$@"
 fi
 
 # Wall clock seconds with millisecond resolution. `perl` ships with macOS, but
@@ -59,7 +59,7 @@ pi_log() {
   # Never let a broken or unwritable log path disturb codesign: stderr is
   # silenced before the file is opened, so even the redirection error is
   # swallowed instead of leaking into the build output.
-  printf '%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" 2>/dev/null >> "$PI_CODESIGN_LOG_PATH" || true
+  printf '%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" 2>/dev/null >> "$OCODE_CODESIGN_LOG_PATH" || true
 }
 
 # Join argv with single spaces, drop newlines/tabs (they would forge log lines)
@@ -92,9 +92,9 @@ pi_redacted_args() {
 
 pi_log "start" "$(pi_now)" "$$" "$(pi_redacted_args "$@")"
 
-"$PI_CODESIGN_REAL_PATH" "$@"
-PI_CODESIGN_STATUS=$?
+"$OCODE_CODESIGN_REAL_PATH" "$@"
+OCODE_CODESIGN_STATUS=$?
 
-pi_log "end" "$(pi_now)" "$$" "$PI_CODESIGN_STATUS"
+pi_log "end" "$(pi_now)" "$$" "$OCODE_CODESIGN_STATUS"
 
-exit "$PI_CODESIGN_STATUS"
+exit "$OCODE_CODESIGN_STATUS"

@@ -1,5 +1,5 @@
 /**
- * Settings destination for paired remote `pi-host` machines (R2b pairing UX,
+ * Settings destination for paired remote `ocode-host` machines (R2b pairing UX,
  * ADR 0286 §Registry).
  *
  * Inventory of `<dataDir>/remote-hosts.json` plus two Add actions that reveal
@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { RemoteHostSshAuth, RemoteHostSummary } from "@pi-desktop/shared";
+import type { RemoteHostSshAuth, RemoteHostSummary } from "@ocode/shared";
 import { api } from "../../lib/api";
 import { remoteHostErrorKey } from "../../lib/remote-host-errors";
 import { useAppStore } from "../../stores/app-store";

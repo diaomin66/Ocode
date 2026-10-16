@@ -8,7 +8,7 @@
  * MCP/skill read, so paying for it on the keystroke is what made the menu feel
  * absent on a fresh launch.
  */
-import type { ComposerCommand } from "@pi-desktop/shared";
+import type { ComposerCommand } from "@ocode/shared";
 import { api } from "./api";
 
 /** Menu and resolver share one window; both re-read after it lapses. */

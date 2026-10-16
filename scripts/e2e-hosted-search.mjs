@@ -92,7 +92,7 @@ if (values.help) {
   console.log(`Usage: node scripts/e2e-hosted-search.mjs [--bundle PATH] [--timeout-ms 15000]
 Default: build shared, agent-runtime, and the production sidecar bundle.
 --bundle: build the resolver module and run that explicit sidecar artifact.
-Evidence and isolated homes stay under PI_SCRATCH_DIR or mkdtemp(os.tmpdir()).
+Evidence and isolated homes stay under OCODE_SCRATCH_DIR or mkdtemp(os.tmpdir()).
 Eight cases: next prompt, Read, instruction change, out-of-project instruction fallback, real Task/TaskWait, persisted restore, two invalid-history cases.
 Files are retained for inspection; no automatic deletion and no dependency installation.
 Reviewed source, patches, and lock metadata are fingerprinted before the build and again
@@ -104,7 +104,7 @@ when the run ends; any change between the two fails the run.`);
   // Scratch allocation is the one step that has nowhere to record a failure: if
   // it throws there is no evidence directory, so the uncaught error on stderr is
   // the intended signal. There is deliberately no fallback location.
-  const dir = await mkdtemp(join(process.env.PI_SCRATCH_DIR || tmpdir(), "hosted-search-e2e-"));
+  const dir = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR || tmpdir(), "hosted-search-e2e-"));
   console.log(`Evidence: ${dir}`);
   const evidence = { startedAt: new Date().toISOString() };
   // Declared before the guard so the `finally` below can still run them when an
@@ -179,9 +179,9 @@ when the run ends; any change between the two fails the run.`);
     assert.ok(evidence.head !== "unavailable" && evidence.sourceFingerprintBefore, "build source identity is unavailable");
     if (!values.bundle) {
       for (const [pkg, script, label] of [
-        ["@pi-desktop/shared", "build", "shared-build"],
-        ["@pi-desktop/agent-runtime", "build", "agent-runtime-build"],
-        ["@pi-desktop/agent-runtime", "bundle", "sidecar-bundle"],
+        ["@ocode/shared", "build", "shared-build"],
+        ["@ocode/agent-runtime", "build", "agent-runtime-build"],
+        ["@ocode/agent-runtime", "bundle", "sidecar-bundle"],
       ]) {
         const args = ["--filter", pkg, script];
         console.log(`Build: pnpm ${args.join(" ")}`);
@@ -189,7 +189,7 @@ when the run ends; any change between the two fails the run.`);
         await writeFile(join(dir, `${label}.log`), output);
       }
     } else {
-      const args = ["--filter", "@pi-desktop/agent-runtime", "build"];
+      const args = ["--filter", "@ocode/agent-runtime", "build"];
       console.log(`Build: pnpm ${args.join(" ")}`);
       const output = runPnpm(args);
       await writeFile(join(dir, "agent-runtime-build.log"), output);

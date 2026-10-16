@@ -6,7 +6,7 @@ import {
   type AgentEventEnvelope,
   type MessageUsage,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 import { InflightCheckpointer } from "./inflight-checkpoint.js";
 import { TurnPersistence } from "./turn-persistence.js";
@@ -58,7 +58,7 @@ export type TurnEventPipelineOptions = {
  * streaming reply (D299), close the turn on its terminal event, and persist
  * every completed row through host-core. The desktop runs the same pass in
  * Electron Main against its file-backed outbox; here the outbox is process
- * memory with a bounded retry, because a `pi-host` ends only with its
+ * memory with a bounded retry, because a `ocode-host` ends only with its
  * supervisor.
  */
 export class TurnEventPipeline {

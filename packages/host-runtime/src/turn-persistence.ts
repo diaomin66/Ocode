@@ -1,4 +1,4 @@
-import { ErrorCodes, type MessageUsage, type UiMessage } from "@pi-desktop/shared";
+import { ErrorCodes, type MessageUsage, type UiMessage } from "@ocode/shared";
 
 import type { HostRpc } from "./host-ports.js";
 
@@ -34,7 +34,7 @@ function isDuplicateMessageIdError(error: unknown): boolean {
  * retried with a bounded backoff, and a duplicate message id counts as
  * written (the host already has the row). The queue is process memory: the
  * desktop keeps a file-backed outbox because a window can close mid-turn,
- * whereas a `pi-host` process ends only with its supervisor.
+ * whereas a `ocode-host` process ends only with its supervisor.
  */
 export class TurnPersistence {
   private readonly chains = new Map<string, Promise<void>>();

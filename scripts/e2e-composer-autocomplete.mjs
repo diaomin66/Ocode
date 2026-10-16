@@ -26,7 +26,7 @@ try {
     jsx: "automatic",
     define: { "process.env.NODE_ENV": '"production"' },
     alias: {
-      "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
+      "@ocode/i18n": join(root, "packages/i18n/src/index.ts"),
       // The fixture lives outside the desktop package; use its React instance.
       react: join(root, "apps/desktop/node_modules/react"),
       "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
@@ -56,10 +56,10 @@ app.whenReady().then(async () => {
       window.setContentSize(viewport, 760);
       for (const fileMode of [false, true]) {
         checks.push(await window.webContents.executeJavaScript("globalThis.autocompleteLayoutProbe(" + width + "," + fileMode + ")"));
-        if (process.env.PI_E2E_ARTIFACT_DIR) {
+        if (process.env.OCODE_E2E_ARTIFACT_DIR) {
           const fs = require("node:fs");
-          fs.mkdirSync(process.env.PI_E2E_ARTIFACT_DIR, { recursive: true });
-          fs.writeFileSync(path.join(process.env.PI_E2E_ARTIFACT_DIR, "autocomplete-" + width + "-" + fileMode + ".png"), (await window.webContents.capturePage()).toPNG());
+          fs.mkdirSync(process.env.OCODE_E2E_ARTIFACT_DIR, { recursive: true });
+          fs.writeFileSync(path.join(process.env.OCODE_E2E_ARTIFACT_DIR, "autocomplete-" + width + "-" + fileMode + ".png"), (await window.webContents.capturePage()).toPNG());
         }
       }
     }

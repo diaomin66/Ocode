@@ -40,34 +40,34 @@ Principles:
 ## 3. Channel Conventions
 
 ```text
-invoke: pi-desktop/<domain>/<action>
-event: pi-desktop/<domain>/event/<name>
+invoke: ocode/<domain>/<action>
+event: ocode/<domain>/event/<name>
 ```
 
 Examples:
 
-- `pi-desktop/agent/prompt`
-- `pi-desktop/agent/steer`
-- `pi-desktop/agent/stop`
-- `pi-desktop/agent/stop-subagents`
-- `pi-desktop/agent/abort`
-- `pi-desktop/agent/event/message`
-- `pi-desktop/agent/askTool/resolve`
-- `pi-desktop/session/list`
-- `pi-desktop/project/open`
-- `pi-desktop/project/pickFolders`
-- `pi-desktop/project/clone`
-- `pi-desktop/project/cloneCheckout`
-- `pi-desktop/project/openFolder`
-- `pi-desktop/project-group/list`
-- `pi-desktop/project-group/create`
-- `pi-desktop/project-group/rename`
-- `pi-desktop/project-group/update`
-- `pi-desktop/project-group/memory/get` / `save`
-- `pi-desktop/project-group/instructions/get` / `save`
-- `pi-desktop/session/getScratchPath`
-- `pi-desktop/session/openScratchPath`
-- `pi-desktop/session/collaboration`
+- `ocode/agent/prompt`
+- `ocode/agent/steer`
+- `ocode/agent/stop`
+- `ocode/agent/stop-subagents`
+- `ocode/agent/abort`
+- `ocode/agent/event/message`
+- `ocode/agent/askTool/resolve`
+- `ocode/session/list`
+- `ocode/project/open`
+- `ocode/project/pickFolders`
+- `ocode/project/clone`
+- `ocode/project/cloneCheckout`
+- `ocode/project/openFolder`
+- `ocode/project-group/list`
+- `ocode/project-group/create`
+- `ocode/project-group/rename`
+- `ocode/project-group/update`
+- `ocode/project-group/memory/get` / `save`
+- `ocode/project-group/instructions/get` / `save`
+- `ocode/session/getScratchPath`
+- `ocode/session/openScratchPath`
+- `ocode/session/collaboration`
 
 ## 3.1 Logical project groups
 
@@ -174,7 +174,7 @@ Prompt execution resolves `mode`, `providerId`, `modelId`, and `thinkingLevel`
 from the durable session record and snapshots the effective command shell ID and
 dialect for Bash.
 The renderer changes those values through
-`pi-desktop/session/configure` while the session is idle:
+`ocode/session/configure` while the session is idle:
 
 ```ts
 type ThinkingLevel =
@@ -227,9 +227,9 @@ Invalid attachment paths fail with `PATH_OUTSIDE_WORKSPACE`.
 
 Regenerate history (D109) also uses session channels:
 
-- `pi-desktop/session/saveRevision`
-- `pi-desktop/session/listRevisions`
-- `pi-desktop/session/activateRevision`
+- `ocode/session/saveRevision`
+- `ocode/session/listRevisions`
+- `ocode/session/activateRevision`
 
 Root user turns may include `revisionRootId`, `revisionCount`, and
 `activeRevision`. Activating a revision replaces the live tail with
@@ -244,7 +244,7 @@ capability-aware contract.
 
 ### 5.1a Steer an active turn
 
-`pi-desktop/agent/steer` accepts `AgentSteerRequest`:
+`ocode/agent/steer` accepts `AgentSteerRequest`:
 
 ```ts
 type AgentSteerRequest = {
@@ -298,7 +298,7 @@ type AgentStopResponse = {
 };
 ```
 
-`pi-desktop/agent/stop` requests a graceful stop for the active runtime. The
+`ocode/agent/stop` requests a graceful stop for the active runtime. The
 sidecar evaluates the one-shot request after the current assistant response and
 completed tool batch, at the same boundary where it would otherwise start the
 next model request. The current durable turn then emits `agent_end` and is
@@ -311,7 +311,7 @@ steering into the active turn; it does not call this graceful-stop channel.
 
 ### 5.2a stop-subagents
 
-`pi-desktop/agent/stop-subagents` accepts `{ sessionId, delegationIds? }` and
+`ocode/agent/stop-subagents` accepts `{ sessionId, delegationIds? }` and
 returns `{ pending: string[] }`. Omitting IDs selects all currently running
 delegates in that session; an explicitly empty or malformed selection is
 rejected. The local Desktop route forwards to `agent.stopSubagents` on the
@@ -353,7 +353,7 @@ type AgentCompactRequest = { sessionId: string };
 type AgentCompactResponse = { accepted: boolean };
 ```
 
-`pi-desktop/agent/compact` creates a model-context checkpoint for an idle
+`ocode/agent/compact` creates a model-context checkpoint for an idle
 session. It is available even when automatic context protection is disabled.
 Missing provider/session configuration fails through the normal `AppError`
 envelope; an active turn or compaction returns `AGENT_BUSY`.
@@ -500,12 +500,12 @@ type PlanResolutionResult = {
 
 Preload methods:
 
-- `pi-desktop/plans/pending({ sessionId? }) -> PlansPendingResult`
-- `pi-desktop/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
+- `ocode/plans/pending({ sessionId? }) -> PlansPendingResult`
+- `ocode/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
 
 Electron forwards each host `plans.changed` notification unchanged to the
 renderer through the stable shared `IPC.event.plansChanged` channel
-(`pi-desktop/plans/event/changed`). This is the Plan/Goal change event surface;
+(`ocode/plans/event/changed`). This is the Plan/Goal change event surface;
 the
 renderer does not receive contract approval transitions as AgentEvent variants.
 `plans.pending` returns only currently pending approval rows. Terminal
@@ -556,10 +556,10 @@ type AgentStatus = {
 ### 5.6 Turn queue (D375 / D386)
 
 The Host owns the per-session prompt queue; the renderer mirrors it. A
-Send-while-running pushes through `pi-desktop/agent/queue/push` and the
+Send-while-running pushes through `ocode/agent/queue/push` and the
 headless Agent Host module admits, orders, and drains the durable entries
 (`turn_queue`, schema v18). Every change is fanned out as
-`pi-desktop/agent/event/queueChanged`.
+`ocode/agent/event/queueChanged`.
 
 ```ts
 type AgentQueuePushRequest = {
@@ -579,12 +579,12 @@ type QueuedTurnSummary = {
   createdAt: string;
 };
 
-// pi-desktop/agent/queue/push       -> QueuedTurnSummary
-// pi-desktop/agent/queue/list       -> { entries: QueuedTurnSummary[] }
-// pi-desktop/agent/queue/remove     -> { ok: true }   (turnId)
-// pi-desktop/agent/queue/prioritize -> { ok: true }   (turnId; "send now")
-// pi-desktop/agent/queue/reorder    -> { moved: boolean } (turnId, direction)
-// pi-desktop/agent/event/queueChanged -> { sessionId, entries }
+// ocode/agent/queue/push       -> QueuedTurnSummary
+// ocode/agent/queue/list       -> { entries: QueuedTurnSummary[] }
+// ocode/agent/queue/remove     -> { ok: true }   (turnId)
+// ocode/agent/queue/prioritize -> { ok: true }   (turnId; "send now")
+// ocode/agent/queue/reorder    -> { moved: boolean } (turnId, direction)
+// ocode/agent/event/queueChanged -> { sessionId, entries }
 ```
 
 `push` returns `AGENT_BUSY` with `queueFull` once a session holds eight
@@ -610,7 +610,7 @@ The promoted block is delivered as adjacent messages rather than as separate
 turns: promoted entries join the active turn through the steering channel
 when it accepts input. With no active turn, the first promoted entry starts
 the turn and every later promoted entry is injected into that same turn
-(`pi-desktop/agent/steer` with the running turn's id), so the transcript shows
+(`ocode/agent/steer` with the running turn's id), so the transcript shows
 the user rows in click order within one turn. An injected entry
 leaves the queue and its own turn is canceled because it never runs on its own.
 An entry the runtime refuses to accept stays queued and leaves at the next
@@ -627,7 +627,7 @@ was holding.
 The renderer has one read-only Electron channel for the sidebar hover card:
 
 ```ts
-// pi-desktop/session/collaboration({ sessionId }) -> SessionCollaborationSummary
+// ocode/session/collaboration({ sessionId }) -> SessionCollaborationSummary
 type SessionCollaborationSummary = {
   sessionId: string;
   title: string;
@@ -807,13 +807,13 @@ The second failure emits the terminal normalized `STREAM_FAILED` error.
 Durable inbox requests are allowlisted preload invokes that Electron forwards
 to the singular host RPC domain without renderer access to SQLite:
 
-- `pi-desktop/notification/list({ unreadOnly?, limit? })`
-- `pi-desktop/notification/markRead({ id })`
-- `pi-desktop/notification/markAllRead()`
-- `pi-desktop/notification/clear()`
+- `ocode/notification/list({ unreadOnly?, limit? })`
+- `ocode/notification/markRead({ id })`
+- `ocode/notification/markAllRead()`
+- `ocode/notification/clear()`
 
 The renderer invokes
-`pi-desktop/notification/setViewingSession({ sessionId })` whenever the chat
+`ocode/notification/setViewingSession({ sessionId })` whenever the chat
 page's active session changes; `sessionId: null` clears the viewing context on
 non-chat pages. A renderer-originated `agent/prompt` also carries a matching
 `viewingSessionId` snapshot, which Electron installs before asynchronous turn
@@ -821,7 +821,7 @@ setup so a fast completion cannot beat the viewing-context update. Electron
 combines this hint with Main-owned window visibility/focus at the terminal event
 boundary. Missing, null, or mismatched context fails safe to notification. It
 also invokes
-`pi-desktop/notification/showNative({ id, sessionId, kind, title, body, createdAt? })`
+`ocode/notification/showNative({ id, sessionId, kind, title, body, createdAt? })`
 after localizing a new record, where `kind` is `"task" | "interactive"` and
 `createdAt` is the durable task timestamp when available. Main keeps a
 `dismissedBefore` watermark for successful mark-all-read/clear actions and
@@ -865,7 +865,7 @@ type SessionsChangedEvent = {
 
 Main sends two events:
 
-- `pi-desktop/notification/event/changed` after `session.endTurn` returns a
+- `ocode/notification/event/changed` after `session.endTurn` returns a
   newly inserted record. Renderer merges the record into its bounded local list
   and recalculates the exact unread count. A terminal result already visible in
   the focused current chat, repeated terminal updates, and aborted turns emit
@@ -874,17 +874,17 @@ Main sends two events:
   A repeated `notification.changed` payload for an id already present in the
   local list is a no-op; a delayed payload whose row was acknowledged or
   cleared is ignored and must not recreate the row or its sidebar outcome.
-- `pi-desktop/notification/event/activated` after the user clicks Electron's
+- `ocode/notification/event/activated` after the user clicks Electron's
   native system notification. Renderer follows its existing session-selection
   path, including project activation for a project-bound session.
-- `pi-desktop/notification/event/sound` is a payload-free, one-way cue for a
+- `ocode/notification/event/sound` is a payload-free, one-way cue for a
   plugin-native notification that Electron successfully showed. Renderer plays
   the shared soft chime; the event carries no notification content and creates
   no inbox row. Native task, interactive, and plugin banners are silent so the
   in-app chime is not doubled by a platform-specific sound.
 
 Plugin-owned session mutations additionally emit
-`pi-desktop/session/event/changed` after a successful write. The renderer
+`ocode/session/event/changed` after a successful write. The renderer
 handles this host-owned event by calling its existing `refreshSessions()` path;
 plugins never send a sidebar event and a skipped import does not emit one.
 
@@ -911,10 +911,10 @@ and a shown notification restores/shows and focuses the window before emitting
 `activated`. No permission, scheduled-reminder, or plugin source enters the
 task notification contract. Native delivery is best-effort; the durable
 inbox remains authoritative when the OS suppresses a banner. On Windows,
-Electron Main registers `net.aiuo.pi-desktop` as the process AppUserModelID
+Electron Main registers `com.ocode.desktop` as the process AppUserModelID
 before readiness and before any window is created. The ID matches the NSIS
 package identity so notification attribution, notification settings, taskbar
-grouping, and installed shortcuts resolve to `PI-Desktop`, never the stock
+grouping, and installed shortcuts resolve to `Ocode`, never the stock
 Electron host.
 
 Task native objects are retained by durable notification id, with at most one
@@ -1037,9 +1037,9 @@ durable `thinkingLevel`.
 
 The global plugin launcher uses Electron-only allowlisted channels:
 
-- `pi-desktop/pluginLauncher/toggle` shows or hides the centered utility window
-- `pi-desktop/pluginLauncher/dismiss` hides it only when invoked by that window
-- `pi-desktop/pluginLauncher/event/shown` resets its query, reloads installed
+- `ocode/pluginLauncher/toggle` shows or hides the centered utility window
+- `ocode/pluginLauncher/dismiss` hides it only when invoked by that window
+- `ocode/pluginLauncher/event/shown` resets its query, reloads installed
   plugins, and restores input focus after every invocation
 
 The launcher reuses `plugin/list` and `plugin/openPanel`; it adds no host-core
@@ -1056,7 +1056,7 @@ remain unchanged.
 The Settings font picker (ADR 0083) reads installed system font families
 through one Electron-only allowlisted channel:
 
-- `pi-desktop/app/systemFonts` returns `string[]` of installed system font
+- `ocode/app/systemFonts` returns `string[]` of installed system font
   family names (platform tooling in Electron main — `system_profiler` on
   macOS as the fallback only, with `osascript` JXA bridging the fast CoreText
   query `CTFontManagerCopyAvailableFontFamilyNames` as the primary path,
@@ -1184,7 +1184,7 @@ expiry, `plan_approvals` execution fields, shell catalog/identity fields, and
 streamed stdout/stderr events. A v7 or older host, and any incompatible v8
 peer, must fail the handshake so a desktop cannot display Plan while silently
 losing the artifact, queue, shell, or policy boundary.
-`pi-desktop/agent/compact` and `session.appendCompaction` remain part of the v9
+`ocode/agent/compact` and `session.appendCompaction` remain part of the v9
 contract. The Goal contract is additive inside v9 (**D198**): `kind` is optional
 on the wire and absent means `plan`, so a peer that predates Goal keeps working
 and simply never negotiates one.
@@ -1224,7 +1224,7 @@ plus `subagentUsage` into `session.endTurn.usage`.
 
 ### stats
 
-- `pi-desktop/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
+- `ocode/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
 
 `bucket` is `day` | `week` | `month`. Omitted dates use the host default window
 (53 weeks / 52 weeks / 24 months) in the host's local calendar. `week` keys use
@@ -1255,7 +1255,7 @@ Non-sensitive config that can be returned to the UI:
   `https`, `socks5`, and `socks5h` URLs, including userinfo. Main applies
   Chromium `session.setProxy` (credentialed URLs through a loopback SOCKS5
   relay; issue #490) and Node env immediately; the agent sidecar is
-  reconfigured without a process restart. `pi-desktop/network/testProxy`
+  reconfigured without a process restart. `ocode/network/testProxy`
   runs one bounded Chromium fetch through the supplied config and does not
   persist it.
 
@@ -1296,8 +1296,8 @@ type CommandShellCatalog = {
 
 Preload methods:
 
-- `pi-desktop/commandShell/list() -> CommandShellCatalog`
-- `pi-desktop/settings/set({ defaultCommandShell }) -> { ok: true }`
+- `ocode/commandShell/list() -> CommandShellCatalog`
+- `ocode/settings/set({ defaultCommandShell }) -> { ok: true }`
 
 Settings shell writes accept only an available ID for the current platform and
 reject unknown, unavailable, or wrong-platform IDs. A genuine effective shell
@@ -1324,14 +1324,14 @@ Signing in with a vendor subscription is an Electron-main conversation, so it
 uses IPC only — the host protocol version is unchanged. Five invoke channels
 plus one event channel:
 
-- `pi-desktop/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
-- `pi-desktop/providers/oauth/start({ vendorId }) -> { loginId }`
-- `pi-desktop/providers/oauth/respond({ loginId, promptId, value? })` — an
+- `ocode/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
+- `ocode/providers/oauth/start({ vendorId }) -> { loginId }`
+- `ocode/providers/oauth/respond({ loginId, promptId, value? })` — an
   absent `value` cancels that prompt, which aborts the flow
-- `pi-desktop/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
-- `pi-desktop/providers/oauth/delete({ providerId }) -> { ok: true }` deletes
+- `ocode/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
+- `ocode/providers/oauth/delete({ providerId }) -> { ok: true }` deletes
   one OAuth account's provider row and its scoped credential
-- `pi-desktop/providers/oauth/event` streams `OAuthLoginEvent`
+- `ocode/providers/oauth/event` streams `OAuthLoginEvent`
 
 ```ts
 type OAuthLoginEvent = { loginId: string; vendorId: string } & (
@@ -1594,12 +1594,12 @@ so the user can review and batch-import into this app's MCP list. ChatGPT
 desktop is listed as a placeholder because it has no public configuration path
 yet.
 
-- `pi-desktop/mcp/importScan` — `{ projectPath? }` →
+- `ocode/mcp/importScan` — `{ projectPath? }` →
   `{ candidates: ExternalMcpCandidate[], sources: ExternalMcpSourceReport[] }`.
   Missing files, ENOENT and parse errors surface on `sources[].error`; one bad
   source never fails the scan. Per-source de-duplication keeps the cross-source
   copies so the user can pick which install to import.
-- `pi-desktop/mcp/importRun` — `{ items: ExternalMcpImportItem[] }` →
+- `ocode/mcp/importRun` — `{ items: ExternalMcpImportItem[] }` →
   `{ imported, skipped, failed }`. Main calls `mcp.upsert` once per item,
   omitting `disabled` from the server payload and following up with
   `mcp.setEnabled({ enabled: false })` when the source marked the server
@@ -1652,15 +1652,15 @@ Built-in skill activation is global and defaults to enabled. Host stores only
 disabled IDs in `<data>/agent-capabilities/skill-builtins.json`, separately
 from the scanned user-skill state. Renderer IPC lists bundled entries with
 their effective enabled state and sets one entry's global state. The
-corresponding Desktop channels are `pi-desktop/skill/builtin/list` and
-`pi-desktop/skill/builtin/setEnabled`.
+corresponding Desktop channels are `ocode/skill/builtin/list` and
+`ocode/skill/builtin/setEnabled`.
 
 The list contains frontmatter-derived `name` and `description`, not the body.
 Only the description enters the prompt, and the body is fetched when the model
 invokes `Skill` (D174). A missing file is removed from the list and its local
 state is pruned during the next scan.
 
-The desktop `pi-desktop/skill/import` channel keeps the file picker
+The desktop `ocode/skill/import` channel keeps the file picker
 single-select and returns `{ skill }` for that path. With
 `sourceKind: "dir"`, it lets the user select multiple directories and returns
 `{ imported: UserSkillRecord[], failed: { path, error }[] }`. Cancellation
@@ -1673,17 +1673,17 @@ all-failed batches do not replace this preference.
 
 Desktop-only channels scan skill folders written by other agent tools on this
 machine — `~/.claude/skills/`, `<project>/.claude/skills/`, and the app's own
-`~/.agents/skills/` (or `PI_DESKTOP_AGENTS_DIR/skills/`) plus its project
+`~/.agents/skills/` (or `OCODE_AGENTS_DIR/skills/`) plus its project
 equivalent — so the user can review candidates and batch-import them. Both the
 single-file (`<id>.md`) and Anthropic-style directory (`<name>/SKILL.md`)
 shapes are detected.
 
-- `pi-desktop/skill/importScan` — `{ projectPath? }` →
+- `ocode/skill/importScan` — `{ projectPath? }` →
   `{ candidates: ExternalSkillCandidate[], sources: ExternalSkillSourceReport[] }`.
   Missing directories and read errors surface on `sources[].error`; one failing
   source never aborts the scan. Candidates from `~/.agents/skills/` carry an
   "already in current registry" warning so the UI can filter or highlight them.
-- `pi-desktop/skill/importRun` — `{ level, projectPath?, mode?, items }` →
+- `ocode/skill/importRun` — `{ level, projectPath?, mode?, items }` →
   `{ imported, skipped, failed }`. Main calls `skills.import` once per item,
   passing `path = shape==="dir" ? rootDir : sourcePath` and forwarding `mode`
   and per-item `id`/`name`/`description`. A conflict lands in `skipped` and
@@ -1692,7 +1692,7 @@ shapes are detected.
 
 Desktop-only skill market channels (not host RPC) live on Electron IPC:
 
-- `pi-desktop/skill/market/search` — `{ query, sources[] }` →
+- `ocode/skill/market/search` — `{ query, sources[] }` →
   `{ entries, failedSources, failureKinds, failureDetails }`. Main aggregates
   builtin-safe catalog JSON and GitHub repo SKILL.md scans. Source URLs must pass
   the public-HTTPS policy (ADR 0243). One failing source is dropped; the rest
@@ -1716,7 +1716,7 @@ Desktop-only skill market channels (not host RPC) live on Electron IPC:
   and an unanswered resolver as `NETWORK_RESOLVE_FAILED` (spec 08 §3.1); the
   install sheet classifies a failed preview on those codes together with the
   structured `reason`.
-- `pi-desktop/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`.
+- `ocode/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`.
   Main fetches the document over the same policy, splits frontmatter, and may
   attach sibling `.md` files from a jsDelivr listing. The renderer installs
   through existing `skills.create`. That policy is the main-process
@@ -1727,7 +1727,7 @@ Desktop-only skill market channels (not host RPC) live on Electron IPC:
 
 Desktop-only MCP market channels (not host RPC) live on Electron IPC:
 
-- `pi-desktop/mcp/market/search` — `{ query?, sources[], more? }` →
+- `ocode/mcp/market/search` — `{ query?, sources[], more? }` →
   `{ entries, failedSources, exhausted }`. Main validates source URLs and asks
   the Electron session for the route on every hop. Fully proxied hops use the
   session transport; direct and unknown hops pin the resolved public address by
@@ -1745,11 +1745,11 @@ The authorization request uses the initial 401 Bearer challenge's `scope`, other
 all valid protected-resource `scopes_supported` entries, otherwise omits `scope`.
 Authorization-server scope catalogs do not add or select requested permissions.
 
-- `pi-desktop/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
+- `ocode/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
   Initiates OAuth metadata discovery and PKCE authorization code flow. Returns immediately; user browser navigation and callback exchange proceed asynchronously in the background.
-- `pi-desktop/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
+- `ocode/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
   Aborts an in-flight authorization attempt, tears down the local loopback HTTP server, and cancels pending timers.
-- `pi-desktop/mcp/oauth/event` streams `McpOAuthLoginEvent` to the renderer:
+- `ocode/mcp/oauth/event` streams `McpOAuthLoginEvent` to the renderer:
 
 ```ts
 type McpOAuthLoginEvent = {
@@ -2056,10 +2056,10 @@ not touch the tray icon: D216 (ADR 0078) creates one at startup on every
 platform, and minimize-to-tray needs it whichever close behavior is stored.
 
 Lifecycle close/quit prompts use additive main-window-only Electron IPC. Main sends
-`pi-desktop/window/event/lifecycleDialogRequest` with `{ requestId, kind }` after the
-renderer acknowledges `pi-desktop/window/lifecycleDialog/ready`; the renderer returns
-`{ requestId, choice }` through `pi-desktop/window/lifecycleDialog/respond`. If Main
-falls back, it sends `pi-desktop/window/event/lifecycleDialogDismiss` with the
+`ocode/window/event/lifecycleDialogRequest` with `{ requestId, kind }` after the
+renderer acknowledges `ocode/window/lifecycleDialog/ready`; the renderer returns
+`{ requestId, choice }` through `ocode/window/lifecycleDialog/respond`. If Main
+falls back, it sends `ocode/window/event/lifecycleDialogDismiss` with the
 request ID so the renderer removes any stale overlay. Main validates the sender and
 pending request ID. A missing/unresponsive renderer falls back to the native dialog
 after a bounded timeout; if that fallback also fails, shutdown proceeds rather than
@@ -2132,14 +2132,14 @@ reservation, and background artifacts cannot change visible window geometry.
 
 ### Tray session shortcuts (ADR tray-session-shortcuts)
 
-- `pi-desktop/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
+- `ocode/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
   returns `{ ok: true }`. `sessionMeta` maps IDs to optional boolean `pinned`
   and `archived` flags plus a non-negative safe integer `order`. `sort` is
   `recent`, `created`, `oldest`, `name`, or `manual`; the renderer mirrors the
   sidebar's effective sort. Main validates the payload, strips unrelated
   metadata, and rejects senders other than the current main window. The setter
   is excluded from the local MCP catalog and persists nothing.
-- Main emits `pi-desktop/tray/event/sessionActivated { sessionId: string | null }`
+- Main emits `ocode/tray/event/sessionActivated { sessionId: string | null }`
   after restoring/focusing the window, waiting for post-bootstrap
   `menu/rendererReady`, and checking that the session still exists and is not
   archived. Renderer enters normal session selection, including cross-project
@@ -2324,7 +2324,7 @@ app/openFeedback() -> { ok: true }
 ```
 
 Electron Main builds a fixed GitHub bug-form URL
-(`https://github.com/vastsa/PI-Desktop/issues/new?template=bug_report.yml`)
+(`https://github.com/diaomin66/Ocode/issues/new?template=bug_report.yml`)
 and opens it with `shell.openExternal`. Query fields `app-version`, `os`, and
 `environment` are filled from Main-owned version info. The renderer cannot
 supply a URL. Construction that leaves that origin or template is rejected.
@@ -2333,13 +2333,13 @@ protocol version.
 
 ## 13d. Local MCP control API (D370)
 
-PI-Desktop can expose a local automation surface for an external Agent without
+Ocode can expose a local automation surface for an external Agent without
 changing the renderer preload contract or host RPC protocol. The server is
 disabled by default and starts only when the Electron process receives:
 
 ```text
-PI_DESKTOP_MCP_CONTROL=1
-PI_DESKTOP_MCP_PORT=37123       # optional; defaults to 37123
+OCODE_MCP_CONTROL=1
+OCODE_MCP_PORT=37123       # optional; defaults to 37123
 ```
 
 Electron Main binds `127.0.0.1` only and serves Streamable HTTP MCP at
@@ -2363,7 +2363,7 @@ connection record to `mcp-control.json`:
 ```json
 {
   "active": true,
-  "serverName": "pi-desktop",
+  "serverName": "ocode",
   "protocol": "streamable-http",
   "url": "http://127.0.0.1:37123/mcp",
   "token": "<redacted>",
@@ -2374,7 +2374,7 @@ connection record to `mcp-control.json`:
 
 Both files are written with mode `0600` where the platform supports POSIX
 permissions. Every request must include `Authorization: Bearer <token>` (the
-`X-Pi-Desktop-Token` header is retained for simple local clients). Requests to
+`X-Ocode-Token` header is retained for simple local clients). Requests to
 other paths, requests without the token, and methods other than
 POST/DELETE/OPTIONS are rejected. The server is stopped before Electron waits
 for host shutdown and the manifest is marked inactive.
@@ -2400,7 +2400,7 @@ The named tools cover the common Agent workflow:
 - `pi_plans_pending`, `pi_plans_resolve`
 - `pi_workspace_diff`, `pi_fs_list`, `pi_fs_read`
 
-`pi_control_describe` returns the reviewed operation catalog. `pi_desktop_invoke`
+`pi_control_describe` returns the reviewed operation catalog. `ocode_invoke`
 accepts an operation id and positional IPC arguments:
 
 ```json
@@ -2440,13 +2440,13 @@ unchanged.
 
 The six `session/collaboration/*` operations are first-party-plugin-only: they
 require an authenticated plugin tool invocation context, so they appear in
-`pi.desktop.listOperations` and are callable through `pi.desktop.invoke`, but
+`ocode.desktop.listOperations` and are callable through `ocode.desktop.invoke`, but
 they are excluded from the MCP-visible catalog (`tools/list`,
-`pi_control_describe`, and the `pi_desktop_invoke` operation enum) and an MCP
+`pi_control_describe`, and the `ocode_invoke` operation enum) and an MCP
 caller cannot invoke them.
 
 After successful **mutating** external calls, Electron Main may emit the existing
-`pi-desktop/session/event/changed` event with additive fields:
+`ocode/session/event/changed` event with additive fields:
 
 ```ts
 {
@@ -2477,7 +2477,7 @@ startup failure is logged and does not prevent the desktop from launching.
 
 ## Native Pi session routing (ADR 0254)
 
-`pi-desktop/session/list` returns both Desktop and native summaries. Each summary
+`ocode/session/list` returns both Desktop and native summaries. Each summary
 may carry `source: "desktop" | "pi-native"`, capability flags, and a stable
 `readOnlyReason`; clients normalize omitted source to `desktop` for backward
 compatibility. `session/get`, `session/open`, `session/fork`, `agent/prompt`,
@@ -2516,7 +2516,7 @@ not intermediate retry/compaction loop ends. Native abort never invokes
 
 ### Provider ordering
 
-`pi-desktop/providers/reorder({ id, targetId, placement: "before" | "after" })`
+`ocode/providers/reorder({ id, targetId, placement: "before" | "after" })`
 returns `{ ok: true }` and forwards to host `providers.reorder`. The sandboxed
 preload permits this channel through the shared IPC registry. Invalid placement
 or missing providers returns `INVALID_PARAMS`; configuration and defaults are
@@ -2532,18 +2532,18 @@ and results use the S3-only contract in `types/config-sync.ts`:
 
 | IPC channel | Host method | contract |
 |---|---|---|
-| `pi-desktop/configSync/getState` | `configSync.getState` | redacted status, category selections, preview counts, and pending approval summaries |
-| `pi-desktop/configSync/test` | `configSync.test` | S3 conditional-write probe and verified cleanup; returns `{ ok: true, conditionalWrites: true }` without persisting configuration |
-| `pi-desktop/configSync/configure` | `configSync.configure` | validates the endpoint, stores encrypted local sync metadata, and enables the vault |
-| `pi-desktop/configSync/syncNow` | `configSync.syncNow` | runs one Host-owned two-way sync or local-snapshot backup, according to the saved mode |
-| `pi-desktop/configSync/pause` | `configSync.pause` | pauses or resumes this device only |
-| `pi-desktop/configSync/unlock` | `configSync.unlock` | unlocks the local vault for the current process/device |
-| `pi-desktop/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | records a digest-bound local activation decision |
-| `pi-desktop/configSync/mapProject` | `configSync.mapProject` | binds one opaque project/group identity to one or more explicitly selected local folders, preserving primary-root order |
-| `pi-desktop/configSync/listHistory` | `configSync.listHistory` | lists the saved mode's latest 30 indexed revisions; never emitted as a state-change event |
-| `pi-desktop/configSync/restore` | `configSync.restore` | sync publishes a new shared revision with propagation acknowledgment; backup restores locally without changing cloud history; both retain recovery/approvals |
-| `pi-desktop/configSync/changePassword` | `configSync.changePassword` | CAS-rewraps the vault key header without returning keys or secret values |
-| `pi-desktop/configSync/disconnect` | `configSync.disconnect` | removes local sync metadata and keys; it does not delete remote vault data |
+| `ocode/configSync/getState` | `configSync.getState` | redacted status, category selections, preview counts, and pending approval summaries |
+| `ocode/configSync/test` | `configSync.test` | S3 conditional-write probe and verified cleanup; returns `{ ok: true, conditionalWrites: true }` without persisting configuration |
+| `ocode/configSync/configure` | `configSync.configure` | validates the endpoint, stores encrypted local sync metadata, and enables the vault |
+| `ocode/configSync/syncNow` | `configSync.syncNow` | runs one Host-owned two-way sync or local-snapshot backup, according to the saved mode |
+| `ocode/configSync/pause` | `configSync.pause` | pauses or resumes this device only |
+| `ocode/configSync/unlock` | `configSync.unlock` | unlocks the local vault for the current process/device |
+| `ocode/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | records a digest-bound local activation decision |
+| `ocode/configSync/mapProject` | `configSync.mapProject` | binds one opaque project/group identity to one or more explicitly selected local folders, preserving primary-root order |
+| `ocode/configSync/listHistory` | `configSync.listHistory` | lists the saved mode's latest 30 indexed revisions; never emitted as a state-change event |
+| `ocode/configSync/restore` | `configSync.restore` | sync publishes a new shared revision with propagation acknowledgment; backup restores locally without changing cloud history; both retain recovery/approvals |
+| `ocode/configSync/changePassword` | `configSync.changePassword` | CAS-rewraps the vault key header without returning keys or secret values |
+| `ocode/configSync/disconnect` | `configSync.disconnect` | removes local sync metadata and keys; it does not delete remote vault data |
 
 Input passwords are accepted only for the operation that needs them. No raw
 secret, vault key, decrypted resource, or remote archive crosses back to the
@@ -2572,25 +2572,25 @@ owner derivation.
 
 | IPC channel | Direction | contract |
 |---|---|---|
-| `pi-desktop/voice/live/status` | Renderer → Main | redacted feature status, binding readiness and settings revision |
-| `pi-desktop/voice/live/prepare` | Renderer → Main | idempotent call preparation by request ID; synchronously reserves the shared microphone lease |
-| `pi-desktop/voice/live/connect` | Renderer → Main | connects a prepared call; Codex may include a bounded SDP offer |
-| `pi-desktop/voice/live/setMuted` | Renderer → Main | sets mute state with a monotonically increasing capture epoch |
-| `pi-desktop/voice/live/reportMedia` | Renderer → Main | reports capture, connection and release lifecycle; release acknowledgement is required before lease reuse |
-| `pi-desktop/voice/live/reportPlayback` | Renderer → Main | bounded list of played PCM cursors used for interruption/truncation |
-| `pi-desktop/voice/live/reportDelegation` | Renderer → Main | reports a provider-requested delegation; v1 rejects execution and never forwards it to Agent/MCP |
-| `pi-desktop/voice/live/reportControlApplied` | Renderer → Main | acknowledges a supported provider control or a rejected unsupported action |
-| `pi-desktop/voice/live/end` | Renderer → Main | idempotently ends an active call or cancels its pending request |
-| `pi-desktop/voice/live/heartbeat` | Renderer → Main | keeps the owning call alive while its renderer is responsive |
-| `pi-desktop/voice/live/event/changed` | Main → Renderer | redacted call phase, error, notice and activity updates |
-| `pi-desktop/voice/live/event/port` | Main → Renderer | transfers exactly one call-scoped `MessagePort` with its call ID and one-time nonce |
-| `pi-desktop/voice/live/event/control` | Main → Renderer | provider control request, limited to the explicit v1 control vocabulary |
-| `pi-desktop/voice/live/event/transcript` | Main → Renderer | transient bounded transcript event for the current call |
-| `pi-desktop/voice/live/widget/visibility` | Widget → Main | the docked widget's own presentation decision and the content box it needs; Main shows or hides that window accordingly |
-| `pi-desktop/voice/live/widget/action` | Widget → Main | a call action pressed in the docked widget; Main validates the sender and forwards it to the owner frame, which runs it |
-| `pi-desktop/voice/live/widget/ownerState` | Main window → Main | what only the owner frame knows: its own failure code (for example a refused mute) and whether the bound work session waits on a decision; neither is in the call view |
-| `pi-desktop/voice/live/event/widgetState` | Main → Widget | the authoritative call view plus the owner's own failure code and waiting-decision flag, pushed to the docked widget window |
-| `pi-desktop/voice/live/event/widgetAction` | Main → Main window | the forwarded widget action the owner frame has to run |
+| `ocode/voice/live/status` | Renderer → Main | redacted feature status, binding readiness and settings revision |
+| `ocode/voice/live/prepare` | Renderer → Main | idempotent call preparation by request ID; synchronously reserves the shared microphone lease |
+| `ocode/voice/live/connect` | Renderer → Main | connects a prepared call; Codex may include a bounded SDP offer |
+| `ocode/voice/live/setMuted` | Renderer → Main | sets mute state with a monotonically increasing capture epoch |
+| `ocode/voice/live/reportMedia` | Renderer → Main | reports capture, connection and release lifecycle; release acknowledgement is required before lease reuse |
+| `ocode/voice/live/reportPlayback` | Renderer → Main | bounded list of played PCM cursors used for interruption/truncation |
+| `ocode/voice/live/reportDelegation` | Renderer → Main | reports a provider-requested delegation; v1 rejects execution and never forwards it to Agent/MCP |
+| `ocode/voice/live/reportControlApplied` | Renderer → Main | acknowledges a supported provider control or a rejected unsupported action |
+| `ocode/voice/live/end` | Renderer → Main | idempotently ends an active call or cancels its pending request |
+| `ocode/voice/live/heartbeat` | Renderer → Main | keeps the owning call alive while its renderer is responsive |
+| `ocode/voice/live/event/changed` | Main → Renderer | redacted call phase, error, notice and activity updates |
+| `ocode/voice/live/event/port` | Main → Renderer | transfers exactly one call-scoped `MessagePort` with its call ID and one-time nonce |
+| `ocode/voice/live/event/control` | Main → Renderer | provider control request, limited to the explicit v1 control vocabulary |
+| `ocode/voice/live/event/transcript` | Main → Renderer | transient bounded transcript event for the current call |
+| `ocode/voice/live/widget/visibility` | Widget → Main | the docked widget's own presentation decision and the content box it needs; Main shows or hides that window accordingly |
+| `ocode/voice/live/widget/action` | Widget → Main | a call action pressed in the docked widget; Main validates the sender and forwards it to the owner frame, which runs it |
+| `ocode/voice/live/widget/ownerState` | Main window → Main | what only the owner frame knows: its own failure code (for example a refused mute) and whether the bound work session waits on a decision; neither is in the call view |
+| `ocode/voice/live/event/widgetState` | Main → Widget | the authoritative call view plus the owner's own failure code and waiting-decision flag, pushed to the docked widget window |
+| `ocode/voice/live/event/widgetAction` | Main → Main window | the forwarded widget action the owner frame has to run |
 
 The `MessagePort` is provisioned only after successful owner validation, then
 relayed by preload to the renderer window. The owner echoes the per-call nonce

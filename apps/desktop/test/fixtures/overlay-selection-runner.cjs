@@ -77,7 +77,7 @@ app.whenReady().then(async () => {
     if (kind === "release") await wait("Boolean(document.querySelector('.release-notes-version li'))");
     await evaluate("Promise.all(document.getAnimations().filter(a => a.effect.getComputedTiming().iterations !== Infinity).map(a => a.finished.catch(() => {})))");
   };
-  await win.loadFile(join(process.env.PI_OVERLAY_TEST_DIR, "index.html"));
+  await win.loadFile(join(process.env.OCODE_OVERLAY_TEST_DIR, "index.html"));
   win.focus(); win.webContents.focus();
   await wait("Boolean(window.overlayFixture) && document.hasFocus()");
   for (const [kind, text, overlay] of [

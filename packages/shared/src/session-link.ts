@@ -1,5 +1,5 @@
 /**
- * Session links (`pi-desktop://session/<id>`): the one way a conversation is
+ * Session links (`ocode://session/<id>`): the one way a conversation is
  * referenced from another one.
  *
  * The link is plain text the user pastes into a Composer draft (or copies from
@@ -10,8 +10,8 @@
  * recognizes them.
  */
 
-/** Custom scheme reserved for PI-Desktop links (deep link registration is A). */
-export const SESSION_LINK_SCHEME = "pi-desktop";
+/** Custom scheme reserved for Ocode links (deep link registration is A). */
+export const SESSION_LINK_SCHEME = "ocode";
 /** Path segment that marks a session link. */
 export const SESSION_LINK_HOST = "session";
 /** References one message may carry; the rest stay plain text in the draft. */
@@ -23,7 +23,7 @@ const SESSION_LINK_ID = /^[A-Za-z0-9_-]{1,64}$/;
  * (`remote:…`) or a deeper path, so nothing is referenced at all.
  */
 const SESSION_LINK_PATTERN =
-  /pi-desktop:\/\/session\/([A-Za-z0-9_-]{1,64})(?![A-Za-z0-9_:/-])/g;
+  /(?:ocode|pi-desktop):\/\/session\/([A-Za-z0-9_-]{1,64})(?![A-Za-z0-9_:/-])/g;
 
 /** The link a session row copies and a Composer draft accepts. */
 export function formatSessionLink(sessionId: string): string {
@@ -36,7 +36,7 @@ export function formatSessionLink(sessionId: string): string {
  * already stops at those.
  */
 export function parseSessionLinks(text: string): string[] {
-  if (!text?.includes(`${SESSION_LINK_SCHEME}://`)) return [];
+  if (!text?.includes("://session/")) return [];
   const found: string[] = [];
   for (const match of text.matchAll(SESSION_LINK_PATTERN)) {
     const id = match[1];
@@ -56,16 +56,17 @@ export function isSessionLinkToken(token: string): boolean {
 /** The session id when the whole token is one session link, otherwise null. */
 export function parseSessionLinkToken(text: string): string | null {
   const trimmed = text.trim();
-  if (!trimmed.startsWith(`${SESSION_LINK_SCHEME}://${SESSION_LINK_HOST}/`)) return null;
-  const ids = parseSessionLinks(trimmed);
-  return ids.length === 1 && trimmed.endsWith(ids[0]) ? ids[0] : null;
+  const spans = sessionLinkSpans(trimmed);
+  return spans.length === 1 && spans[0].start === 0 && spans[0].end === trimmed.length
+    ? spans[0].id
+    : null;
 }
 
 /** Every session link in `text` with the span it occupies, in text order. */
 export function sessionLinkSpans(
   text: string,
 ): Array<{ id: string; start: number; end: number }> {
-  if (!text?.includes(`${SESSION_LINK_SCHEME}://`)) return [];
+  if (!text?.includes("://session/")) return [];
   const spans: Array<{ id: string; start: number; end: number }> = [];
   for (const match of text.matchAll(SESSION_LINK_PATTERN)) {
     const id = match[1];

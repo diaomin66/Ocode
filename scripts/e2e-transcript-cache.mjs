@@ -15,9 +15,9 @@ const host = new Host(resolveHostBinary(), dataDir, {
     ANTHROPIC_API_KEY: "",
     GOOGLE_API_KEY: "",
     OPENROUTER_API_KEY: "",
-    PI_DESKTOP_TEST_API_KEY: "",
-    PI_DESKTOP_TEST_BASE_URL: "",
-    PI_DESKTOP_TEST_MODEL: "",
+    OCODE_TEST_API_KEY: "",
+    OCODE_TEST_BASE_URL: "",
+    OCODE_TEST_MODEL: "",
   },
 });
 

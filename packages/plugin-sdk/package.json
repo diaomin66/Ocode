@@ -1,5 +1,5 @@
 {
-  "name": "@pi-desktop/plugin-sdk",
+  "name": "@ocode/plugin-sdk",
   "version": "0.21.0-beta.1",
   "private": true,
   "type": "module",

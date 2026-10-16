@@ -26,10 +26,10 @@
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ErrorCodes } from "@pi-desktop/shared";
+import { ErrorCodes } from "@ocode/shared";
 
 /** Environment variable naming the file the helper reads the secret from. */
-export const ASKPASS_SECRET_ENV = "PI_SSH_ASKPASS_SECRET";
+export const ASKPASS_SECRET_ENV = "OCODE_SSH_ASKPASS_SECRET";
 
 /**
  * The helper. `$1` is OpenSSH's prompt text and is deliberately ignored: the

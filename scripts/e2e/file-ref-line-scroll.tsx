@@ -2,8 +2,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { createInstance } from "i18next";
 import { I18nextProvider, initReactI18next } from "react-i18next";
-import { IPC } from "@pi-desktop/shared";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
+import { IPC } from "@ocode/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
 import { Markdown } from "../../apps/desktop/src/components/Markdown";
 import { FilesTab } from "../../apps/desktop/src/components/workpanel/FilesTab";
 import { LinkifiedText } from "../../apps/desktop/src/features/chat/transcript/shared";
@@ -26,7 +26,7 @@ let fileManagerPlugin = {
   scope: { mode: "global", projects: [] as string[] },
 };
 
-window.piDesktop = {
+window.ocode = {
   platform: "darwin",
   channels: IPC,
   on: () => () => {},
@@ -195,7 +195,7 @@ void i18n
 
 declare global {
   interface Window {
-    piDesktop?: {
+    ocode?: {
       platform: NodeJS.Platform;
       channels: typeof IPC;
       on: (channel: string, listener: (...args: unknown[]) => void) => () => void;

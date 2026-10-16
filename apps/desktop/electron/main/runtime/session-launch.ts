@@ -16,7 +16,7 @@ import {
   type SessionThinkingLevel,
   type UserSkillRecord,
   type UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   capabilitiesFromModelConfig,
   clampThinkingLevel,
@@ -28,7 +28,7 @@ import {
   resolveSubagentProviders,
   visionFromModelConfig,
   type UserSubagentDocument,
-} from "@pi-desktop/agent-runtime";
+} from "@ocode/agent-runtime";
 import { builtinSkills } from "../builtin-skills";
 import { OAUTH_AUTH_KIND, type VendorOAuth } from "../oauth";
 import {

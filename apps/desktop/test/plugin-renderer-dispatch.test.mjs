@@ -15,8 +15,8 @@ const { PluginRendererError } = await import("../src/plugins/renderer-error.ts")
 const { composerDraftBridge } = await import(
   "../src/features/chat/composer/plugins/draft-bridge.ts"
 );
-const { IPC } = await import("@pi-desktop/shared");
-const { PLUGIN_RENDERER_ACTIONS } = await import("@pi-desktop/plugin-sdk");
+const { IPC } = await import("@ocode/shared");
+const { PLUGIN_RENDERER_ACTIONS } = await import("@ocode/plugin-sdk");
 
 const PLUGIN = "demo.lab";
 const ALL = [...PLUGIN_RENDERER_ACTIONS];
@@ -457,7 +457,7 @@ test("the default routes reach the draft bridge, the window's event and the main
   const invoked = [];
   let reply = { ok: true, data: { pong: true } };
   globalThis.window = {
-    piDesktop: {
+    ocode: {
       invoke: async (channel, ...args) => {
         invoked.push([channel, ...args]);
         return reply;

@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { convertMessages } from "@earendil-works/pi-ai/api/openai-completions";
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@ocode/shared";
 import {
   buildProviderModel,
   type RuntimeProviderConfig,

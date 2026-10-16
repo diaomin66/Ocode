@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 register(pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")));
 
-const { IPC } = await import("@pi-desktop/shared");
+const { IPC } = await import("@ocode/shared");
 const { createBackendRouter, makeRemoteSessionId } = await import(
   "../electron/main/remote/backend-router.ts"
 );
@@ -281,7 +281,7 @@ test("closeAll disposes a pending SSH forward before draining host operations", 
   const tunnels = createSshTunnelManager({
     reservePort: async () => 1234,
     buildTransport: () => ({
-      execWithInput: async () => ({ stdout: 'PI_HOST_READY {"hostId":"fixture","host":"127.0.0.1","port":1234,"version":"0.15.0"}', stderr: "", code: 0 }),
+      execWithInput: async () => ({ stdout: 'OCODE_HOST_READY {"hostId":"fixture","host":"127.0.0.1","port":1234,"version":"0.15.0"}', stderr: "", code: 0 }),
       forward: () => { started.resolve(); return forwarding.promise; }, dispose: () => { disposed++; },
     }),
   });
@@ -358,10 +358,10 @@ test("bootstrapHost closes its unadopted outcome when shutdown rejects its queue
     sshBootstrap: {
       buildTransport: () => ({
         exec: async () => ({ code: 0, stdout: "Linux\nx86_64\n", stderr: "" }),
-        execWithInput: async () => ({ code: 0, stderr: "", stdout: `PI_HOST_READY ${JSON.stringify({ hostId: "host", host: "127.0.0.1", port: 1234, version })}\nPI_HOST_PAIRING_TOKEN ${JSON.stringify({ token: "fixture-token", expiresAt: 1893456000000 })}` }),
+        execWithInput: async () => ({ code: 0, stderr: "", stdout: `OCODE_HOST_READY ${JSON.stringify({ hostId: "host", host: "127.0.0.1", port: 1234, version })}\nOCODE_HOST_PAIRING_TOKEN ${JSON.stringify({ token: "fixture-token", expiresAt: 1893456000000 })}` }),
         forward: async () => forward, dispose: () => undefined,
       }),
-      fetchChecksum: async () => `${"a".repeat(64)}  pi-host-${version}-linux-x64.tar.gz`,
+      fetchChecksum: async () => `${"a".repeat(64)}  ocode-host-${version}-linux-x64.tar.gz`,
       reservePort: async () => 1234, exchangePairing: async () => "fixture-device-token",
     },
   });

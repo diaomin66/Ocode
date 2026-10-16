@@ -13,7 +13,7 @@ import {
   stepHistoryIndex,
 } from "../src/features/chat/composer/input-history.ts";
 
-const KEY = "pi.desktop.composerInputHistory";
+const KEY = "ocode.desktop.composerInputHistory";
 
 function installStorage({ failWrites = false } = {}) {
   const data = new Map();

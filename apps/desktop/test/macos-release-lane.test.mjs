@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import { chmod, cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, join as nativeJoin } from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+
+const join = (...parts) => nativeJoin(...parts).replaceAll("\\", "/");
+const bash = process.platform === "win32"
+  ? join(process.env.ProgramFiles ?? "C:/Program Files", "Git/bin/bash.exe")
+  : "bash";
 
 /**
  * End-to-end structure test for the signed local macOS lane.
@@ -27,7 +32,7 @@ const LANE_SCRIPTS = [
   "macos-stapler-retry-shim.sh",
   "macos-bundle-inventory.mjs",
 ];
-const SIGNING_IDENTITY = "Developer ID Application: XingYu Liu (DUV63RKYTW)";
+const SIGNING_IDENTITY = "Developer ID Application: Ocode Developer (ABCDE12345)";
 const SUBMISSION_ID = "11111111-2222-3333-4444-555555555555";
 
 async function writeStubs(bin, log, repoRoot) {
@@ -43,11 +48,11 @@ exit 0
 printf 'pnpm %s\\n' "$*" >> "${log}"
 case "$*" in
   *electron-builder*)
-    app="${repoRoot}/apps/desktop/release/mac-arm64/PI-Desktop.app"
+    app="${repoRoot}/apps/desktop/release/mac-arm64/Ocode.app"
     mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources/bin"
-    : > "$app/Contents/MacOS/PI-Desktop"
-    : > "$app/Contents/Resources/bin/pi-desktop-host-core"
-    : > "${repoRoot}/apps/desktop/release/PI-Desktop-0.0.0-arm64.dmg"
+    : > "$app/Contents/MacOS/Ocode"
+    : > "$app/Contents/Resources/bin/ocode-host-core"
+    : > "${repoRoot}/apps/desktop/release/Ocode-0.0.0-arm64.dmg"
     ;;
 esac
 exit 0
@@ -56,6 +61,7 @@ exit 0
 printf 'codesign %s\\n' "$*" >> "${log}"
 if [[ "$*" == *"-dv"* ]]; then
   echo "Authority=${SIGNING_IDENTITY}" >&2
+  echo "TeamIdentifier=ABCDE12345" >&2
   echo "flags=0x10000(runtime)" >&2
 fi
 exit 0
@@ -86,7 +92,7 @@ test(
   "the signed local macOS lane runs electron-builder with every documented flag",
   { skip: process.platform !== "darwin" ? "macOS-only lane" : false },
   async (t) => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-macos-lane-"));
+    const root = await mkdtemp(join(tmpdir(), "ocode-macos-lane-"));
     t.after(() => rm(root, { recursive: true, force: true }));
 
     const repoRoot = join(root, "repo");
@@ -100,14 +106,15 @@ test(
     await chmod(join(repoRoot, "scripts", "release-macos.sh"), 0o755);
     await writeStubs(bin, log, repoRoot);
 
-    const result = spawnSync("bash", [join(repoRoot, "scripts", "release-macos.sh")], {
+    const result = spawnSync(bash, [join(repoRoot, "scripts", "release-macos.sh")], {
       encoding: "utf8",
       env: {
         ...process.env,
-        PATH: `${bin}:${process.env.PATH}`,
+        PATH: `${bin}${delimiter}${process.env.PATH}`,
         APPLE_ID: "release@example.com",
         APPLE_APP_SPECIFIC_PASSWORD: "app-specific-password",
-        APPLE_TEAM_ID: "DUV63RKYTW",
+        APPLE_TEAM_ID: "ABCDE12345",
+        MAC_SIGNING_IDENTITY: SIGNING_IDENTITY,
         STAPLE_DELAY_SECONDS: "1",
       },
     });
@@ -121,10 +128,10 @@ test(
     assert.match(builderCall, /--publish never/);
     assert.match(
       await readFile(join(repoRoot, "scripts", "release-macos.sh"), "utf8"),
-      /PI_STAPLER_MAX_ATTEMPTS="\$\{PI_STAPLER_MAX_ATTEMPTS:-6\}"/,
+      /OCODE_STAPLER_MAX_ATTEMPTS="\$\{OCODE_STAPLER_MAX_ATTEMPTS:-6\}"/,
       "the local signed lane enables the same bounded app stapling retries",
     );
-    assert.match(builderCall, /-c\.mac\.identity=XingYu Liu \(DUV63RKYTW\)/);
+    assert.match(builderCall, /-c\.mac\.identity=Ocode Developer \(ABCDE12345\)/);
     assert.match(builderCall, /-c\.mac\.forceCodeSigning=true/);
     assert.match(builderCall, /-c\.mac\.notarize=true/);
     assert.doesNotMatch(
@@ -154,3 +161,54 @@ test(
     assert.doesNotMatch(result.stdout, /STALL/);
   },
 );
+
+test("local release validates configured signing identity and team before building", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "ocode-macos-preflight-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bin = join(root, "bin");
+  const script = join(root, "scripts", "release-macos.sh");
+  await mkdir(join(root, "scripts"), { recursive: true });
+  await mkdir(bin, { recursive: true });
+  await cp(new URL("release-macos.sh", scripts), script);
+  for (const [name, body] of [
+    ["uname", 'case "$1" in -s) echo Darwin ;; -m) echo arm64 ;; esac'],
+    ["cargo", 'echo "build boundary reached"; exit 77'],
+  ]) {
+    await writeFile(join(bin, name), `#!/usr/bin/env bash\n${body}\n`);
+    await chmod(join(bin, name), 0o755);
+  }
+  const env = {
+    ...process.env,
+    PATH: `${bin}${delimiter}${process.env.PATH}`,
+    STUB_BIN: bin.replace(/^([A-Za-z]):/, (_, drive) => `/${drive.toLowerCase()}`),
+    MAC_ARCH: "arm64",
+    APPLE_ID: "release@example.com",
+    APPLE_APP_SPECIFIC_PASSWORD: "app-specific-password",
+    APPLE_TEAM_ID: "ABCDE12345",
+    MAC_SIGNING_IDENTITY: SIGNING_IDENTITY,
+  };
+  const args = ["-c", 'export PATH="$STUB_BIN:$PATH"; exec bash "$1"', "release", script];
+  for (const [override, message] of [
+    [{ MAC_SIGNING_IDENTITY: "" }, /MAC_SIGNING_IDENTITY is required/],
+    [{ MAC_SIGNING_IDENTITY: "   " }, /MAC_SIGNING_IDENTITY is required/],
+    [{ MAC_SIGNING_IDENTITY: "Developer ID Application: " }, /MAC_SIGNING_IDENTITY is required/],
+    [{ APPLE_TEAM_ID: "" }, /APPLE_TEAM_ID must be/],
+    [{ APPLE_TEAM_ID: "abcde12345" }, /APPLE_TEAM_ID must be/],
+    [{ APPLE_TEAM_ID: "ABCDE1234!" }, /APPLE_TEAM_ID must be/],
+    [{ APPLE_TEAM_ID: "ABCDE123456" }, /APPLE_TEAM_ID must be/],
+    [{ APPLE_TEAM_ID: "FGHIJ67890" }, /certificate in APPLE_TEAM_ID/],
+  ]) {
+    const result = spawnSync(bash, args, { encoding: "utf8", env: { ...env, ...override } });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, message);
+    assert.doesNotMatch(result.stdout, /build boundary reached/);
+  }
+  for (const team of ["ABCDE12345", "FGHIJ67890"]) {
+    const result = spawnSync(bash, args, {
+      encoding: "utf8",
+      env: { ...env, APPLE_TEAM_ID: team, MAC_SIGNING_IDENTITY: `Ocode Developer (${team})` },
+    });
+    assert.equal(result.status, 77, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /build boundary reached/);
+  }
+});

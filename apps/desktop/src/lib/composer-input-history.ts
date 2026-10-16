@@ -19,7 +19,7 @@ type HistoryBucket = { sessionId: string; entries: ComposerHistoryEntry[] };
 
 type HistoryReference = ComposerHistoryEntry["fileReferences"][number];
 
-const KEY = "pi.desktop.composerInputHistory";
+const KEY = "ocode.desktop.composerInputHistory";
 /** Entries kept per conversation. */
 export const COMPOSER_INPUT_HISTORY_MAX = 100;
 /** Conversations with retained history; the oldest written bucket is dropped. */

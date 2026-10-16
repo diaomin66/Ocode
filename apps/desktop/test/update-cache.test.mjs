@@ -22,7 +22,7 @@ const {
 const { UpdateCacheMaintenance } = await import("../electron/main/update-cache-maintenance.ts");
 
 async function withTempDir(run) {
-  const root = await mkdtemp(join(tmpdir(), "pi-desktop-update-cache-"));
+  const root = await mkdtemp(join(tmpdir(), "ocode-update-cache-"));
   try {
     await run(root);
   } finally {
@@ -63,15 +63,15 @@ test("cache override requires an absolute path and uses app-update.yml's directo
   assert.equal(resolveUpdateCacheOverride("relative/cache"), null);
   assert.equal(resolveUpdateCacheOverride("/mnt/PI cache"), "/mnt/PI cache");
   assert.equal(
-    readUpdaterCacheDirName("provider: github\nupdaterCacheDirName: '@pi-desktopdesktop-updater'\n"),
-    "@pi-desktopdesktop-updater",
+    readUpdaterCacheDirName("provider: github\nupdaterCacheDirName: '@ocodedesktop-updater'\n"),
+    "@ocodedesktop-updater",
   );
   assert.equal(readUpdaterCacheDirName("provider: github\n"), null);
   assert.equal(readUpdaterCacheDirName("updaterCacheDirName: ../outside"), null);
   assert.equal(readUpdaterCacheDirName("updaterCacheDirName: nested/path"), null);
   assert.equal(
-    updateCacheDirFor("/mnt/cache", "@pi-desktopdesktop-updater"),
-    "/mnt/cache/@pi-desktopdesktop-updater",
+    updateCacheDirFor("/mnt/cache", "@ocodedesktop-updater"),
+    "/mnt/cache/@ocodedesktop-updater",
   );
   assert.equal(sameUpdateCacheDir("C:/Cache/UPDATER", "c:/cache/updater", "win32"), true);
   assert.equal(sameUpdateCacheDir("/Cache/UPDATER", "/cache/updater", "linux"), false);
@@ -82,7 +82,7 @@ test("discarding a completed update removes only the pending installers", async 
     const cache = join(root, "cache");
     const pending = join(cache, "pending");
     await mkdir(pending, { recursive: true });
-    await writeFile(join(pending, "PI-Desktop-Setup-0.15.8.exe"), "installer");
+    await writeFile(join(pending, "Ocode-Setup-0.15.8.exe"), "installer");
     await writeFile(join(pending, "update-info.json"), "{}");
     await writeFile(join(cache, "installer.exe"), "differential baseline");
     await writeFile(join(cache, "current.blockmap"), "block map");
@@ -143,7 +143,7 @@ test("cache maintenance reads the packaged updater name, adopts baselines, then 
     const resources = join(root, "resources");
     const legacyBase = join(root, "legacy-base");
     const activeBase = join(root, "active-base");
-    const cacheName = "@pi-desktopdesktop-updater";
+    const cacheName = "@ocodedesktop-updater";
     const legacyCache = join(legacyBase, cacheName);
     const activeCache = join(activeBase, cacheName);
     await mkdir(resources, { recursive: true });

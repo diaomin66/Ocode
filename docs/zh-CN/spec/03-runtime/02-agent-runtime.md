@@ -114,7 +114,7 @@ pi 消费排队输入时保留渲染器提供的消息 id；即使补充输入�
    之内的图片才会被读进内存；更大的图片走流式哈希/复制以及既有的安全路径回退。
    草稿内联命名过位置的图片会把那段 `@path` 文本作为 `inlinePath` 随持久消息和
    sidecar 附件传递；运行时据此把图片块放在用户写下的位置，而不是统一追加在提示文本之后
-   草稿里的 `pi-desktop://session/<id>` 链接在同一步骤里解析成有界摘录附件：只限
+   草稿里的 `ocode://session/<id>` 链接在同一步骤里解析成有界摘录附件：只限
    同一项目，当前对话在任何读取之前就被跳过；运行时随后把它作为一个
    `<session_reference name="…" session="…">` 块排在用户自己的话之前引用给模型
 7. 为本回合快照有效的 shell ID 与方言
@@ -319,7 +319,7 @@ pi 0.84.4+ 只在循环将要在同一次运行中开启另一个助手回合时
 
 1. pi 在助手消息和所有工具之后发出并等待 `turn_end`
    该回合的结果已完成
-2. PI-Desktop 根据完整转录本和最新转录本重建上下文
+2. Ocode 根据完整转录本和最新转录本重建上下文
    有效的检查点并估计下一个请求预算
 3.低于硬边界，并且没有待处理的模型请求，下一回合
    收益不变
@@ -391,7 +391,7 @@ pi 0.84.4+ 只在循环将要在同一次运行中开启另一个助手回合时
   正在总结中。
 
 压缩系列先由构造选项决定，其次才轮到
-`PI_DESKTOP_COMPACTION_STRATEGY`。它不是设置项，在 `AppSettings` 与 i18n 中
+`OCODE_COMPACTION_STRATEGY`。它不是设置项，在 `AppSettings` 与 i18n 中
 都不存在；它之所以存在，是为了让"不做摘要"这条机制既被实现、又可被测试。
 
 **面向模型的表面。** `new_context` 不带任何参数并开始一个新的
@@ -460,7 +460,7 @@ z.ai 等提供商不会先按溢出恢复、随后又被报告为通用的 `PROV
 计为运行状态，直到持久持久性完成。
 
 检查点携带的文件清单由 pi 自己的收集器从被摘要的区间里读出，它只认小写拼写
-`read` / `write` / `edit`——也就是 pi 自己工具的名字。PI-Desktop 注册的是
+`read` / `write` / `edit`——也就是 pi 自己工具的名字。Ocode 注册的是
 `Read` / `Write` / `Edit`，因此运行时**只在交给 pi 的准备阶段**转换这三个名字
 （`withPiFileOpToolNames`）：存储内容不变，其它工具名一律保持我们注册的拼写。
 缺少这一步时，检查点的 `readFiles` / `modifiedFiles` 与摘要里的 `<read-files>` 段
@@ -920,8 +920,8 @@ OpenCode Go 的一次性调用复用会话 id 作为 `x-opencode-session`；否�
 `opencode.ai`——都会发送：
 
 - `x-opencode-session`：持久的对话 id；调用方没有会话时则为一个按次生成的 UUID
-- `x-opencode-client: pi-desktop`
-- `User-Agent: pi-desktop/<APP_VERSION>`
+- `x-opencode-client: ocode`
+- `User-Agent: ocode/<APP_VERSION>`
 
 调用方自带的标头会覆盖 client 与 User-Agent 默认值。空的会话标头会由对话 id
 补回，使 OpenCode Go 不会返回 `MissingSessionID`。提供商行上的 `headers` 映射
@@ -1169,7 +1169,7 @@ sidecar 无法选择不同的根。在一次提示期间，路径解析
 空的、不可读的以及根目录外的指令文件仍会被跳过。全局文件与项目条目各有独立的
 32 KiB UTF-8 预算，过大的全局文件不会挤掉项目指令。超出剩余预算的文件按 UTF-8
 字符边界截断，并在末尾附加
-`[PI-Desktop truncated <source>: loaded the first <n> of <total> bytes; ...]`
+`[Ocode truncated <source>: loaded the first <n> of <total> bytes; ...]`
 提示；被截断文件之后的项目文件不再加载。源路径标记在 `# Project instructions` 下。
 sidecar 从不直接读取工作区指令。改变的根链
 在下一个提示时重新创建空闲运行时；嵌套指令已解决
@@ -1184,7 +1184,7 @@ sidecar 从不直接读取工作区指令。改变的根链
 对隔离会话（ADR 0329），启动元数据另带 `workspaceRoot`，即其 git worktree：指令链及其
 路径解析都以它为根，代理因此遵循 worktree 自己的 `AGENTS.md`。`projectPath` 仍是记忆、
 技能、插件、MCP 服务器、子代理定义、自定义系统提示和分组上下文的项目身份。系统提示会
-增加一段简短的隔离工作区说明（只在 worktree 中工作、使用 `PI_PORT` 端口块、把切换分支和
+增加一段简短的隔离工作区说明（只在 worktree 中工作、使用 `OCODE_PORT` 端口块、把切换分支和
 合并留给用户，以及如何解决合并冲突）。
 
 ## 8. 并发
@@ -1248,7 +1248,7 @@ provider/model 目录发现超出当前有线路径。
 
 桌面 sidecar 使用 Node 的 `--use-system-ca` 启动，同时保留内置根证书和继承的
 `NODE_EXTRA_CA_CERTS`。它使用操作系统信任库，但不会关闭证书链或主机名校验。
-更新本地信任库或额外 CA 启动环境后，需要重启桌面应用。无头 pi-host 启动行为以及
+更新本地信任库或额外 CA 启动环境后，需要重启桌面应用。无头 ocode-host 启动行为以及
 System/Direct/Custom 代理路由保持不变。
 
 在主 session 和内置 delegate 中，明确的证书校验错误在初始化和流恢复阶段都视为

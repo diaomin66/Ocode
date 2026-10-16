@@ -1,5 +1,5 @@
-import { decodePcm16, encodePcm16, StreamingPcmResampler } from "@pi-desktop/voice-runtime/live";
-import type { LivePlaybackCursor } from "@pi-desktop/shared";
+import { decodePcm16, encodePcm16, StreamingPcmResampler } from "@ocode/voice-runtime/live";
+import type { LivePlaybackCursor } from "@ocode/shared";
 import { liveError } from "./live-voice-api";
 
 const MAX_INPUT_CREDITS = 10;

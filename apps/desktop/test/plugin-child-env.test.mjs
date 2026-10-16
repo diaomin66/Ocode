@@ -55,13 +55,13 @@ test("a variable the host does not have stays absent instead of empty", () => {
 });
 
 test("the child environment stays closed to host secrets", () => {
-  withHostEnv({ PI_TEST_SECRET: "must-not-cross", OPENAI_API_KEY: "sk-must-not-cross" }, () => {
+  withHostEnv({ OCODE_TEST_SECRET: "must-not-cross", OPENAI_API_KEY: "sk-must-not-cross" }, () => {
     const envs = [
       pluginChildEnv("com.example.plugin"),
       mcpProcessEnv("com.example.plugin", {}),
     ];
     for (const env of envs) {
-      assert.equal(env.PI_TEST_SECRET, undefined);
+      assert.equal(env.OCODE_TEST_SECRET, undefined);
       assert.equal(env.OPENAI_API_KEY, undefined);
     }
   });

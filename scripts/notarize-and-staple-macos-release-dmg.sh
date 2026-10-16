@@ -3,7 +3,7 @@
 # ticket. Run after electron-builder produced the DMG.
 #
 # Why this exists: electron-builder's `mac.notarize=true` notarizes the built
-# `PI-Desktop.app` (so the app and the ZIP that carries it pass Gatekeeper and
+# `Ocode.app` (so the app and the ZIP that carries it pass Gatekeeper and
 # in-app updates work). The DMG is a separate artifact with its own signature,
 # so it needs its own notarytool submission before it can be stapled. Stapling a
 # DMG that was never submitted fails with:
@@ -13,16 +13,18 @@
 #   The staple and validate action failed! Error 65.
 #
 # Required environment (never echoed, never written to the repo):
-#   APPLE_ID                      Apple ID email in team DUV63RKYTW
+#   MAC_SIGNING_IDENTITY          Developer ID certificate common name or label
+#   APPLE_ID                      Apple ID email for the configured team
 #   APPLE_APP_SPECIFIC_PASSWORD   app-specific password for that Apple ID
-#   APPLE_TEAM_ID                 must be DUV63RKYTW
+#   APPLE_TEAM_ID                 10-character uppercase alphanumeric team ID
 #
 # Usage: scripts/notarize-and-staple-macos-release-dmg.sh [release-dir]
 
 set -euo pipefail
 
 RELEASE_DIR="${1:-apps/desktop/release}"
-EXPECTED_TEAM_ID="DUV63RKYTW"
+IDENTITY_NAME="${MAC_SIGNING_IDENTITY:-}"
+IDENTITY_NAME="${IDENTITY_NAME#Developer ID Application: }"
 # The ticket can take a moment to reach the stapler after Apple accepts, but a
 # retry is only legal once the submission returned Accepted. Overridable so
 # tests do not sleep for real.
@@ -34,8 +36,16 @@ if [[ -z "${APPLE_ID:-}" || -z "${APPLE_APP_SPECIFIC_PASSWORD:-}" || -z "${APPLE
   exit 1
 fi
 
-if [[ "$APPLE_TEAM_ID" != "$EXPECTED_TEAM_ID" ]]; then
-  echo "error: APPLE_TEAM_ID must be $EXPECTED_TEAM_ID (got: $APPLE_TEAM_ID)." >&2
+if [[ ! "$APPLE_TEAM_ID" =~ ^[A-Z0-9]{10}$ ]]; then
+  echo "error: APPLE_TEAM_ID must be 10 uppercase alphanumeric characters." >&2
+  exit 1
+fi
+if [[ -z "${IDENTITY_NAME//[[:space:]]/}" ]]; then
+  echo "error: MAC_SIGNING_IDENTITY is required to notarize a release DMG." >&2
+  exit 1
+fi
+if [[ "$IDENTITY_NAME" != *" ($APPLE_TEAM_ID)" || "$IDENTITY_NAME" == *$'\n'* || "$IDENTITY_NAME" == *$'\r'* ]]; then
+  echo "error: MAC_SIGNING_IDENTITY must name a Developer ID certificate in APPLE_TEAM_ID." >&2
   exit 1
 fi
 
@@ -56,7 +66,7 @@ DMG="${DMGS[0]}"
 
 # Explicit template: GNU `mktemp -t` rejects a name without X's, and BSD
 # `mktemp -t` would append its own suffix. `TMPDIR` is set on macOS runners.
-SUBMIT_LOG="$(mktemp "${TMPDIR:-/tmp}/pi-desktop-notarytool-submit.XXXXXX")"
+SUBMIT_LOG="$(mktemp "${TMPDIR:-/tmp}/ocode-notarytool-submit.XXXXXX")"
 trap 'rm -f "$SUBMIT_LOG"' EXIT
 
 # `notarytool log` needs the same credentials as `submit`; both are passed on

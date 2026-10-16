@@ -9,8 +9,8 @@ import {
   type KeyboardShortcutId,
   type NativeMenuAction,
   type ShortcutPlatform,
-} from "@pi-desktop/shared";
-import { catalogs, resolveLocale } from "@pi-desktop/i18n";
+} from "@ocode/shared";
+import { catalogs, resolveLocale } from "@ocode/i18n";
 
 export type ApplicationMenuOptions = {
   platform?: NodeJS.Platform;

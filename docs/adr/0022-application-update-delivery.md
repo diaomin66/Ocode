@@ -2,12 +2,12 @@
 
 - Status: Accepted (amended by D364 / D603 / D628 / ADR 0197, D450 / ADR 0289; issue #1098)
 - Date: 2026-07-26
-- Deciders: PI-Desktop core
+- Deciders: Ocode core
 - Related: D120, D126, D364, D603, D628, D010, D450, ADR 0021, ADR 0197, ADR 0289
 
 ## Context
 
-PI-Desktop needs a release-update path that preserves the renderer sandbox,
+Ocode needs a release-update path that preserves the renderer sandbox,
 does not expose feed configuration to untrusted UI code, and reflects each
 platform's actual installer capabilities. A single automatic-install policy is
 not appropriate: unsigned macOS packages cannot provide a qualified in-app
@@ -22,7 +22,7 @@ download-and-install flow.
    cannot supply a feed URL.
 2. Development builds keep updates disabled. Packaged macOS, Windows NSIS, and
    Linux AppImage use in-app download and quit-and-install delivery. Non-AppImage
-   Linux (deb/rpm) and Windows ZIP builds (`piDistribution = "zip"`) use
+   Linux (deb/rpm) and Windows ZIP builds (`ocodeDistribution = "zip"`) use
    notify-and-link delivery so an NSIS installer cannot replace a no-install
    run. Legacy portable executables remain manual when
    `PORTABLE_EXECUTABLE_FILE` is present. (Packaged macOS was notify-and-link
@@ -85,14 +85,14 @@ certificate remains available (D078).
 The Windows no-install lane now publishes a normal ZIP archive instead of
 electron-builder's self-extracting `portable` executable. The release helper
 builds NSIS and ZIP separately and stamps the ZIP app metadata with
-`piDistribution = "zip"`; the updater uses that marker to keep the ZIP manual
+`ocodeDistribution = "zip"`; the updater uses that marker to keep the ZIP manual
 even though ordinary ZIP launches do not set `PORTABLE_EXECUTABLE_FILE`. Users
-extract the archive and run `PI-Desktop.exe`; the NSIS lane and existing data
+extract the archive and run `Ocode.exe`; the NSIS lane and existing data
 directory remain unchanged.
 
 ## Amendment (issue #1098)
 
-For Windows NSIS installs, `PI_DESKTOP_UPDATE_CACHE_DIR` may set an absolute,
+For Windows NSIS installs, `OCODE_UPDATE_CACHE_DIR` may set an absolute,
 writable base for electron-updater's download cache. Main reads the cache's
 subdirectory name from the packaged `app-update.yml`, adopts the installer and
 block-map differential baselines plus any staged update from `%LOCALAPPDATA%`

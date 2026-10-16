@@ -8,7 +8,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-09-17
-- Deciders: PI-Desktop plugin and distribution maintainers
+- Deciders: Ocode plugin and distribution maintainers
 - Related: ADR 0102, D238, E2E-024P, E2E-PLUGIN-official-channel-resolves-through-the-platform
 
 ## Context
@@ -66,7 +66,7 @@ The product always reads `https://plugins.aiuo.net/catalog.json`; the Plugins
 page has no source selector. `pluginMarketSource` and `pluginMarketCustomUrl`
 remain in persisted settings so older settings can be read without migration,
 but host-core ignores them. The development-only
-`PI_DESKTOP_PLUGIN_MARKET_URL` override remains available to tests and local
+`OCODE_PLUGIN_MARKET_URL` override remains available to tests and local
 development.
 
 | Channel | Value | Catalog URL | Install path |
@@ -116,7 +116,7 @@ identity the operating system exposes — the Windows
 `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`, the macOS platform UUID, or
 Linux `/etc/machine-id` (falling back to `/var/lib/dbus/machine-id` and
 `/sys/class/dmi/id/product_uuid`). What leaves the machine is
-`sha256("pi-desktop.device.v1:" + <machine id>)` as 64-character lowercase hex,
+`sha256("ocode.device.v1:" + <machine id>)` as 64-character lowercase hex,
 never the machine code itself: the platform only needs to compare two requests
 for equality, so it has no use for the code, and a raw hardware identifier in a
 third-party request is a privacy downgrade the counting feature does not

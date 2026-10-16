@@ -37,7 +37,7 @@ async function tool(name, args = {}) {
   if (result?.isError) throw new Error(`${name}: ${text}`);
   try { return JSON.parse(text); } catch { return text; }
 }
-const invoke = (channel, ...args) => tool("pi_desktop_invoke", { operation: channel, args }).then((r) => (r && typeof r === "object" && "result" in r ? r.result : r));
+const invoke = (channel, ...args) => tool("ocode_invoke", { operation: channel, args }).then((r) => (r && typeof r === "object" && "result" in r ? r.result : r));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function messageText(message) {
@@ -279,7 +279,7 @@ const confirmedSignOut = await ui.run(() => {
 check("the sign-out action requires its confirmation click", confirmedSignOut);
 const disconnected = await ui.until(
   async (id) => {
-    const result = await window.piDesktop.invoke(window.piDesktop.channels.invoke.providersOauthVendors);
+    const result = await window.ocode.invoke(window.ocode.channels.invoke.providersOauthVendors);
     if (!result.ok) throw new Error(`Failed to list OAuth vendors: ${result.error.message}`);
     if (!Array.isArray(result.data?.vendors)) throw new Error("OAuth vendor response did not include vendors");
     return result.data.vendors.some((vendor) => vendor.vendorId === id && vendor.accounts.some((account) => !account.connected));
@@ -327,7 +327,7 @@ for (let i = 0; i < 60 && answeredNow() < 3; i++) {
     if (!m || answered.has(m[1])) continue;
     answered.add(m[1]);
     await invoke("extensions/ui/respond", { promptId: m[1], value: answers[m[2]], confirm: true }).catch(async () => {
-      await tool("pi_desktop_invoke", { operation: "extensions/ui/respond", args: [{ promptId: m[1], value: answers[m[2]] }], confirm: true });
+      await tool("ocode_invoke", { operation: "extensions/ui/respond", args: [{ promptId: m[1], value: answers[m[2]] }], confirm: true });
     });
   }
 }

@@ -161,7 +161,7 @@ pub(super) fn missing_error() -> WorktreeError {
     )
 }
 
-/// `PI_PORT`, `PI_PROJECT_ROOT`, and `PI_WORKTREE_ROOT` for an isolated
+/// `OCODE_PORT`, `OCODE_PROJECT_ROOT`, and `OCODE_WORKTREE_ROOT` for an isolated
 /// session's shell commands (PRD R2d); empty for every other session.
 pub fn tool_env(db: &Database, session_id: &str) -> Vec<(String, String)> {
     let Ok(Some(row)) = own_row(db, session_id) else {
@@ -176,14 +176,14 @@ pub fn tool_env(db: &Database, session_id: &str) -> Vec<(String, String)> {
 
 pub(super) fn env_for(row: &WorktreeRow, project: Option<&str>) -> Vec<(String, String)> {
     let mut env = vec![(
-        "PI_WORKTREE_ROOT".to_string(),
+        "OCODE_WORKTREE_ROOT".to_string(),
         row.workspace_root().to_string_lossy().into_owned(),
     )];
     if let Some(project) = project {
-        env.push(("PI_PROJECT_ROOT".to_string(), project.to_string()));
+        env.push(("OCODE_PROJECT_ROOT".to_string(), project.to_string()));
     }
     if let Some(port) = row.port_base {
-        env.push(("PI_PORT".to_string(), port.to_string()));
+        env.push(("OCODE_PORT".to_string(), port.to_string()));
     }
     env
 }
@@ -352,7 +352,7 @@ pub async fn create_session_worktree(
                 "worktree",
                 "lock",
                 "--reason",
-                &format!("PI-Desktop session {session_id}"),
+                &format!("Ocode session {session_id}"),
                 &root_text,
             ],
         )

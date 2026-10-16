@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
-import { IPC, IPC_WHITELIST } from "@pi-desktop/shared/protocol";
+import { IPC, IPC_WHITELIST } from "@ocode/shared/protocol";
 
-const LOCALE_ARGUMENT_PREFIX = "--pi-desktop-locale=";
+const LOCALE_ARGUMENT_PREFIX = "--ocode-locale=";
 
 function readOsLocale(): string | undefined {
   return process.argv
@@ -32,7 +32,7 @@ const api = {
       const value = payload && typeof payload === "object" ? payload as { callId?: unknown; nonce?: unknown } : null;
       const port = event.ports[0];
       if (!port || typeof value?.callId !== "string" || typeof value.nonce !== "string") return;
-      window.postMessage({ kind: "pi-desktop-live-voice-port", callId: value.callId, nonce: value.nonce }, "*", [port]);
+      window.postMessage({ kind: "ocode-live-voice-port", callId: value.callId, nonce: value.nonce }, "*", [port]);
     };
     ipcRenderer.on(IPC.event.liveVoicePort, listener);
     return () => ipcRenderer.removeListener(IPC.event.liveVoicePort, listener);
@@ -56,6 +56,8 @@ const api = {
   },
 };
 
+contextBridge.exposeInMainWorld("ocode", api);
+// Compatibility alias; both names enforce the identical channel allowlist.
 contextBridge.exposeInMainWorld("piDesktop", api);
 
-export type PiDesktopPreloadApi = typeof api;
+export type OcodePreloadApi = typeof api;

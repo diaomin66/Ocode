@@ -15,13 +15,13 @@ import { MARKERS, PASSWORD, rpc, runSyncJourney, runBackupJourney } from "./e2e/
 const { values } = parseArgs({ options: { "live-s3": { type: "boolean" }, "env-file": { type: "string" } } });
 if (Boolean(values["live-s3"]) !== Boolean(values["env-file"])) throw new Error("Live tests require both --live-s3 and --env-file");
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const prefix = `pi-desktop-tests/s3-config-sync-${randomUUID()}`;
+const prefix = `ocode-tests/s3-config-sync-${randomUUID()}`;
 const binary = resolveHostBinary();
 const revision = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 const base = execFileSync("git", ["rev-parse", "origin/main"], { cwd: root, encoding: "utf8" }).trim();
 execFileSync("git", ["merge-base", "--is-ancestor", "origin/main", "HEAD"], { cwd: root });
 const binarySha256 = createHash("sha256").update(await readFile(binary)).digest("hex");
-const dataRoot = await mkdtemp(join(process.env.PI_SCRATCH_DIR || tmpdir(), "pi-config-sync-e2e-"));
+const dataRoot = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR || tmpdir(), "pi-config-sync-e2e-"));
 const hosts = [];
 const errors = [];
 let store;
@@ -39,7 +39,7 @@ try {
     const home = join(dataRoot, name, "home");
     await mkdir(home, { recursive: true });
     hosts.push(new Host(binary, join(dataRoot, name, "data"), {
-      env: { HOME: home, USERPROFILE: home, PI_DESKTOP_AGENTS_DIR: join(home, "agents"), XDG_CONFIG_HOME: join(home, ".config"), DEBUG_HOST: "" },
+      env: { HOME: home, USERPROFILE: home, OCODE_AGENTS_DIR: join(home, "agents"), XDG_CONFIG_HOME: join(home, ".config"), DEBUG_HOST: "" },
       quiet: Boolean(values["live-s3"]),
     }));
   }

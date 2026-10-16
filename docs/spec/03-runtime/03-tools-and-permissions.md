@@ -226,7 +226,7 @@ as binary content.
 - **Addressing.** In a project session, the model addresses scratch by absolute
   path only; the path is advertised in the system prompt, relative tool paths
   resolve against the project workspace, and `Bash` exports
-  `PI_SCRATCH_DIR`. POSIX shells, including Git Bash on Windows, receive the
+  `OCODE_SCRATCH_DIR`. POSIX shells, including Git Bash on Windows, receive the
   forward-slash path advertised in the prompt; PowerShell and cmd keep the
   native path spelling. In a temporary session, that same scratch directory is
   the session workspace root, so relative Read/Glob/Grep/Write/Edit/Bash paths
@@ -368,7 +368,7 @@ validation and its write.
 
 A session created with `isolated: true` in a git project owns a dedicated
 worktree at `<data_dir>/worktrees/<project-key>/<id>` on branch
-`pi-desktop/<id>`, created from the project's current `HEAD` (uncommitted
+`ocode/<id>`, created from the project's current `HEAD` (uncommitted
 project changes are not copied; git-ignored files listed in
 `.worktreeinclude` are, without following links). For such a session:
 
@@ -378,14 +378,14 @@ project changes are not copied; git-ignored files listed in
   (a missing worktree fails with a `WORKTREE_*` error);
 - `AGENTS.md` instructions are read from the worktree, while project identity
   (memory, skills, plugins, MCP, subagents) stays keyed to the project path;
-- Bash receives `PI_PORT` (first port of a 10-port block in 41000–48999; a
-  block is assigned only when all ten ports are free), `PI_PROJECT_ROOT`, and
-  `PI_WORKTREE_ROOT`;
+- Bash receives `OCODE_PORT` (first port of a 10-port block in 41000–48999; a
+  block is assigned only when all ten ports are free), `OCODE_PROJECT_ROOT`, and
+  `OCODE_WORKTREE_ROOT`;
 - the optional per-project setup command runs once in each new worktree, with
   the same variables, in the user's default command shell
   (`defaultCommandShell`, otherwise the platform default: Windows PowerShell on
   Windows, bash elsewhere). It is not translated between dialects, so on
-  Windows it must use PowerShell syntax (`$env:PI_PORT`, `;` rather than
+  Windows it must use PowerShell syntax (`$env:OCODE_PORT`, `;` rather than
   `&&` on Windows PowerShell 5.1) unless a POSIX shell such as Git Bash is
   the configured default;
 - git hooks and fsmonitor are disabled for host-run git commands in the
@@ -454,7 +454,7 @@ with `COMMAND_SHELL_CHANGED`; settings writes reject unavailable or
 wrong-platform IDs with `COMMAND_SHELL_INVALID`. No arbitrary executable path
 or executable path hash is accepted as shell identity.
 
-1. `PI_DESKTOP_BASH` env override (path to a bash executable)
+1. `OCODE_BASH` env override (path to a bash executable)
 2. Unix: well-known locations (`/bin/bash`, `/usr/bin/bash`, `/usr/local/bin/bash`, Homebrew), then PATH
 3. Windows: `bash.exe` from Git for Windows — derived from the `git` on PATH, then standard install dirs, then PATH excluding the WSL launcher in `System32`
 

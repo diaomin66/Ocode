@@ -4,7 +4,7 @@ import {
   askToolOptionDescription,
   askToolOptionLabel,
   type AskToolQuestion,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { AskToolRichText } from "./AskToolRichText";
 import type { PendingAsk } from "../lib/pending-asks";
 import { useAppStore } from "../stores/app-store";

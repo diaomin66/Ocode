@@ -38,7 +38,7 @@ import type {
   SessionSummary,
   ThinkingLevel,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   NativePiSessionLease,
   guardNativePiSessionManager,

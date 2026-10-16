@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-12
-- Deciders: PI-Desktop maintainers
+- Deciders: Ocode maintainers
 - Related: ADR 0062 (parallel delegates), ADR 0089 (delegation tools),
   D114 (per-session scratch), `docs/spec/03-runtime/03-tools-and-permissions.md` §4d
 
@@ -24,8 +24,8 @@ the project directory.
 ## Decision
 
 1. An isolated session is opt-in per new session, default off. It owns one git
-   worktree on branch `pi-desktop/<id>`, created by host-core under
-   `~/.pi-desktop/worktrees/<project-key>/` from the project's current branch
+   worktree on branch `ocode/<id>`, created by host-core under
+   `~/.ocode/worktrees/<project-key>/` from the project's current branch
    tip. Uncommitted project changes are not carried over.
 2. host-core owns all git execution, worktree paths, and the `worktrees`
    registry (schema v24). The renderer and the agent runtime send only a
@@ -65,7 +65,7 @@ the project directory.
    permission.
 8. New worktrees copy ignored files listed in `.worktreeinclude` (the format
    Claude Code and Conductor read), then run an optional per-project setup
-   command with `PI_PROJECT_ROOT`, `PI_WORKTREE_ROOT`, and `PI_PORT` (a block
+   command with `OCODE_PROJECT_ROOT`, `OCODE_WORKTREE_ROOT`, and `OCODE_PORT` (a block
    of 10 ports per worktree, after Conductor's `CONDUCTOR_PORT`).
 9. Minimum git version is 2.29 (`git worktree repair`). Relative worktree
    links are not used because they raise the repository format version.

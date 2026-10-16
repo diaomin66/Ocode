@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { chmod, mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { delimiter, dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -17,7 +17,7 @@ const inventoryScript = fileURLToPath(
   new URL("../../../scripts/macos-bundle-inventory.mjs", import.meta.url),
 );
 
-const SIGNING_IDENTITY_NAME = "XingYu Liu (DUV63RKYTW)";
+const SIGNING_IDENTITY_NAME = "Ocode Developer (ABCDE12345)";
 const SIGNING_IDENTITY = `Developer ID Application: ${SIGNING_IDENTITY_NAME}`;
 const NO_IDENTITIES = "  0 valid identities found";
 const MATCHING_IDENTITY = `echo '  1) 0123456789ABCDEF "Developer ID Application: ${SIGNING_IDENTITY_NAME}"'
@@ -131,9 +131,20 @@ exit 0`,
 }
 
 function runDiagnostics(bin, { args = [], env = {} } = {}) {
-  return spawnSync("bash", [diagnosticsScript, ...args], {
+  const bash = process.platform === "win32"
+    ? join(process.env.ProgramFiles ?? "C:/Program Files", "Git/bin/bash.exe")
+    : "bash";
+  // Git Bash prepends its own uname/curl; put the stubs first after startup.
+  return spawnSync(bash, ["-c", 'export PATH="$STUB_BIN:$PATH"; exec bash "$@"', "diagnostics", diagnosticsScript.replaceAll("\\", "/"), ...args], {
     encoding: "utf8",
-    env: { ...BASE_ENV, PATH: `${bin}:${process.env.PATH}`, ...env },
+    env: {
+      ...BASE_ENV,
+      PATH: `${bin}${delimiter}${process.env.PATH}`,
+      STUB_BIN: bin.replaceAll("\\", "/").replace(/^([A-Za-z]):/, (_, drive) => `/${drive.toLowerCase()}`),
+      MAC_SIGNING_IDENTITY: SIGNING_IDENTITY_NAME,
+      APPLE_TEAM_ID: "ABCDE12345",
+      ...env,
+    },
   });
 }
 
@@ -184,7 +195,7 @@ async function writeBinaryResource(file, bytes, mode = 0o644) {
 }
 
 function appFixturePath(release) {
-  return join(release, "mac-arm64", "PI-Desktop.app");
+  return join(release, "mac-arm64", "Ocode.app");
 }
 
 async function tempRoot(t, prefix) {
@@ -195,11 +206,11 @@ async function tempRoot(t, prefix) {
 
 /**
  * The bundle used by the counting tests:
- *   Contents/MacOS/PI-Desktop                            mach-o, executable
+ *   Contents/MacOS/Ocode                            mach-o, executable
  *   Contents/Frameworks/Foo.framework/Versions/A/Foo     mach-o in a framework
  *   Contents/Frameworks/Foo.framework/Versions/Current   symlink to A
  *   Contents/Frameworks/Helper.app/Contents/MacOS/Helper text, nested bundle
- *   Contents/Resources/bin/pi-desktop-host-core          mach-o, executable
+ *   Contents/Resources/bin/ocode-host-core          mach-o, executable
  *   Contents/Resources/bin/run.sh                        script, executable
  *   Contents/Resources/native.dylib                      text
  *   Contents/Resources/native.node                       text
@@ -210,13 +221,13 @@ async function tempRoot(t, prefix) {
  */
 async function writeBundleFixture(release) {
   const app = appFixturePath(release);
-  await writeMachO(join(app, "Contents", "MacOS", "PI-Desktop"), 4100);
+  await writeMachO(join(app, "Contents", "MacOS", "Ocode"), 4100);
   await writeMachO(
     join(app, "Contents", "Frameworks", "Foo.framework", "Versions", "A", "Foo"),
     516,
   );
   await writeMachO(
-    join(app, "Contents", "Resources", "bin", "pi-desktop-host-core"),
+    join(app, "Contents", "Resources", "bin", "ocode-host-core"),
     2052,
   );
   await writeFileWithParents(
@@ -240,7 +251,7 @@ async function writeBundleFixture(release) {
 }
 
 test("diagnostics report an available Developer ID identity", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-signing-diagnostics-");
+  const root = await tempRoot(t, "ocode-signing-diagnostics-");
   const bin = join(root, "bin");
   await writeDiagnosticsShims(bin, { identities: MATCHING_IDENTITY });
 
@@ -252,18 +263,18 @@ test("diagnostics report an available Developer ID identity", async (t) => {
   assert.match(result.stdout, /^==> Keychain$/m);
   assert.match(result.stdout, /^==> Xcode toolchain$/m);
   assert.ok(
-    result.stdout.includes(`==> Developer ID identity available: ${SIGNING_IDENTITY}`),
+    result.stdout.includes(`==> Developer ID identity available: ${SIGNING_IDENTITY.replace("ABCDE12345", "[redacted]")}`),
     result.stdout,
   );
   assert.ok(
-    result.stdout.includes(`"${SIGNING_IDENTITY}"`),
+    result.stdout.includes(`"${SIGNING_IDENTITY.replace("ABCDE12345", "[redacted]")}"`),
     "the matching find-identity line is echoed",
   );
   assert.doesNotMatch(result.stdout, /is not available/);
 });
 
 test("diagnostics fail closed when --require-identity finds no identity", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-signing-required-");
+  const root = await tempRoot(t, "ocode-signing-required-");
   const bin = join(root, "bin");
   await writeDiagnosticsShims(bin, { identities: NO_IDENTITIES });
 
@@ -273,14 +284,14 @@ test("diagnostics fail closed when --require-identity finds no identity", async 
   assert.match(result.stderr, /not available/);
   assert.ok(
     result.stdout.includes(
-      `warning: Developer ID Application: ${SIGNING_IDENTITY_NAME} is not available in the current keychain`,
+      `warning: Developer ID Application: ${SIGNING_IDENTITY_NAME.replace("ABCDE12345", "[redacted]")} is not available in the current keychain`,
     ),
     result.stdout,
   );
 });
 
 test("diagnostics treat a missing identity as a warning by default", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-signing-optional-");
+  const root = await tempRoot(t, "ocode-signing-optional-");
   const bin = join(root, "bin");
   await writeDiagnosticsShims(bin, { identities: NO_IDENTITIES });
 
@@ -289,7 +300,7 @@ test("diagnostics treat a missing identity as a warning by default", async (t) =
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.ok(
     result.stdout.includes(
-      `warning: Developer ID Application: ${SIGNING_IDENTITY_NAME} is not available`,
+      `warning: Developer ID Application: ${SIGNING_IDENTITY_NAME.replace("ABCDE12345", "[redacted]")} is not available`,
     ),
     result.stdout,
   );
@@ -297,7 +308,7 @@ test("diagnostics treat a missing identity as a warning by default", async (t) =
 });
 
 test("diagnostics refuse to run off macOS", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-signing-linux-");
+  const root = await tempRoot(t, "ocode-signing-linux-");
   const bin = join(root, "bin");
   await writeDiagnosticsShims(bin, { unameSystem: "Linux" });
 
@@ -308,7 +319,7 @@ test("diagnostics refuse to run off macOS", async (t) => {
 });
 
 test("diagnostics never echo signing secrets", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-signing-redaction-");
+  const root = await tempRoot(t, "ocode-signing-redaction-");
   const bin = join(root, "bin");
   await writeDiagnosticsShims(bin, { leaky: true });
 
@@ -318,7 +329,7 @@ test("diagnostics never echo signing secrets", async (t) => {
       CSC_KEY_PASSWORD: CSC_PASSWORD_SENTINEL,
       APPLE_ID: APPLE_ID_SENTINEL,
       APPLE_APP_SPECIFIC_PASSWORD: APPLE_PASSWORD_SENTINEL,
-      APPLE_TEAM_ID: "DUV63RKYTW",
+      APPLE_TEAM_ID: "ABCDE12345",
     },
   });
 
@@ -331,13 +342,56 @@ test("diagnostics never echo signing secrets", async (t) => {
     CSC_PASSWORD_SENTINEL,
     APPLE_PASSWORD_SENTINEL,
     APPLE_ID_SENTINEL,
+    "ABCDE12345",
   ]) {
     assert.ok(!combined.includes(secret), `secret value leaked: ${secret}`);
   }
 });
 
+test("diagnostics allow unconfigured informational runs but require release configuration", async (t) => {
+  const root = await tempRoot(t, "ocode-signing-unconfigured-");
+  const bin = join(root, "bin");
+  await writeDiagnosticsShims(bin, { identities: MATCHING_IDENTITY });
+  const env = { MAC_SIGNING_IDENTITY: "", APPLE_TEAM_ID: "" };
+  const optional = runDiagnostics(bin, { env });
+  assert.equal(optional.status, 0, optional.stderr);
+  assert.match(optional.stdout, /MAC_SIGNING_IDENTITY is not configured/);
+  assert.doesNotMatch(optional.stdout, /Developer ID identity available/);
+  const required = runDiagnostics(bin, { env, args: ["--require-identity"] });
+  assert.equal(required.status, 1);
+  assert.match(required.stderr, /MAC_SIGNING_IDENTITY is not configured/);
+});
+
+test("required diagnostics reject malformed or mismatched teams", async (t) => {
+  const root = await tempRoot(t, "ocode-signing-invalid-team-");
+  const bin = join(root, "bin");
+  await writeDiagnosticsShims(bin, { identities: MATCHING_IDENTITY });
+  for (const team of ["", "abcde12345", "ABCDE1234!", "ABCDE123456", "FGHIJ67890"]) {
+    const result = runDiagnostics(bin, {
+      args: ["--require-identity"],
+      env: { APPLE_TEAM_ID: team },
+    });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /APPLE_TEAM_ID/);
+    assert.doesNotMatch(result.stdout, /Developer ID identity available/);
+  }
+});
+
+test("required diagnostics accept a different configured team and redact it", async (t) => {
+  const root = await tempRoot(t, "ocode-signing-other-team-");
+  const bin = join(root, "bin");
+  await writeDiagnosticsShims(bin, { identities: MATCHING_IDENTITY.replaceAll("ABCDE12345", "FGHIJ67890") });
+  const result = runDiagnostics(bin, {
+    args: ["--require-identity"],
+    env: { APPLE_TEAM_ID: "FGHIJ67890", MAC_SIGNING_IDENTITY: "Developer ID Application: Ocode Developer (FGHIJ67890)" },
+  });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.match(result.stdout, /Developer ID identity available/);
+  assert.doesNotMatch(`${result.stdout}${result.stderr}`, /FGHIJ67890/);
+});
+
 test("inventory counts the signing payload of a release directory", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-inventory-");
+  const root = await tempRoot(t, "ocode-bundle-inventory-");
   const release = join(root, "release");
   const app = await writeBundleFixture(release);
 
@@ -345,7 +399,7 @@ test("inventory counts the signing payload of a release directory", async (t) =>
 
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.ok(
-    result.stdout.includes(`==> PI-Desktop.app inventory: ${app}`),
+    result.stdout.includes(`==> Ocode.app inventory: ${app}`),
     result.stdout,
   );
   assert.match(result.stdout, /^entries: 21 \(files: 9, directories: 11, symlinks: 1\)$/m);
@@ -354,7 +408,10 @@ test("inventory counts the signing payload of a release directory", async (t) =>
     /^mach-o: 3 \(dylib: 1, node: 1, framework binaries: 1\)$/m,
   );
   assert.match(result.stdout, /^bundles: frameworks=1 nested-apps=1$/m);
-  assert.match(result.stdout, /^executables: script=1 mach-o=3$/m);
+  // Windows does not preserve the POSIX execute bits set by chmod.
+  assert.match(result.stdout, process.platform === "win32"
+    ? /^executables: script=0 mach-o=0$/m
+    : /^executables: script=1 mach-o=3$/m);
   assert.match(result.stdout, /^binary-resources: 1$/m);
   assert.match(
     result.stdout,
@@ -367,7 +424,7 @@ test("inventory counts the signing payload of a release directory", async (t) =>
   assert.match(result.stdout, /^top-level-cost: Contents\/MacOS=\d+, Contents\/Resources=\d+$/m);
   assert.match(
     result.stdout,
-    /^slowest-likely: Contents\/MacOS\/PI-Desktop \(4100 bytes\), Contents\/Resources\/bin\/pi-desktop-host-core \(2052 bytes\)$/m,
+    /^slowest-likely: Contents\/MacOS\/Ocode \(4100 bytes\), Contents\/Resources\/bin\/ocode-host-core \(2052 bytes\)$/m,
   );
   assert.match(result.stdout, /^warning: non-Mach-O regular file in Contents\/Resources\/bin: Contents\/Resources\/bin\/run\.sh$/m);
 
@@ -382,27 +439,27 @@ test("inventory counts the signing payload of a release directory", async (t) =>
   assert.equal(json.nodeModules, 1);
   assert.equal(json.frameworks, 1);
   assert.equal(json.nestedApps, 1);
-  assert.equal(json.executableScripts, 1);
-  assert.equal(json.executableMachO, 3);
+  assert.equal(json.executableScripts, process.platform === "win32" ? 0 : 1);
+  assert.equal(json.executableMachO, process.platform === "win32" ? 0 : 3);
   assert.equal(json.machOOutsideFramework, 2);
   assert.equal(json.binaryResources, 1);
   assert.equal(json.signingCandidates, 5);
   assert.equal(json.topLevelCost.length, 2);
   assert.equal(json.slowestLikely.length, 2);
-  assert.equal(json.slowestLikely[0].path, "Contents/MacOS/PI-Desktop");
+  assert.equal(json.slowestLikely[0].path, "Contents/MacOS/Ocode");
   assert.equal(json.slowestLikely[0].bytes, 4100);
   assert.equal(json.resources.bin.files, 2);
   assert.equal(json.resources["models.dev"], null);
 });
 
 test("inventory counts binary-looking resources as signing candidates", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-binary-resources-");
+  const root = await tempRoot(t, "ocode-bundle-binary-resources-");
   const release = join(root, "release");
   const app = appFixturePath(release);
   // One Mach-O, one NUL-carrying resource, one text resource and one nested
   // bundle: osx-sign signs all of those except the text resource, so the total
   // is 1 + 1 + 1 = 3.
-  await writeMachO(join(app, "Contents", "MacOS", "PI-Desktop"), 512);
+  await writeMachO(join(app, "Contents", "MacOS", "Ocode"), 512);
   await writeBinaryResource(
     join(app, "Contents", "Frameworks", "Electron Framework.framework", "Resources", "icudtl.dat"),
     256,
@@ -438,13 +495,13 @@ test("inventory counts binary-looking resources as signing candidates", async (t
 });
 
 test("inventory does not double count native-extension files as binary resources", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-native-extensions-");
+  const root = await tempRoot(t, "ocode-bundle-native-extensions-");
   const release = join(root, "release");
   const app = appFixturePath(release);
   // A `.dylib` and a `.node` that happen to look binary are already reported by
   // their own counters, so only the `.dat` may raise `binary-resources`.
   await writeMachO(
-    join(app, "Contents", "Resources", "bin", "pi-desktop-host-core"),
+    join(app, "Contents", "Resources", "bin", "ocode-host-core"),
     256,
   );
   await writeBinaryResource(
@@ -478,7 +535,7 @@ test("inventory does not double count native-extension files as binary resources
 });
 
 test("inventory requires exactly one app bundle under the given path", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-selection-");
+  const root = await tempRoot(t, "ocode-bundle-selection-");
 
   const empty = join(root, "empty-release");
   await mkdir(join(empty, "mac-arm64"), { recursive: true });
@@ -488,11 +545,11 @@ test("inventory requires exactly one app bundle under the given path", async (t)
 
   const twoApps = join(root, "two-release");
   await writeFileWithParents(
-    join(twoApps, "mac-arm64", "PI-Desktop.app", "Contents", "Info.plist"),
+    join(twoApps, "mac-arm64", "Ocode.app", "Contents", "Info.plist"),
     "<plist/>",
   );
   await writeFileWithParents(
-    join(twoApps, "mac-x64", "PI-Desktop.app", "Contents", "Info.plist"),
+    join(twoApps, "mac-x64", "Ocode.app", "Contents", "Info.plist"),
     "<plist/>",
   );
   const twoResult = runInventory([twoApps]);
@@ -503,16 +560,16 @@ test("inventory requires exactly one app bundle under the given path", async (t)
   assert.equal(missingResult.status, 1);
   assert.match(missingResult.stderr, /path does not exist/);
 
-  const fileResult = runInventory([join(root, "two-release", "mac-arm64", "PI-Desktop.app", "Contents", "Info.plist")]);
+  const fileResult = runInventory([join(root, "two-release", "mac-arm64", "Ocode.app", "Contents", "Info.plist")]);
   assert.equal(fileResult.status, 1);
   assert.match(fileResult.stderr, /not a directory/);
 });
 
 test("inventory survives a symlink cycle without hanging or double counting", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-symlink-");
+  const root = await tempRoot(t, "ocode-bundle-symlink-");
   const release = join(root, "release");
   const app = appFixturePath(release);
-  await writeFileWithParents(join(app, "Contents", "MacOS", "PI-Desktop"), "not-mach-o");
+  await writeFileWithParents(join(app, "Contents", "MacOS", "Ocode"), "not-mach-o");
   await mkdir(join(app, "Contents", "Resources"), { recursive: true });
   await symlink(
     join("..", ".."),
@@ -537,7 +594,7 @@ test("inventory survives a symlink cycle without hanging or double counting", as
 });
 
 test("inventory warns about oversized bundles without failing", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-thresholds-");
+  const root = await tempRoot(t, "ocode-bundle-thresholds-");
   const release = join(root, "release");
   const app = appFixturePath(release);
   for (let index = 0; index < 5; index += 1) {
@@ -548,8 +605,8 @@ test("inventory warns about oversized bundles without failing", async (t) => {
   }
 
   const result = runInventory([app, "--json"], {
-    PI_DESKTOP_INVENTORY_MAX_FILES: "3",
-    PI_DESKTOP_INVENTORY_MAX_DIR_FILES: "1",
+    OCODE_INVENTORY_MAX_FILES: "3",
+    OCODE_INVENTORY_MAX_DIR_FILES: "1",
   });
 
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
@@ -562,7 +619,7 @@ test("inventory warns about oversized bundles without failing", async (t) => {
 });
 
 test("inventory flags Mach-O files outside the expected locations", async (t) => {
-  const root = await tempRoot(t, "pi-desktop-bundle-misplaced-");
+  const root = await tempRoot(t, "ocode-bundle-misplaced-");
   const release = join(root, "release");
   const app = appFixturePath(release);
   await writeMachO(join(app, "Contents", "Resources", "tools", "odd-binary"), 128);

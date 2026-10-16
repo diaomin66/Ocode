@@ -4,12 +4,12 @@
 # Local builds without a certificate remain unsigned. This script injects a
 # real signing identity and requires notarization credentials:
 #
-#   MAC_SIGNING_IDENTITY   default: "XingYu Liu (DUV63RKYTW)" — bare common
-#                          name; electron-builder rejects the
-#                          "Developer ID Application:" prefix
+#   MAC_SIGNING_IDENTITY   required certificate common name (with team suffix);
+#                          an optional "Developer ID Application:" prefix is
+#                          stripped because electron-builder rejects it
 #   APPLE_ID               Apple ID email for notarization
 #   APPLE_APP_SPECIFIC_PASSWORD  app-specific password for the Apple ID
-#   APPLE_TEAM_ID          Apple Developer Team ID (must be DUV63RKYTW)
+#   APPLE_TEAM_ID          required 10-character uppercase alphanumeric team ID
 #   MAC_ARCH               optional `arm64` or `x64`; must match the host
 #
 # Observability: the packaging command runs under
@@ -18,7 +18,7 @@
 # (DEBUG=electron-notarize*), prints a heartbeat while electron-builder is
 # silent, dumps diagnostics when the signing phase stalls, bounds the phase
 # with a hard timeout, and reports per-file codesign timings. The
-# `signing PI-Desktop.app` line electron-builder emits is otherwise the last
+# `signing Ocode.app` line electron-builder emits is otherwise the last
 # thing the log shows for minutes, because nested signing, silent full
 # retries, and Apple's notarization queue all happen without output.
 # See docs/spec/06-delivery/06-release-runbook.md for the full runbook.
@@ -55,32 +55,44 @@ if [[ "$MAC_ARCH" != "$DEFAULT_MAC_ARCH" ]]; then
   exit 1
 fi
 
-MAC_SIGNING_IDENTITY="${MAC_SIGNING_IDENTITY:-XingYu Liu (DUV63RKYTW)}"
+MAC_SIGNING_IDENTITY="${MAC_SIGNING_IDENTITY:-}"
 MAC_SIGNING_IDENTITY="${MAC_SIGNING_IDENTITY#Developer ID Application: }"
-APPLE_TEAM_ID="${APPLE_TEAM_ID:-DUV63RKYTW}"
+APPLE_TEAM_ID="${APPLE_TEAM_ID:-}"
+
+if [[ -z "${MAC_SIGNING_IDENTITY//[[:space:]]/}" ]]; then
+  echo "error: MAC_SIGNING_IDENTITY is required for a signed release." >&2
+  exit 1
+fi
+
+if [[ ! "$APPLE_TEAM_ID" =~ ^[A-Z0-9]{10}$ ]]; then
+  echo "error: APPLE_TEAM_ID must be 10 uppercase alphanumeric characters." >&2
+  exit 1
+fi
+
+if [[ "$MAC_SIGNING_IDENTITY" != *" ($APPLE_TEAM_ID)" || "$MAC_SIGNING_IDENTITY" == *$'\n'* || "$MAC_SIGNING_IDENTITY" == *$'\r'* ]]; then
+  echo "error: MAC_SIGNING_IDENTITY must name a Developer ID certificate in APPLE_TEAM_ID." >&2
+  exit 1
+fi
+export MAC_SIGNING_IDENTITY APPLE_TEAM_ID
 
 if [[ -z "${APPLE_ID:-}" || -z "${APPLE_APP_SPECIFIC_PASSWORD:-}" ]]; then
   echo "error: notarization credentials are required (APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD)." >&2
-  echo "For an unsigned local build use: pnpm --filter @pi-desktop/desktop dist" >&2
+  echo "For an unsigned local build use: pnpm --filter @ocode/desktop dist" >&2
   exit 1
 fi
 
-if [[ "$APPLE_TEAM_ID" != "DUV63RKYTW" ]]; then
-  echo "error: APPLE_TEAM_ID must be DUV63RKYTW (got: $APPLE_TEAM_ID)." >&2
-  exit 1
-fi
 
 echo "==> Building host-core (release)"
 cargo build -p host-core --release
 
 echo "==> Building workspace packages"
-pnpm -r --filter '!@pi-desktop/desktop' build
+pnpm -r --filter '!@ocode/desktop' build
 
 echo "==> Bundling the agent-runtime sidecar"
-pnpm --filter @pi-desktop/agent-runtime bundle
+pnpm --filter @ocode/agent-runtime bundle
 
 echo "==> Building the desktop bundles"
-pnpm --filter @pi-desktop/desktop exec electron-vite build
+pnpm --filter @ocode/desktop exec electron-vite build
 
 echo "==> Packaging the desktop (Developer ID signed + notarized, $MAC_ARCH)"
 # `--publish never` keeps a local checkout from publishing to GitHub; the
@@ -90,11 +102,11 @@ echo "==> Packaging the desktop (Developer ID signed + notarized, $MAC_ARCH)"
 # `executing` line prints every spawned command with only its own stem list
 # redacted, which leaves `security set-key-partition-list -k <p12 password>`
 # in clear text on a terminal or in a log file.
-PI_STAPLER_MAX_ATTEMPTS="${PI_STAPLER_MAX_ATTEMPTS:-6}" \
-PI_STAPLER_RETRY_DELAY_SECONDS="${PI_STAPLER_RETRY_DELAY_SECONDS:-10}" \
+OCODE_STAPLER_MAX_ATTEMPTS="${OCODE_STAPLER_MAX_ATTEMPTS:-6}" \
+OCODE_STAPLER_RETRY_DELAY_SECONDS="${OCODE_STAPLER_RETRY_DELAY_SECONDS:-10}" \
 DEBUG="${DEBUG:-electron-osx-sign*,electron-notarize*}" \
   node scripts/macos-signing-watchdog.mjs --label "release-macos-${MAC_ARCH}" -- \
-  pnpm --filter @pi-desktop/desktop exec electron-builder --mac "--${MAC_ARCH}" \
+  pnpm --filter @ocode/desktop exec electron-builder --mac "--${MAC_ARCH}" \
     --publish never \
     -c.mac.identity="${MAC_SIGNING_IDENTITY}" \
     -c.mac.forceCodeSigning=true \

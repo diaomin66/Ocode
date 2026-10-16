@@ -30,8 +30,8 @@ await build({
   format: "esm",
   alias: {
     electron: electronStub,
-    "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-    "@pi-desktop/shared": join(root, "packages/shared/src"),
+    "@ocode/i18n": join(root, "packages/i18n/src"),
+    "@ocode/shared": join(root, "packages/shared/src"),
   },
   nodePaths: [join(root, "apps/desktop/node_modules")],
 });
@@ -104,19 +104,19 @@ test("renderer choices drive close and quit while unavailable renderers use nati
   const quitCancelled = runtime.confirmQuitDialog();
   assert.equal(window.restoreCount, 1);
   assert.equal(window.focusCount, 1);
-  const firstQuit = lastEvent(events, "pi-desktop/window/event/lifecycleDialogRequest");
+  const firstQuit = lastEvent(events, "ocode/window/event/lifecycleDialogRequest");
   assert.equal(firstQuit.payload.kind, "quit-confirmation");
   assert.equal(runtime.respondLifecycleDialog(99, firstQuit.payload.requestId, "confirm"), false);
   assert.equal(runtime.respondLifecycleDialog(41, firstQuit.payload.requestId, "cancel"), true);
   assert.equal(await quitCancelled, false);
 
   const quitConfirmed = runtime.confirmQuitDialog();
-  const secondQuit = lastEvent(events, "pi-desktop/window/event/lifecycleDialogRequest");
+  const secondQuit = lastEvent(events, "ocode/window/event/lifecycleDialogRequest");
   assert.equal(runtime.respondLifecycleDialog(41, secondQuit.payload.requestId, "confirm"), true);
   assert.equal(await quitConfirmed, true);
 
   const closeChoice = runtime.askCloseBehavior(window);
-  const closeRequest = lastEvent(events, "pi-desktop/window/event/lifecycleDialogRequest");
+  const closeRequest = lastEvent(events, "ocode/window/event/lifecycleDialogRequest");
   assert.equal(closeRequest.payload.kind, "close-behavior");
   assert.equal(runtime.respondLifecycleDialog(41, closeRequest.payload.requestId, "tray"), true);
   assert.equal(await closeChoice, "tray");
@@ -126,20 +126,20 @@ test("renderer choices drive close and quit while unavailable renderers use nati
 
   globalThis.__nativeDialogResponses.push(2);
   const fallbackChoice = runtime.askCloseBehavior(window);
-  const fallbackRequest = lastEvent(events, "pi-desktop/window/event/lifecycleDialogRequest");
+  const fallbackRequest = lastEvent(events, "ocode/window/event/lifecycleDialogRequest");
   emit("render-process-gone");
   assert.equal(await fallbackChoice, "quit");
   assert.equal(
-    lastEvent(events, "pi-desktop/window/event/lifecycleDialogDismiss").payload.requestId,
+    lastEvent(events, "ocode/window/event/lifecycleDialogDismiss").payload.requestId,
     fallbackRequest.payload.requestId,
   );
   const nativeAsk = globalThis.__nativeDialogOptions.at(-1);
-  assert.equal(nativeAsk.title, "Keep PI-Desktop running in the background?");
+  assert.equal(nativeAsk.title, "Keep Ocode running in the background?");
   assert.equal(nativeAsk.message.startsWith("When you close the window"), true);
 
   globalThis.__nativeDialogResponses.push(0);
   assert.equal(await runtime.confirmQuitDialog(), false);
   const nativeQuit = globalThis.__nativeDialogOptions.at(-1);
-  assert.equal(nativeQuit.title, "Quit PI-Desktop?");
+  assert.equal(nativeQuit.title, "Quit Ocode?");
   assert.notEqual(nativeQuit.message, nativeQuit.title);
 });

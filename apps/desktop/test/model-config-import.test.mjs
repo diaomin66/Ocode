@@ -104,7 +104,7 @@ test("model settings embeds the model-config importer while retaining its protoc
   assert.match(modelPage, /<ModelConfigImportPanel \/>/);
   assert.match(modelImport, /scanImportModelConfigs/);
   assert.match(apiSource, /modelConfigImportScan/);
-  assert.match(protocol, /pi-desktop\/modelConfig\/importScan/);
+  assert.match(protocol, /ocode\/modelConfig\/importScan/);
   assert.match(mainSource, /providers\.create/);
   assert.match(mainSource, /providers\.getSecret/);
   assert.match(mainSource, /secretValue: draft\.secretValue/);

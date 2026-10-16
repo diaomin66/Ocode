@@ -13,7 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(join(root, "packages/agent-runtime/package.json"));
 const { build } = require("esbuild");
 const { electronBinary } = resolveElectronBinary(root);
-const temp = await mkdtemp(join(process.env.PI_SCRATCH_DIR || tmpdir(), "pi-question-notification-"));
+const temp = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR || tmpdir(), "pi-question-notification-"));
 try {
   await build({
     entryPoints: [join(root, "scripts/e2e/question-notification.tsx")],
@@ -21,9 +21,9 @@ try {
     jsx: "automatic", loader: { ".css": "empty" },
     define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "false" },
     alias: {
-      "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
-      "@pi-desktop/shared/protocol": join(root, "packages/shared/src/protocol.ts"),
-      "@pi-desktop/shared": join(root, "packages/shared/src/index.ts"),
+      "@ocode/i18n": join(root, "packages/i18n/src/index.ts"),
+      "@ocode/shared/protocol": join(root, "packages/shared/src/protocol.ts"),
+      "@ocode/shared": join(root, "packages/shared/src/index.ts"),
       react: join(root, "apps/desktop/node_modules/react"),
       "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
     },

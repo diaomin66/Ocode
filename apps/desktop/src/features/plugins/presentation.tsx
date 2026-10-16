@@ -8,7 +8,7 @@ import type {
   PluginFsPolicy,
   PluginServiceStatus,
   PluginSummary,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   CAPABILITY_ORDER,
   FS_MODES,

@@ -2,9 +2,9 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { en } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared/protocol";
-import type { AskToolRequest, Result, SessionSummary } from "@pi-desktop/shared";
+import { en } from "@ocode/i18n";
+import { IPC } from "@ocode/shared/protocol";
+import type { AskToolRequest, Result, SessionSummary } from "@ocode/shared";
 import { AskToolCard } from "../../apps/desktop/src/components/AskToolCard";
 import { ToastHost } from "../../apps/desktop/src/components/Toast";
 import { headAsk } from "../../apps/desktop/src/lib/pending-asks";
@@ -101,7 +101,7 @@ declare global {
 
 globalThis.questionNotificationProbe = async () => {
   await i18n.init({ lng: "en", resources: { en: { translation: en } } });
-  window.piDesktop = {
+  window.ocode = {
     channels: IPC, platform: "win32", on: () => () => {},
     invoke: async <T,>(channel: string, ...args: unknown[]): Promise<Result<T>> => {
       const input = args[0];

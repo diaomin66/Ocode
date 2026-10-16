@@ -4,7 +4,7 @@ import {
   keybindingDisplayParts,
   resolveKeybinding,
   type ShortcutPlatform,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../stores/app-store";
 import {
@@ -55,7 +55,7 @@ export function ConversationTopbar({
   const navBack = useAppStore((s) => s.navBack);
   const setPage = useAppStore((s) => s.setPage);
   const platform = (
-    typeof window === "undefined" ? "darwin" : window.piDesktop?.platform ?? "darwin"
+    typeof window === "undefined" ? "darwin" : window.ocode?.platform ?? "darwin"
   ) as ShortcutPlatform;
   const newTaskShortcut = KEYBOARD_SHORTCUTS.find(
     (shortcut) => shortcut.id === "newTask",

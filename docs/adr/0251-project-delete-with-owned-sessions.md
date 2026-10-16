@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-15
-- Deciders: PI-Desktop maintainers
+- Deciders: Ocode maintainers
 
 ## Context
 
@@ -17,7 +17,7 @@ That left no user-facing way to remove a durable project record. A user who
 archived a project that should no longer exist could only edit host-core's
 SQLite file directly and clear renderer storage afterwards, because the Projects
 index is a union of four sources: project-group projections of the durable
-`projects` rows, `pi.desktop.recentProjects`, projects re-derived from live
+`projects` rows, `ocode.desktop.recentProjects`, projects re-derived from live
 sessions, and the active workspace. Deleting only the database row leaves the
 other three sources in place, so the row reappears.
 
@@ -41,7 +41,7 @@ Two integrity facts constrain the fix:
    for a single conversation delete, and it clears the project's durable memory.
    It is idempotent for an unknown path, and it is refused while any attached
    session has a running turn (see 7).
-3. The RPC never touches the project's folder on disk. PI-Desktop deletes
+3. The RPC never touches the project's folder on disk. Ocode deletes
    application records, never user files, and a project whose folder was moved
    or deleted is still removable.
 4. A path that is a root of a stored multi-folder project group is refused with
@@ -77,7 +77,7 @@ Two integrity facts constrain the fix:
   records are removed by one action.
 - Sessions and transcripts of a deleted project are gone permanently. A project
   delete is therefore not recoverable from the application; the folder on disk
-  and any file-level history outside PI-Desktop are unaffected.
+  and any file-level history outside Ocode are unaffected.
 - Group structure is never silently rewritten. Users with multi-folder projects
   see an explicit refusal instead of a corrupted group.
 - Composer/sidebar code that lists projects must treat the four index sources

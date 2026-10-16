@@ -15,8 +15,8 @@ import { startHtmlPreviewModel } from "./e2e/html-preview-model.mjs";
 
 const root = repositoryRoot();
 const require = createRequire(import.meta.url);
-const { _electron } = require(process.env.PI_TEST_PLAYWRIGHT || "playwright");
-const output = await mkdtemp(join(process.env.PI_TEST_OUTPUT || tmpdir(), "pi-html-links-"));
+const { _electron } = require(process.env.OCODE_TEST_PLAYWRIGHT || "playwright");
+const output = await mkdtemp(join(process.env.OCODE_TEST_OUTPUT || tmpdir(), "pi-html-links-"));
 const data = join(output, "data"), primary = join(output, "project"), secondary = join(output, "assets");
 await Promise.all([data, primary, secondary].map(path => mkdir(path, { recursive: true })));
 const binary = resolveHostBinary();
@@ -100,8 +100,8 @@ try {
   }
 } finally { await host.stop(); }
 
-const env = { ...process.env, PI_DESKTOP_DATA_DIR: data, PI_DESKTOP_HOST_BIN: binary,
-  PI_DESKTOP_MCP_CONTROL: "0", ELECTRON_RENDERER_URL: "", PI_DESKTOP_START_MAXIMIZED: "0" };
+const env = { ...process.env, OCODE_DATA_DIR: data, OCODE_HOST_BIN: binary,
+  OCODE_MCP_CONTROL: "0", ELECTRON_RENDERER_URL: "", OCODE_START_MAXIMIZED: "0" };
 delete env.ELECTRON_RUN_AS_NODE;
 const { appDir, electronBinary } = resolveElectronBinary(root);
 const app = await _electron.launch({ executablePath: electronBinary,
@@ -124,7 +124,7 @@ try {
     BrowserWindow.getAllWindows().find(window => window.webContents.getURL() === url)
       ?.setTitle("PI HTML Link Regression QA"), page.url());
   for (const item of cases) {
-    await page.evaluate(id => window.__PI_DESKTOP__.selectSession(id), item.sessionId);
+    await page.evaluate(id => window.__OCODE__.selectSession(id), item.sessionId);
     await page.getByRole("link", { name: item.label, exact: true }).click();
     const url = pathToFileURL(item.file).href;
     let guest;
@@ -164,7 +164,7 @@ try {
     results.push(item.label);
     console.log("PASS " + item.label);
   }
-  await page.evaluate(id => window.__PI_DESKTOP__.selectSession(id), cases[0].sessionId);
+  await page.evaluate(id => window.__OCODE__.selectSession(id), cases[0].sessionId);
   await page.getByRole("link", { name: "Missing HTML", exact: true }).click();
   await page.getByText("No file matches missing.html", { exact: true }).waitFor();
   results.push("missing file reports its failure");
@@ -178,7 +178,7 @@ try {
   await page.getByText("Ordinary-scratch.html:1", { exact: true }).click();
   await page.locator(".file-viewer").waitFor();
   results.push("positioned HTML opens source, not execution");
-  await page.evaluate(id => window.__PI_DESKTOP__.selectSession(id), cases[5].sessionId);
+  await page.evaluate(id => window.__OCODE__.selectSession(id), cases[5].sessionId);
   await page.getByText("Isolated-worktree.html:1", { exact: true }).click();
   await page.locator(".file-viewer").waitFor();
   await page.locator(".file-viewer").getByText(/Pelican bicycle animation/).waitFor();
@@ -186,7 +186,7 @@ try {
   // Exercise BrowserPreview through a user send, ToolSearch, sidecar and main.
   // The only fake is the loopback provider, which requests a deterministic tool.
   for (const item of [cases[0], cases[2], cases[5]]) {
-    await page.evaluate(id => window.__PI_DESKTOP__.selectSession(id), item.sessionId);
+    await page.evaluate(id => window.__OCODE__.selectSession(id), item.sessionId);
     model.preview(item === cases[2] ? item.file : basename(item.file));
     const composer = page.locator('.composer-input[contenteditable="true"]');
     await composer.fill("Open the generated HTML with BrowserPreview.");
@@ -226,9 +226,9 @@ try {
     await writeFile(join(output, "native-window.png"), Buffer.from(native, "base64"));
     results.push("native Windows window captured with browser guest");
   }
-  await page.evaluate(id => window.__PI_DESKTOP__.selectSession(id), cases[0].sessionId);
+  await page.evaluate(id => window.__OCODE__.selectSession(id), cases[0].sessionId);
   await page.evaluate(async () => {
-    const result = await window.piDesktop.invoke("pi-desktop/plugin/disable", "pi.browser");
+    const result = await window.ocode.invoke("ocode/plugin/disable", "pi.browser");
     if (!result.ok) throw new Error(result.error.message);
   });
   await page.getByRole("link", { name: cases[0].label, exact: true }).click();
@@ -242,7 +242,7 @@ try {
   console.error("HTML_LINKS_FAILED " + output);
   throw error;
 } finally {
-  await app.evaluate(() => { process.env.PI_DESKTOP_BOOT_PROBE = "1"; });
+  await app.evaluate(() => { process.env.OCODE_BOOT_PROBE = "1"; });
   await app.close();
   await model.close();
 }

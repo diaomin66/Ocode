@@ -12,7 +12,7 @@ test("Voice settings render Live Voice only and preserve legacy settings", async
       location: { origin: "http://localhost" },
       addEventListener() {},
       removeEventListener() {},
-      piDesktop: {
+      ocode: {
         on: () => () => undefined,
         invoke: async () => ({ ok: true, data: { voice: { enabled: true } } }),
       },

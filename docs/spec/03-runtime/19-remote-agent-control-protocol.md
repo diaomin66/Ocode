@@ -35,7 +35,7 @@ authorities rather than reproducing them in a Gateway or client.
 
 RACP v1 is a strict subset of what the local desktop can do. The remote-host
 profile in §6.2 is the v1.1 addition that lets the desktop itself act as the
-Remote Client of a `pi-host` on another machine (D375); operations that stay
+Remote Client of a `ocode-host` on another machine (D375); operations that stay
 deferred are listed in §6.3 so that no binding invents them under another
 name.
 
@@ -74,7 +74,7 @@ The client sends:
   "params": {
     "protocolVersion": "1.0",
     "client": {
-      "name": "pi-desktop-web",
+      "name": "ocode-web",
       "version": "0.1.0"
     },
     "bindings": ["RACP-WS", "RACP-HTTP"],
@@ -103,7 +103,7 @@ The Host returns:
   "result": {
     "protocolVersion": "1.0",
     "server": {
-      "name": "pi-desktop-agent-host",
+      "name": "ocode-agent-host",
       "version": "0.1.0"
     },
     "connectionId": "conn_01J...",
@@ -572,7 +572,7 @@ MUST use capability discovery rather than assuming optional operations exist.
 
 ### 6.2 Remote-host profile (v1.1, required by rollout R2)
 
-When the desktop is the Remote Client of a `pi-host` on another machine, the
+When the desktop is the Remote Client of a `ocode-host` on another machine, the
 renderer expects the session controls it has locally. These operations are
 part of the contract from v1.1 and are advertised through the
 `remoteHostProfile` capability. Each one keeps its local rule: configuration
@@ -583,7 +583,7 @@ session root as working directory and stream through `terminal.output`.
 
 | Operation | Role | Behavior |
 |---|---|---|
-| `session/configure` | controller | Change mode, provider/model, thinking level, or permission mode while idle; same rules as `pi-desktop/session/configure` |
+| `session/configure` | controller | Change mode, provider/model, thinking level, or permission mode while idle; same rules as `ocode/session/configure` |
 | `session/fork` | controller | Fork an idle session, optionally through a message id, into a new idle session |
 | `session/rename` | controller | Rename a session |
 | `session/deriveTitle` | controller | Apply the Host's deterministic first-prompt title to a still-untitled session; returns `{ updated }` and never overrides a rename |
@@ -1068,7 +1068,7 @@ binding defines two authentication profiles:
 
 A token in the URL is rejected in both profiles.
 
-First deployment (rollout R2): a `pi-host` binds loopback on the remote
+First deployment (rollout R2): a `ocode-host` binds loopback on the remote
 machine and the desktop reaches it through an SSH port forward on the header
 profile with a device token obtained by the SSH bootstrap pairing. Plain
 `ws://` is accepted on that port only when both the bind address and the peer

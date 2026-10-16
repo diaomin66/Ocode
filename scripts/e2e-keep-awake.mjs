@@ -16,8 +16,8 @@ const root = mkdtempSync(join(tmpdir(), "pi-keep-awake-e2e-"));
 const dataDir = join(root, "data");
 const profile = join(root, "profile");
 const project = join(root, "project");
-const evidence = process.env.PI_KEEP_AWAKE_EVIDENCE_DIR;
-const configuredPort = process.env.PI_KEEP_AWAKE_CDP_PORT ? Number(process.env.PI_KEEP_AWAKE_CDP_PORT) : null;
+const evidence = process.env.OCODE_KEEP_AWAKE_EVIDENCE_DIR;
+const configuredPort = process.env.OCODE_KEEP_AWAKE_CDP_PORT ? Number(process.env.OCODE_KEEP_AWAKE_CDP_PORT) : null;
 mkdirSync(dataDir);
 mkdirSync(project);
 const host = new Host(resolveHostBinary(), dataDir);
@@ -56,8 +56,8 @@ async function launch() {
   mkdirSync(userDataDir);
   const env = {
     ...process.env,
-    PI_DESKTOP_DATA_DIR: dataDir,
-    PI_DESKTOP_START_MAXIMIZED: "0",
+    OCODE_DATA_DIR: dataDir,
+    OCODE_START_MAXIMIZED: "0",
     ELECTRON_RENDERER_URL: "",
   };
   delete env.ELECTRON_RUN_AS_NODE;
@@ -167,7 +167,7 @@ async function openSettings() {
 
 async function setting() {
   return session.evaluate(`(async () => {
-    const r = await window.piDesktop.invoke(window.piDesktop.channels.invoke.settingsGet);
+    const r = await window.ocode.invoke(window.ocode.channels.invoke.settingsGet);
     if (!r.ok) throw new Error(JSON.stringify(r.error));
     return r.data.keepAwakeWhileRunning;
   })()`);
@@ -175,7 +175,7 @@ async function setting() {
 
 async function screenSetting() {
   return session.evaluate(`(async () => {
-    const r = await window.piDesktop.invoke(window.piDesktop.channels.invoke.settingsGet);
+    const r = await window.ocode.invoke(window.ocode.channels.invoke.settingsGet);
     if (!r.ok) throw new Error(JSON.stringify(r.error));
     return r.data.preventScreenSleep === true;
   })()`);

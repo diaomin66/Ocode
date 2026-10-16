@@ -13,7 +13,7 @@ const remote = {
 
 test("remote home and transcript use the regular composer without local workspace identity", async (t) => {
   const ssr = await slotSsr(t);
-  globalThis.window = { piDesktop: { platform: "darwin" }, matchMedia: () => ({ matches: false }) };
+  globalThis.window = { ocode: { platform: "darwin" }, matchMedia: () => ({ matches: false }) };
   t.after(() => { delete globalThis.window; });
   const { useAppStore } = await ssr.load("/src/stores/app-store.ts");
   Object.assign(useAppStore.getInitialState(), {
@@ -83,7 +83,7 @@ test("remote Read/Write tool rows stay readable and retained panes cannot open l
   const ssr = await slotSsr(t);
   const calls = [];
   globalThis.window = {
-    piDesktop: { platform: "darwin", invoke: async (...args) => { calls.push(args); throw new Error("remote must not call local host"); }, on: () => () => {} },
+    ocode: { platform: "darwin", invoke: async (...args) => { calls.push(args); throw new Error("remote must not call local host"); }, on: () => () => {} },
     matchMedia: () => ({ matches: false }),
   };
   t.after(() => { delete globalThis.window; });
@@ -121,7 +121,7 @@ test("remote Markdown links remain copyable text and callbacks cannot open local
     if (id.endsWith("/components/Markdown.tsx")) return source + "\nexport { Anchor as ProbeAnchor, InlineCode as ProbeInlineCode };";
   } }] });
   const calls = [];
-  globalThis.window = { piDesktop: { platform: "darwin", invoke: async (...args) => { calls.push(args); return { ok: true, data: {} }; } }, matchMedia: () => ({ matches: false }) };
+  globalThis.window = { ocode: { platform: "darwin", invoke: async (...args) => { calls.push(args); return { ok: true, data: {} }; } }, matchMedia: () => ({ matches: false }) };
   t.after(() => { delete globalThis.window; });
   const { useAppStore } = await ssr.load("/src/stores/app-store.ts");
   const state = { sessions: [remote], activeSessionId: remote.id, workspace: { path: "/local/private" }, openUrlInWorkPanel: (...args) => calls.push(args) };

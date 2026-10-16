@@ -2,7 +2,7 @@
 # Record a non-sensitive snapshot of the macOS code-signing environment before
 # electron-builder starts packaging.
 #
-# Why this exists: @electron/osx-sign walks the whole `PI-Desktop.app` and runs
+# Why this exists: @electron/osx-sign walks the whole `Ocode.app` and runs
 # one `codesign --sign <identity> --force --timestamp --entitlements ...` per
 # Mach-O file and per nested bundle, strictly serially. When a release signing
 # step stalls, every interesting question is environmental: is a usable
@@ -14,9 +14,8 @@
 # Usage: scripts/macos-signing-diagnostics.sh [--require-identity]
 #
 # Environment:
-#   MAC_SIGNING_IDENTITY   bare common name ("XingYu Liu (DUV63RKYTW)") or the
-#                          full certificate label
-#                          ("Developer ID Application: XingYu Liu (DUV63RKYTW)").
+#   MAC_SIGNING_IDENTITY   configured bare common name or full certificate label
+#   APPLE_TEAM_ID          configured 10-character uppercase alphanumeric team ID
 #
 # Exit status:
 #   0  snapshot printed. A missing certificate is only a warning by default:
@@ -48,9 +47,21 @@ done
 
 # Accepts either the bare common name or the full certificate label, matching
 # scripts/verify-macos-release.sh.
-IDENTITY_NAME="${MAC_SIGNING_IDENTITY:-XingYu Liu (DUV63RKYTW)}"
+IDENTITY_NAME="${MAC_SIGNING_IDENTITY:-}"
 IDENTITY_NAME="${IDENTITY_NAME#Developer ID Application: }"
 EXPECTED_IDENTITY="Developer ID Application: ${IDENTITY_NAME}"
+IDENTITY_CONFIG_ERROR=""
+if [[ -z "${IDENTITY_NAME//[[:space:]]/}" ]]; then
+  IDENTITY_CONFIG_ERROR="MAC_SIGNING_IDENTITY is not configured."
+elif [[ ! "${APPLE_TEAM_ID:-}" =~ ^[A-Z0-9]{10}$ ]]; then
+  IDENTITY_CONFIG_ERROR="APPLE_TEAM_ID must be 10 uppercase alphanumeric characters."
+elif [[ "$IDENTITY_NAME" != *" ($APPLE_TEAM_ID)" || "$IDENTITY_NAME" == *$'\n'* || "$IDENTITY_NAME" == *$'\r'* ]]; then
+  IDENTITY_CONFIG_ERROR="MAC_SIGNING_IDENTITY must name a Developer ID certificate in APPLE_TEAM_ID."
+fi
+if [[ -n "$IDENTITY_CONFIG_ERROR" && "$REQUIRE_IDENTITY" == "true" ]]; then
+  echo "error: $IDENTITY_CONFIG_ERROR" >&2
+  exit 1
+fi
 
 if [[ "$(uname -s 2>/dev/null || true)" != "Darwin" ]]; then
   echo "error: macOS signing diagnostics must run on macOS." >&2
@@ -205,14 +216,16 @@ fi
 # ---------------------------------------------------------------------------
 
 echo "==> Signing identity"
-if [[ -n "$IDENTITY_OUTPUT" && "$IDENTITY_OUTPUT" == *"$EXPECTED_IDENTITY"* ]]; then
-  echo "==> Developer ID identity available: ${EXPECTED_IDENTITY}"
-  IDENTITY_LINE="$(printf '%s\n' "$IDENTITY_OUTPUT" | grep -F -- "$EXPECTED_IDENTITY" | head -n 1 || true)"
+if [[ -n "$IDENTITY_CONFIG_ERROR" ]]; then
+  echo "warning: $IDENTITY_CONFIG_ERROR"
+elif [[ -n "$IDENTITY_OUTPUT" && "$IDENTITY_STATUS" -eq 0 && "$IDENTITY_OUTPUT" == *\""$EXPECTED_IDENTITY"\"* ]]; then
+  echo_redacted "==> Developer ID identity available: ${EXPECTED_IDENTITY}"
+  IDENTITY_LINE="$(printf '%s\n' "$IDENTITY_OUTPUT" | grep -F -- "\"$EXPECTED_IDENTITY\"" | head -n 1 || true)"
   echo_redacted "$IDENTITY_LINE"
 else
-  echo "warning: Developer ID Application: ${IDENTITY_NAME} is not available in the current keychain (electron-builder imports CSC_LINK during packaging)."
+  echo_redacted "warning: Developer ID Application: ${IDENTITY_NAME} is not available in the current keychain (electron-builder imports CSC_LINK during packaging)."
   if [[ "$REQUIRE_IDENTITY" == "true" ]]; then
-    echo "error: Developer ID Application: ${IDENTITY_NAME} is not available in this keychain." >&2
+    echo_redacted "error: Developer ID Application: ${IDENTITY_NAME} is not available in this keychain." >&2
     exit 1
   fi
 fi

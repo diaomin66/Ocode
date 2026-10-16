@@ -2,10 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { flattenCatalog } from "@pi-desktop/i18n/locale-info";
-import { en } from "@pi-desktop/i18n/locales/en";
+import { flattenCatalog } from "@ocode/i18n/locale-info";
+import { en } from "@ocode/i18n/locales/en";
 import { remoteEn, remoteZh } from "./locales/remote";
-import { MAC_TRAFFIC_LIGHT_EDGE_DIP } from "@pi-desktop/shared";
+import { MAC_TRAFFIC_LIGHT_EDGE_DIP } from "@ocode/shared";
 import App from "./App";
 import { ErrorBoundary, RoutePending } from "./features/app/chrome";
 import { initLanguageSync } from "./lib/app-language";
@@ -18,7 +18,7 @@ document.documentElement.dataset.theme = "dark";
 // Window-chrome layout differs per OS (traffic lights left on macOS,
 // controls overlay right on Windows/Linux); set before first paint.
 document.documentElement.dataset.platform =
-  window.piDesktop?.platform ?? "darwin";
+  window.ocode?.platform ?? "darwin";
 // The macOS traffic lights are native views with a fixed footprint; the space
 // the shell leaves clear for them derives from the same shared constant the
 // main process positions them with (styles/tokens.css). Only macOS has them —

@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-PI-Desktop uses the pi agent loop without adopting the CLI's session runtime
+Ocode uses the pi agent loop without adopting the CLI's session runtime
 or giving a JavaScript package ownership of desktop persistence. Package
 boundaries must keep that split clear as upstream packages evolve.
 
@@ -19,7 +19,7 @@ in `docs/project/pi-110-adoption.md`.
   prompt-template expansion, and session-context projection.
 - `@earendil-works/pi-ai` supplies provider transports, auth, message types,
   request retries, and token estimation. Hosted-search request and estimation
-  behavior remains covered by PI-Desktop's pi-ai patch and contract tests.
+  behavior remains covered by Ocode's pi-ai patch and contract tests.
 - Rust `host-core` remains the sole owner of SQLite and authoritative durable
   session state. The Node sidecar asks it to persist checkpoints and tool
   outcomes through the existing RPC contract.
@@ -51,7 +51,7 @@ atomic commits, task checkpoints, compaction, and recovery. Its Node adapters
 include SQLite and JSONL storage; the README states that one process owns a
 storage at a time and that cross-process locking is not provided.
 
-Those semantics differ from PI-Desktop's current boundary: Rust host-core owns
+Those semantics differ from Ocode's current boundary: Rust host-core owns
 the SQLite database and session records, while Node owns the in-memory agent
 loop. Do not open a second SQLite writer against host-core's database. Before
 adopting the durable harness, a separate ADR must compare these options:

@@ -1,4 +1,4 @@
-import { blockRendererLanguageKey } from "@pi-desktop/plugin-sdk";
+import { blockRendererLanguageKey } from "@ocode/plugin-sdk";
 
 /**
  * Pure helpers for the `blockRenderer` slot (`docs/plugin-plan/ui/block-renderer/`).

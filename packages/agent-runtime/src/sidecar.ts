@@ -19,7 +19,7 @@ import {
   type RuntimeProviderConfig,
 } from "./runtime.js";
 import type { PluginSkillDef } from "./plugin-skills-prompt.js";
-import type { SessionMessageOrigin, TrustedExtensionSpec } from "@pi-desktop/shared";
+import type { SessionMessageOrigin, TrustedExtensionSpec } from "@ocode/shared";
 import type { ProjectInstructions } from "./project-instructions.js";
 import type { CustomSystemPrompt } from "./custom-system-prompt.js";
 import {
@@ -36,7 +36,7 @@ import {
   normalizeNetworkProxy,
   OAUTH_AUTH_KIND,
   readNdjsonLines,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type {
   AgentEventEnvelope,
   AskToolResolution,
@@ -48,7 +48,7 @@ import type {
   PlanExecution,
   SessionThinkingLevel,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 type RuntimeMap = Map<string, DesktopAgentRuntime>;
 
@@ -66,7 +66,7 @@ const runtimes: RuntimeMap = new Map();
 const hostProxy = new ParentHostProxy();
 const testRuntimeIds = new WeakMap<DesktopAgentRuntime, string>();
 function testRuntimeIdentity(sessionId: string) {
-  if (process.env.PI_DESKTOP_PLAN_UI_PROBE !== "1") {
+  if (process.env.OCODE_PLAN_UI_PROBE !== "1") {
     throw Object.assign(new Error("test runtime identity RPC is unavailable"), {
       rpcCode: -32601,
     });
@@ -672,7 +672,7 @@ process.on("unhandledRejection", (reason) => {
   process.stderr.write(`[agent-sidecar] unhandled promise rejection: ${detail}\n`);
 });
 
-const bootProxy = process.env.PI_DESKTOP_PROXY_JSON;
+const bootProxy = process.env.OCODE_PROXY_JSON;
 if (bootProxy) {
   try {
     applyNodeNetworkProxy(normalizeNetworkProxy(JSON.parse(bootProxy)));

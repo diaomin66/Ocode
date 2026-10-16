@@ -10,7 +10,7 @@
 
 ## Context
 
-PI-Desktop currently embeds `pi-agent-core` in a Node sidecar. Electron Main
+Ocode currently embeds `pi-agent-core` in a Node sidecar. Electron Main
 owns the sidecar and Rust host-core bridges, while the renderer communicates
 through typed Electron IPC. The local sidecar and host-core boundaries use
 stdio NDJSON JSON-RPC. ADR 0203 adds an opt-in, loopback-only MCP control plane
@@ -188,8 +188,8 @@ notifications on messaging channels with simple commands back; no recorded
 request asks for a browser or phone client of the desktop. The design-gate
 answers below were chosen by the maintainer the same day.
 
-1. **First remote topology: the desktop as Remote Client of a `pi-host`
-   over an SSH tunnel.** The `pi-host` bundle packages the headless module,
+1. **First remote topology: the desktop as Remote Client of a `ocode-host`
+   over an SSH tunnel.** The `ocode-host` bundle packages the headless module,
    the Node sidecar, and the platform's host-core binary at the desktop's
    version. A bootstrap script uploaded over the user's own SSH session
    downloads it from GitHub Releases, verifies the published SHA-256, starts
@@ -265,7 +265,7 @@ the project runs.
    the user's SSH hosts, the messaging channels the user configured with
    their own bot tokens or webhooks, the model providers the user configured,
    and the read-only, checksum-verified GitHub Releases download of
-   `pi-host`.
+   `ocode-host`.
 4. **Unchanged.** The SSH-tunnel topology, device pairing, the messaging
    integration, and every RACP shape already satisfy this rule; the
    specifications change wording, not structure.

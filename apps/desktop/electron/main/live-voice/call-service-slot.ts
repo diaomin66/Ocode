@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import type { LivePrepareRequest } from "@pi-desktop/shared";
-import { LiveWorkFeedbackScheduler } from "@pi-desktop/host-runtime";
+import type { LivePrepareRequest } from "@ocode/shared";
+import { LiveWorkFeedbackScheduler } from "@ocode/host-runtime";
 import type { LiveOwner, Slot } from "./call-service-internals";
 
 export function createLiveCallSlot(owner: LiveOwner, request: LivePrepareRequest, now: () => number): Slot {

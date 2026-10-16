@@ -61,7 +61,7 @@ import {
   type TrustedExtensionDiagnostic,
   type TrustedExtensionSpec,
   type TrustedExtensionUiResponse,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type {
   TrustedExtensionRunner,
   RegisteredTrustedExtensionAgent,
@@ -98,7 +98,7 @@ import type {
   ThinkingLevel,
   ToolTokenUsage,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   addUsage,
   checkpointGeneration,
@@ -123,7 +123,7 @@ import {
   subagentToolsLabel,
   type ProposalKind,
   type SubagentPermission,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { createStreamCoalescer, type StreamCoalescer } from "./stream-coalescer.js";
 import type { RuntimeHost } from "./host-client.js";
 import { classifyAgentError } from "./agent-errors.js";
@@ -297,7 +297,7 @@ export type { RuntimeProviderConfig } from "./provider-binding.js";
 export type RuntimePromptAttachment = Omit<AgentPromptAttachment, "kind"> & {
   /**
    * `session` is written by Electron main for a resolved
-   * `pi-desktop://session/<id>` reference; the renderer never sends it.
+   * `ocode://session/<id>` reference; the renderer never sends it.
    */
   kind: AgentPromptAttachment["kind"] | "session";
   /** Base64 payload is transient and only crosses the sidecar for this turn. */
@@ -842,7 +842,7 @@ const PROGRESS_TURN_NUDGE = [
 /**
  * Some OpenAI-style models emit their internal parallel-call wrapper as
  * assistant text (`to=multi_tool_use.parallel code:{"tool_uses":[…]}`) instead
- * of real tool calls. PI-Desktop has no such tool, so the whole batch lands as
+ * of real tool calls. Ocode has no such tool, so the whole batch lands as
  * prose and silently does nothing — the turn looks finished while no work ran.
  * Rare (2 occurrences across 255 recorded sessions) but indistinguishable from
  * a stuck agent when it happens.
@@ -879,7 +879,7 @@ function resolveCompactionStrategy(
   option?: CompactionStrategy,
 ): CompactionStrategy {
   if (option) return option;
-  return process.env.PI_DESKTOP_COMPACTION_STRATEGY === "fresh_window"
+  return process.env.OCODE_COMPACTION_STRATEGY === "fresh_window"
     ? "fresh_window"
     : "summary";
 }
@@ -1004,7 +1004,7 @@ export type AgentRuntimeOptions = {
   compactionSettings?: ContextCompactionSettings;
   /**
    * Which compaction family to use. Tests set it explicitly; production reads
-   * `PI_DESKTOP_COMPACTION_STRATEGY` and otherwise summarizes.
+   * `OCODE_COMPACTION_STRATEGY` and otherwise summarizes.
    */
   compactionStrategy?: CompactionStrategy;
   /** Plugin agent tools to expose to the model this session. */
@@ -1269,11 +1269,11 @@ const TOOL_PROGRESS_TRUNCATION_MARKER =
 function shellScratchVariable(shell: CommandShellOption): string {
   switch (shell.dialect) {
     case "powershell":
-      return "$env:PI_SCRATCH_DIR";
+      return "$env:OCODE_SCRATCH_DIR";
     case "cmd":
-      return "%PI_SCRATCH_DIR%";
+      return "%OCODE_SCRATCH_DIR%";
     case "posix":
-      return "$PI_SCRATCH_DIR";
+      return "$OCODE_SCRATCH_DIR";
   }
 }
 
@@ -1308,7 +1308,7 @@ export function commandShellGuidance(
   const formattedScratch = formatScratchDirForShell(shell, scratchDir);
   const scratch = formattedScratch
     ? `The session scratch directory is \`${formattedScratch}\`; use ${scratchVariable} for it and keep temporary files there.`
-    : `When PI_SCRATCH_DIR is available, use ${scratchVariable} for the session scratch directory and keep temporary files there.`;
+    : `When OCODE_SCRATCH_DIR is available, use ${scratchVariable} for the session scratch directory and keep temporary files there.`;
   return [
     `Shell commands run through ${shell.label} (${shell.id}). The protocol tool remains named Bash for compatibility, even when the active shell is PowerShell or cmd.`,
     shellSyntaxGuidance(shell),
@@ -1770,7 +1770,7 @@ export function isolatedWorkspaceGuidance(): string {
     "Isolated session: the advertised workspace is a separate git worktree on its own branch; the user's main project checkout is outside it.",
     "Edit, build, and test only inside this workspace and never change files in the main checkout.",
     "The worktree is a fresh checkout, so install dependencies first when a build or test needs them.",
-    "Start dev servers only on the 10 ports beginning at the PI_PORT environment variable.",
+    "Start dev servers only on the 10 ports beginning at the OCODE_PORT environment variable.",
     "Do not switch branches, rebase, or reset in this worktree; the user merges its branch into the project from the app.",
     "To resolve a merge conflict here, remove the conflict markers from text files, and stage binary or deleted files with git add or git rm.",
     "MCP tools act on the main project, not on this workspace.",
@@ -2202,7 +2202,7 @@ Do not invent objections or turn speculative risks into blockers. Stop when the 
         const stallAbort = new AbortController();
         const attemptOptions: SimpleStreamOptions = {
           ...hookedOptions,
-          // Cap the output budget at the pi-desktop layer so the estimate
+          // Cap the output budget at the Ocode layer so the estimate
           // holds for both adapter branches: `streamSimple` re-derives
           // max_tokens, but the low-level `stream` path used by
           // `thinkingLevel: "omit"` would otherwise send it untouched, and

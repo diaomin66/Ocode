@@ -15,7 +15,7 @@ more credentials than the user intended.
 Keep the existing ownership model. The user selects eligible providers and
 confirms credential copying in Settings. Main reads only those secrets, validates
 a versioned bounded payload, and writes it to an explicit SSH command's stdin.
-`pi-host provider-import` forwards the payload to the running Host over an
+`ocode-host provider-import` forwards the payload to the running Host over an
 owner-only Unix socket. The socket accepts only provider import and uses the
 Host's existing Rust RPC connection. It is not a general-purpose RPC tunnel.
 

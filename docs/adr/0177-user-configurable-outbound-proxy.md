@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-08
-- Deciders: PI-Desktop core
+- Deciders: Ocode core
 - Related: D340, ADR 0083, ADR 0096,
   `04-ux/06-settings-ia.md`, `03-runtime/07-process-model.md`
 
@@ -64,7 +64,7 @@ certificate verification on.
 
 6. **Apply without restart.** `settings.set` updates Chromium sessions
    (including `session-created`), main env, and `sidecar.configure`. A Test
-   action (`pi-desktop/network/testProxy`) runs one bounded Chromium fetch
+   action (`ocode/network/testProxy`) runs one bounded Chromium fetch
    through the supplied config and does not persist it.
 
 7. **Secrets.** Custom proxy userinfo lives in the settings JSON next to other

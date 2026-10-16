@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Packaged Host + actual Desktop main routing, with only the model/network fixture mocked.
  * This is not SSH/sshd or Electron renderer acceptance. All mutable state is temporary.
- * PI_HOST_E2E_BUNDLE points to the directory produced by pi-host/scripts/bundle.mjs. */
+ * OCODE_HOST_E2E_BUNDLE points to the directory produced by ocode-host/scripts/bundle.mjs. */
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -17,10 +17,10 @@ const { createRemoteHostsBoot } = await import("../apps/desktop/electron/main/bo
 const { createBackendRouter } = await import("../apps/desktop/electron/main/remote/backend-router.ts");
 const { exchangePairingToken } = await import("../apps/desktop/electron/main/remote/racp-remote-host-client.ts");
 
-assert.ok(process.env.PI_HOST_E2E_BUNDLE, "PI_HOST_E2E_BUNDLE must name the packaged Host directory");
-const bundle = resolve(process.env.PI_HOST_E2E_BUNDLE);
-const cli = join(bundle, "pi-host.js");
-const root = await mkdtemp(join(process.env.PI_SCRATCH_DIR ?? tmpdir(), "remote-mvp-"));
+assert.ok(process.env.OCODE_HOST_E2E_BUNDLE, "OCODE_HOST_E2E_BUNDLE must name the packaged Host directory");
+const bundle = resolve(process.env.OCODE_HOST_E2E_BUNDLE);
+const cli = join(bundle, "ocode-host.js");
+const root = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR ?? tmpdir(), "remote-mvp-"));
 const dataDir = join(root, "host");
 const project = join(root, "project");
 await mkdir(dataDir, { mode: 0o700 });
@@ -85,8 +85,8 @@ async function runImport(payload) {
   importer.stdin.end(JSON.stringify(payload));
   const [code] = await once(importer, "exit");
   assert.equal(code, 0, "CLI imports through the running Host admin socket");
-  assert.ok(output.startsWith("PI_HOST_PROVIDERS "));
-  return JSON.parse(output.slice("PI_HOST_PROVIDERS ".length));
+  assert.ok(output.startsWith("OCODE_HOST_PROVIDERS "));
+  return JSON.parse(output.slice("OCODE_HOST_PROVIDERS ".length));
 }
 async function stop() {
   await boot?.closeAll();
@@ -113,8 +113,8 @@ try {
       let newline;
       while ((newline = output.indexOf("\n")) >= 0) {
         const line = output.slice(0, newline); output = output.slice(newline + 1);
-        if (line.startsWith("PI_HOST_READY ")) found.host = JSON.parse(line.slice(14));
-        if (line.startsWith("PI_HOST_PAIRING_TOKEN ")) found.pairing = JSON.parse(line.slice(22));
+        if (line.startsWith("OCODE_HOST_READY ")) found.host = JSON.parse(line.slice(14));
+        if (line.startsWith("OCODE_HOST_PAIRING_TOKEN ")) found.pairing = JSON.parse(line.slice(22));
       }
       if (found.host && found.pairing) { clearTimeout(timer); resolveReady(found); }
     });

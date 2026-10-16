@@ -121,9 +121,9 @@ async fn isolated_session_user_path_from_create_to_delete() {
     // Bash runs in the default command shell: PowerShell on Windows.
     let shell_id = crate::tools::shell::default_shell_id();
     let probe = if crate::tools::shell::dialect_for_id(shell_id) == Some("powershell") {
-        "(Get-Location).Path; Write-Output $env:PI_PORT"
+        "(Get-Location).Path; Write-Output $env:OCODE_PORT"
     } else {
-        "pwd; printf %s \"$PI_PORT\""
+        "pwd; printf %s \"$OCODE_PORT\""
     };
     let bash = crate::tools::execute_tool_with_path_access(
         Some(&root),
@@ -145,7 +145,7 @@ async fn isolated_session_user_path_from_create_to_delete() {
     .await;
     assert!(bash.ok, "{:?}", bash.content);
     let stdout = bash.content["stdout"].as_str().unwrap();
-    assert!(stdout.contains(&env_map["PI_PORT"]), "{stdout}");
+    assert!(stdout.contains(&env_map["OCODE_PORT"]), "{stdout}");
     assert_eq!(
         canonical(Path::new(stdout.lines().next().unwrap().trim())),
         canonical(&root)
@@ -416,7 +416,7 @@ async fn isolated_session_of(
 }
 
 fn session_branches(project: &Path) -> String {
-    git_cmd(project, &["branch", "--list", "pi-desktop/*"])
+    git_cmd(project, &["branch", "--list", "ocode/*"])
 }
 
 /// E2E-WORKTREE-isolated-session-lifecycle, Windows check: a path beyond 260

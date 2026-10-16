@@ -3,11 +3,11 @@ import {
   parseProviderImportPayload, parseProviderImportSummary,
   type ProviderCreateInput, type ProviderImportPayload, type ProviderImportSummary,
   type ProviderPublic, type RemoteHostSshMetadata,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type { SshTarget, SshTransport } from "./ssh-transport.js";
 import { sshTargetOf } from "./ssh-tunnel.js";
 
-const IMPORT_COMMAND = 'node "$HOME/.pi-desktop/pi-host/current/pi-host.js" provider-import';
+const IMPORT_COMMAND = 'node "$HOME/.ocode/ocode-host/current/ocode-host.js" provider-import';
 const OUTPUT_MAX_BYTES = 64 * 1024;
 function invalid(): Error {
   return Object.assign(new Error("Provider selection cannot be synced"), { errorCode: ErrorCodes.INVALID_ARGUMENT });
@@ -83,8 +83,8 @@ export async function importProvidersOverSsh(input: ImportOverSshInput): Promise
       const result = await transport.execWithInput(IMPORT_COMMAND, JSON.stringify(payload), { timeoutMs: 60_000, maxOutputBytes: OUTPUT_MAX_BYTES });
       if (result.code !== 0 || Buffer.byteLength(result.stdout) > OUTPUT_MAX_BYTES) throw failed();
       const line = result.stdout.trim();
-      if (!line.startsWith("PI_HOST_PROVIDERS ") || line.includes("\n")) throw failed();
-      const summary = parseProviderImportSummary(JSON.parse(line.slice("PI_HOST_PROVIDERS ".length)));
+      if (!line.startsWith("OCODE_HOST_PROVIDERS ") || line.includes("\n")) throw failed();
+      const summary = parseProviderImportSummary(JSON.parse(line.slice("OCODE_HOST_PROVIDERS ".length)));
       const ids = new Set(payload.providers.map((entry) => entry.sourceId));
       const entries = [...summary.imported, ...summary.skipped];
       if (entries.length !== ids.size || entries.some((entry) => !ids.has(entry.sourceId))

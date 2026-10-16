@@ -41,10 +41,17 @@ def _px(value: float) -> int:
 
 
 def _font(path: str, size: float, index: int = 0) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    try:
-        return ImageFont.truetype(path, _px(size), index=index)
-    except OSError:
-        return ImageFont.load_default()
+    candidates = [path]
+    if "Hiragino" in path:
+        candidates += ["C:/Windows/Fonts/msyh.ttc"]
+    else:
+        candidates += ["C:/Windows/Fonts/segoeui.ttf"]
+    for candidate in candidates:
+        try:
+            return ImageFont.truetype(candidate, _px(size), index=index if candidate == path else 0)
+        except OSError:
+            continue
+    return ImageFont.load_default(size=_px(size))
 
 
 def _center_text(
@@ -135,7 +142,7 @@ def _wordmark(base: Image.Image) -> None:
     zh_font = _font("/System/Library/Fonts/Hiragino Sans GB.ttc", 12, index=0)
 
     draw = ImageDraw.Draw(base)
-    title = "PI-Desktop"
+    title = "Ocode"
     x0, y0, x1, y1 = draw.textbbox((0, 0), title, font=title_font)
     gap = _px(10)
     cluster_w = mark_size + gap + (x1 - x0)

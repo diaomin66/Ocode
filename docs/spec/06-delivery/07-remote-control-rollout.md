@@ -65,7 +65,7 @@ Verification is layered and recorded separately:
 
 Published SSH bootstrap requires the matching release to contain the new Host
 bundle; a successful local bundle does not publish those release assets.
-See `apps/pi-host/README.md` for candidate build and local acceptance commands.
+See `apps/ocode-host/README.md` for candidate build and local acceptance commands.
 
 ## 2. Milestones
 
@@ -145,14 +145,14 @@ tested, and stay dead code until the full topology is ready:
   backends, every renderer call still hits the local handler byte-for-byte.
   Every subsystem has a `node --test` fixture that exercises it against a
   fake — or, for the RACP adapter, against the real in-memory harness in
-  `@pi-desktop/racp/test-harness`.
+  `@ocode/racp/test-harness`.
 - **R2b — Pairing, SSH bootstrap, terminal, and reverse tool relay.** The
   remaining bullets below. R2's exit criteria stay unchanged and land with
   R2b; R2a alone is not user-visible and does not attempt them.
 
 Deliverables:
 
-- the `pi-host` bundle: the module, the Node pi sidecar, and the platform's
+- the `ocode-host` bundle: the module, the Node pi sidecar, and the platform's
   host-core binary, versioned with the desktop, bound to loopback, downloaded
   from GitHub Releases by a bootstrap script the desktop uploads over SSH
   with the published SHA-256 verified before install, then started and paired
@@ -187,7 +187,7 @@ Design decisions (D375, recorded 2026-09-10):
    that require workspace or filesystem access are excluded.
 3. The work-panel terminal ships in this milestone as the `terminal/*`
    operations, running on the remote machine.
-4. `pi-host` is downloaded from GitHub Releases per platform at the desktop's
+4. `ocode-host` is downloaded from GitHub Releases per platform at the desktop's
    version by a bootstrap script the desktop uploads over SSH, with the
    published SHA-256 verified; a version mismatch is `PROTOCOL_MISMATCH`
    and the desktop offers to re-run the download. A machine without outbound
@@ -208,7 +208,7 @@ Exit criteria:
 3. Mode, model, and thinking-level changes on a remote session behave as
    locally, idle-only.
 4. The remote tool catalog contains no desktop plugin tool.
-5. A `pi-host` at another version is rejected and the update path is offered.
+5. A `ocode-host` at another version is rejected and the update path is offered.
 6. A desktop-configured MCP tool advertised for relay executes on the desktop
    during a remote turn, a workspace-requiring plugin tool is absent from the
    remote catalog, and closing the desktop mid-call fails the tool without
@@ -269,7 +269,7 @@ It is not a release gate for remote control.
 
 The RACP server calls the headless Agent Host module, which calls the same
 host and sidecar paths the renderer uses. It does not call the renderer,
-`host.proxy`, or Rust host-core from a network listener. The `pi-host` bundle
+`host.proxy`, or Rust host-core from a network listener. The `ocode-host` bundle
 runs the module and supervision on another machine without changing RACP.
 
 ### 3.2 Keep the Agent independent of clients
@@ -341,7 +341,7 @@ binding may choose its native status and serialization, but it must preserve:
 
 - the headless module inside Electron Main with the real sidecar and
   host-core supervision;
-- a `pi-host` bundle on a Linux test machine reached through an SSH port
+- a `ocode-host` bundle on a Linux test machine reached through an SSH port
   forward, including bootstrap, pairing, version mismatch, and re-pairing;
 - the desktop adapter rendering a remote session through the unchanged
   renderer;
@@ -358,7 +358,7 @@ binding may choose its native status and serialization, but it must preserve:
 ### 4.3 Security validation
 
 - invalid, expired, revoked, and wrong-Host device tokens;
-- non-loopback peers and non-loopback binds without TLS on a `pi-host`;
+- non-loopback peers and non-loopback binds without TLS on a `ocode-host`;
 - pairing token reuse and pairing over a non-SSH channel;
 - wrong role, wrong Session, wrong Host, and stale revision;
 - SSRF and arbitrary file/path attempts, including `workspace/read` outside
@@ -406,7 +406,7 @@ disconnected client does not affect Agent execution on either machine.
 Rollback MUST:
 
 - stop accepting new remote connections and stop the integration adapter;
-- leave a remote `pi-host` process running or stopped according to the
+- leave a remote `ocode-host` process running or stopped according to the
   user's choice, never deleting its transcripts;
 - leave local stdio, renderer, and MCP paths usable;
 - preserve completed local transcript data; and
@@ -424,7 +424,7 @@ The scheduled feature set is not production-ready until:
    milestones are signed off;
 3. a failure-injection run proves no duplicate execution after reconnect,
    including an SSH session drop;
-4. `pi-host` bundles are published to GitHub Releases with checksums for
+4. `ocode-host` bundles are published to GitHub Releases with checksums for
    every Linux platform the desktop's release pipeline publishes, and the
    version-mismatch and tampered-download paths are tested;
 5. the Host operational metrics are available; and
@@ -470,24 +470,24 @@ Recorded on the `feat/remote-agent-host` branch, 2026-09-10:
   server and client cores, the `ws` binding on loopback, and device-token
   pairing; handshake, authorization, idempotency, queue order, approvals,
   cursor replay, eviction, epoch change, slow clients, and reconnect without
-  duplicate execution are package tests. The `pi-host` bundle, the desktop
+  duplicate execution are package tests. The `ocode-host` bundle, the desktop
   adapter, and the SSH bootstrap have since started: the R2a desktop kernel
   (D449 / ADR 0286) brought the adapter and the bundle, and the SSH bootstrap
   followed in D453 / ADR 0292.
 - R2b partial (2026-09-19, D453 / ADR 0292): the desktop installs and pairs
-  a `pi-host` over the user's own `ssh` client with `BatchMode=yes`, so the
+  a `ocode-host` over the user's own `ssh` client with `BatchMode=yes`, so the
   user's configuration, agent, and jump hosts apply and no SSH secret reaches
-  the app. `remote/pi-host-release.ts` holds the pure release coordinates
+  the app. `remote/ocode-host-release.ts` holds the pure release coordinates
   (remote platform, desktop version, published SHA-256, refusal of unpublished
-  targets) and `remote/pi-host-bootstrap-script.ts` generates the single
+  targets) and `remote/ocode-host-bootstrap-script.ts` generates the single
   `umask 077` script that downloads, verifies, installs under the remote
   `$HOME`, restarts the host on loopback with `--pair`, and echoes
-  `PI_HOST_READY` / `PI_HOST_PAIRING_TOKEN`; `remote/ssh-transport.ts` is the
+  `OCODE_HOST_READY` / `OCODE_HOST_PAIRING_TOKEN`; `remote/ssh-transport.ts` is the
   injectable transport port and `remote/ssh-tunnel.ts` owns one durable
   `ssh -N -L` forward per host, re-established on every launch and adopted
   from the bootstrap so pairing opens exactly one tunnel. Records carry
   `metadata.transport = "ssh"` plus an SSH descriptor instead of a URL, and
-  `pi-desktop/remoteHost/bootstrap` joins `list` / `pair` / `remove`. The
+  `ocode/remoteHost/bootstrap` joins `list` / `pair` / `remove`. The
   terminal work-panel client, the reverse tool relay, and provider-configuration
   propagation over the SSH channel are not in this slice.
 
@@ -503,10 +503,10 @@ harness.
 D375 (2026-09-10) re-sequenced the milestones around recorded demand: R2 is
 the SSH-tunnel remote Host with the desktop as client, R3 is the outbound
 messaging integration, and the Gateway, browser, and gRPC milestones are
-unscheduled. It added the `pi-host` bundle, the desktop adapter rule, and
+unscheduled. It added the `ocode-host` bundle, the desktop adapter rule, and
 E2E-231 / E2E-232 as the acceptance targets. Its design-gate answers,
 recorded the same day, put the reverse tool relay and the terminal in R2 as
-one milestone, download `pi-host` from GitHub Releases, persist the turn
+one milestone, download `ocode-host` from GitHub Releases, persist the turn
 queue in host-core, default the remote approval lifetime to 30 minutes, make
 the paired-device exemption a Host policy, and fix the Gateway identity
 source to the PI account service.

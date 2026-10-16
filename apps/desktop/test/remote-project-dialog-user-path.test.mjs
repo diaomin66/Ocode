@@ -15,8 +15,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { ProjectCreateDialog } from "../../apps/desktop/src/components/ProjectCreateDialog";
 import { RemoteHostsPage } from "../../apps/desktop/src/components/settings/RemoteHostsPage";
 import { FilesTab } from "../../apps/desktop/src/components/workpanel/FilesTab";
@@ -35,7 +35,7 @@ let releaseCreate;
 let releaseOldFile;
 let savedGroup;
 const group = { id: "local-group", name: "My server app", primaryPath: "remote-project:local-group", roots: [{ id: "root", path: "remote-project:local-group", position: 0 }], remote: { hostKey: "h2", path: "/home/user/app" }, createdAt: "2026-10-11T00:00:00Z", updatedAt: "2026-10-11T00:00:00Z" };
-window.piDesktop = { platform: "darwin", channels: IPC, on() { return () => {}; },
+window.ocode = { platform: "darwin", channels: IPC, on() { return () => {}; },
  async invoke(channel, input) {
   calls.push({ channel, input });
   const data = await (async () => { switch (channel) {
@@ -193,8 +193,8 @@ test("remote host page opens a preselected remote project and creates a local pr
       outfile: join(temp, "renderer.js"), bundle: true, platform: "browser", format: "esm", jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "false" },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@ocode/i18n": join(root, "packages/i18n/src"),
+        "@ocode/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

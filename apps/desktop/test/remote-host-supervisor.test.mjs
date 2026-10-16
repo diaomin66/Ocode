@@ -12,14 +12,14 @@ register(pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")));
 const { buildRemoteHostSupervisorScript, parseRemoteHostReady, ensureRemoteHostReady } = await import("../electron/main/remote/remote-host-supervisor.ts");
 const VERSION = "0.15.1-beta.5";
 const ready = { hostId: "durable-host", host: "127.0.0.1", port: 45678, version: VERSION };
-const line = value => `PI_HOST_READY ${JSON.stringify(value)}\n`;
+const line = value => `OCODE_HOST_READY ${JSON.stringify(value)}\n`;
 
 test("readiness validates loopback, integral port, identity and version without leaking output", () => {
   assert.deepEqual(parseRemoteHostReady(line(ready), { version: `v${VERSION}`, expectedHostId: ready.hostId }), ready);
   for (const invalid of [{ host: "0.0.0.0" }, { port: 0 }, { port: 65536 }, { port: 1.5 }, { port: "42" }, { hostId: " " }, { version: "" }]) {
     assert.throws(() => parseRemoteHostReady(line({ ...ready, ...invalid }), { version: VERSION }), { errorCode: "HOST_BOOTSTRAP_FAILED" });
   }
-  for (const output of ["", "PI_HOST_READY {", line(ready) + line(ready), line(ready) + "PI_HOST_PAIRING_TOKEN secret"]) {
+  for (const output of ["", "OCODE_HOST_READY {", line(ready) + line(ready), line(ready) + "OCODE_HOST_PAIRING_TOKEN secret"]) {
     assert.throws(() => parseRemoteHostReady(output, { version: VERSION }), error => !error.message.includes("secret"));
   }
   assert.throws(() => parseRemoteHostReady(line(ready), { version: "other" }), { errorCode: "HOST_VERSION_MISMATCH", retriable: false });
@@ -41,13 +41,13 @@ test("supervisor uses bounded stdin execution and refuses nonzero status", async
 
 async function fixture(t, { legacy = false } = {}) {
   const home = await mkdtemp(join(tmpdir(), "supervisor-"));
-  const base = join(home, ".pi-desktop/pi-host");
+  const base = join(home, ".ocode/ocode-host");
   const work = join(base, ".bootstrap");
   await mkdir(join(base, "current/bin"), { recursive: true });
   await mkdir(work);
   const credentials = join(home, "credentials");
   await writeFile(credentials, "durable-device-token");
-  const entry = join(base, "current/pi-host.js");
+  const entry = join(base, "current/ocode-host.js");
   await writeFile(entry, `const fs = require('node:fs');
 const net = require('node:net');
 if (process.argv.slice(2).join(' ') !== '--port 0') process.exit(2);
@@ -55,11 +55,11 @@ let inheritedLock = false;
 try { inheritedLock = fs.readlinkSync('/proc/self/fd/9').endsWith('/.deploy.lock'); } catch {}
 if (inheritedLock) process.exit(3);
 const server = net.createServer();
-server.listen(0, '127.0.0.1', () => console.log('PI_HOST_READY ' + JSON.stringify({ hostId: 'durable-host', host: '127.0.0.1', port: server.address().port, version: '${VERSION}' })));
+server.listen(0, '127.0.0.1', () => console.log('OCODE_HOST_READY ' + JSON.stringify({ hostId: 'durable-host', host: '127.0.0.1', port: server.address().port, version: '${VERSION}' })));
 `);
   if (!legacy) await symlink(process.execPath, join(base, "current/bin/node"));
   t.after(async () => {
-    const pid = Number(await readFile(join(work, "pi-host.pid"), "utf8").catch(() => "0"));
+    const pid = Number(await readFile(join(work, "ocode-host.pid"), "utf8").catch(() => "0"));
     if (pid > 0 && pid !== 99999999 && pid !== process.pid) { try { process.kill(pid); } catch {} }
     await rm(home, { recursive: true, force: true });
   });
@@ -77,21 +77,21 @@ server.listen(0, '127.0.0.1', () => console.log('PI_HOST_READY ' + JSON.stringif
 
 test("stopped installed Host starts at a fresh port, then running reuse preserves PID and credentials", async t => {
   const f = await fixture(t);
-  await writeFile(join(f.work, "pi-host.pid"), "99999999\n");
-  await writeFile(join(f.work, "pi-host.log"), line(ready) + "PI_HOST_PAIRING_TOKEN historic-secret\n");
+  await writeFile(join(f.work, "ocode-host.pid"), "99999999\n");
+  await writeFile(join(f.work, "ocode-host.log"), line(ready) + "OCODE_HOST_PAIRING_TOKEN historic-secret\n");
   const first = await f.run();
   assert.equal(first.code, 0, first.stderr);
   const live = parseRemoteHostReady(first.stdout, { version: VERSION });
   assert.notEqual(live.port, ready.port);
-  const pid = await readFile(join(f.work, "pi-host.pid"), "utf8");
+  const pid = await readFile(join(f.work, "ocode-host.pid"), "utf8");
   // Simulate a bootstrap log that still contains its original pairing token.
-  await writeFile(join(f.work, "pi-host.log"), first.stdout + "PI_HOST_PAIRING_TOKEN historic-secret\n");
+  await writeFile(join(f.work, "ocode-host.log"), first.stdout + "OCODE_HOST_PAIRING_TOKEN historic-secret\n");
   const second = await f.run();
   assert.equal(second.code, 0, second.stderr);
   assert.equal(second.stdout, first.stdout);
-  assert.equal(await readFile(join(f.work, "pi-host.pid"), "utf8"), pid);
+  assert.equal(await readFile(join(f.work, "ocode-host.pid"), "utf8"), pid);
   assert.equal(await readFile(f.credentials, "utf8"), "durable-device-token");
-  assert.ok((await readFile(join(f.work, "pi-host.log"), "utf8")).includes("historic-secret"));
+  assert.ok((await readFile(join(f.work, "ocode-host.log"), "utf8")).includes("historic-secret"));
 });
 
 test("legacy installed bundle can use system Node without installing", async t => {
@@ -103,17 +103,17 @@ test("legacy installed bundle can use system Node without installing", async t =
 
 test("unrelated live PID is neither killed nor mistaken for an installed Host", async t => {
   const f = await fixture(t);
-  await writeFile(join(f.work, "pi-host.pid"), String(process.pid));
-  await writeFile(join(f.work, "pi-host.log"), line(ready));
+  await writeFile(join(f.work, "ocode-host.pid"), String(process.pid));
+  await writeFile(join(f.work, "ocode-host.log"), line(ready));
   const result = await f.run();
   assert.equal(result.code, 1);
   assert.match(result.stderr, /host-pid-mismatch/);
-  assert.equal(await readFile(join(f.work, "pi-host.log"), "utf8"), line(ready));
+  assert.equal(await readFile(join(f.work, "ocode-host.log"), "utf8"), line(ready));
 });
 
 test("symlinked stale log is rejected without truncating its target", async t => {
   const f = await fixture(t);
-  await symlink(f.credentials, join(f.work, "pi-host.log"));
+  await symlink(f.credentials, join(f.work, "ocode-host.log"));
   const result = await f.run();
   assert.equal(result.code, 1);
   assert.match(result.stderr, /unsafe-state-file/);

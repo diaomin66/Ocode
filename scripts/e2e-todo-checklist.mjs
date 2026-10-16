@@ -19,8 +19,8 @@ try {
   await build({ entryPoints: [join(root, "scripts/e2e/todo-checklist.tsx")],
     outfile: join(temp, "renderer.js"), bundle: true, platform: "browser", format: "esm", jsx: "automatic",
     define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "false" },
-    alias: { "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
-      "@pi-desktop/shared": join(root, "packages/shared/src/index.ts"),
+    alias: { "@ocode/i18n": join(root, "packages/i18n/src/index.ts"),
+      "@ocode/shared": join(root, "packages/shared/src/index.ts"),
       react: join(root, "apps/desktop/node_modules/react"),
       "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
       i18next: join(root, "apps/desktop/node_modules/i18next"),
@@ -35,7 +35,7 @@ try {
   await writeFile(join(temp, "index.html"), `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:">${css.map((path) => `<link rel="stylesheet" href="${path}">`).join("")}</head><body><div id="root"></div><script type="module" src="renderer.js"></script></body></html>`);
   await writeFile(join(temp, "preload.cjs"), `
 const { contextBridge, ipcRenderer } = require("electron");
-contextBridge.exposeInMainWorld("piDesktop", {
+contextBridge.exposeInMainWorld("ocode", {
   platform: process.platform,
   invoke: (channel, input) => ipcRenderer.invoke("fixture:invoke", channel, input),
   on: (channel, listener) => {

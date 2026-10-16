@@ -1,5 +1,5 @@
 {
-  "name": "@pi-desktop/plugin-devkit",
+  "name": "@ocode/plugin-devkit",
   "version": "0.21.0-beta.1",
   "private": true,
   "type": "module",
@@ -12,6 +12,7 @@
     }
   },
   "bin": {
+    "ocode-plugin": "./dist/cli.js",
     "pi-plugin": "./dist/cli.js"
   },
   "scripts": {
@@ -21,7 +22,7 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@pi-desktop/plugin-sdk": "workspace:*"
+    "@ocode/plugin-sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

@@ -1,4 +1,4 @@
-import type { RemoteHostSummary, SessionSummary } from "@pi-desktop/shared";
+import type { RemoteHostSummary, SessionSummary } from "@ocode/shared";
 import { api } from "./api";
 import { safeSessionSummary } from "./remote-session-safety";
 

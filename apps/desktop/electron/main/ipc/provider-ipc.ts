@@ -6,7 +6,7 @@ import {
   type ModelBinding,
   type ProviderReorderInput,
   type OAuthRespondInput,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { OAUTH_AUTH_KIND, type VendorOAuth } from "../oauth";
 import { probeProviderEndpoint } from "../model-discovery";
 import {

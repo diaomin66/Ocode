@@ -51,7 +51,7 @@ const PLUGIN = `
       name: "probe", description: "Probe invocation isolation", schema: { type: "object" },
       execute: async (args, ctx) => {
         ctx.signal.addEventListener("abort", () => aborted.add(ctx.sessionId), { once: true });
-        await pi.desktop.invoke({ operation: "session/get", args: [ctx.sessionId] });
+        await ocode.desktop.invoke({ operation: "session/get", args: [ctx.sessionId] });
         if (args.reveal) await pi.browser.reveal();
         if (args.wait) {
           return new Promise((resolve) => {
@@ -61,13 +61,13 @@ const PLUGIN = `
           });
         }
         const context = await pi.session.getLlmContext();
-        const created = await pi.desktop.invoke({ operation: "session/create", args: [{ inheritPermissionFromSessionId: ctx.sessionId }] });
+        const created = await ocode.desktop.invoke({ operation: "session/create", args: [{ inheritPermissionFromSessionId: ctx.sessionId }] });
         return { sessionId: ctx.sessionId, turnId: ctx.turnId, hasSignal: !!ctx.signal, context, created };
       },
     }),
     onPanelInvoke: async (channel, payload) => {
       if (channel === "probe.aborted") return aborted.has(payload.sessionId);
-      if (channel === "probe.desktop") return pi.desktop.invoke({ operation: "session/get", args: ["panel"] });
+      if (channel === "probe.desktop") return ocode.desktop.invoke({ operation: "session/get", args: ["panel"] });
       try { return await pi.session.getLlmContext(); }
       catch (error) { return { code: error.code }; }
     },

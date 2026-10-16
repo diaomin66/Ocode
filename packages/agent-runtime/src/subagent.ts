@@ -45,7 +45,7 @@ import {
   type SubagentRunStatus as SharedSubagentRunStatus,
   type SubagentThinkingLevel,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { classifyAgentError } from "./agent-errors.js";
 import { readLocalRequestErrorDetails } from "./local-request-errors.js";
 import { withProviderFetchFailure } from "./provider-transport-recovery.js";
@@ -200,7 +200,7 @@ export function composeSubagentSystemPrompt(options: {
       ? resolved.join(", ")
       : subagentToolsLabel(definition);
   const framing = [
-    `You are the \"${definition.name}\" subagent inside PI-Desktop, working on one task delegated by the main agent.`,
+    `You are the \"${definition.name}\" subagent inside Ocode, working on one task delegated by the main agent.`,
     `You cannot see the user, ask questions, or delegate further. Finish the task with the tools you have: ${toolList}.`,
     subagentCanMutate(definition, resolved)
       ? "You may change files, but only the ones the task is about; leave everything else untouched. If the final report would exceed ~8,000 characters, write the full report to a file yourself and make the final message a compact summary plus the file path."

@@ -115,8 +115,8 @@ async fn a_writing_subagent_starts_from_the_parents_current_files() {
         .collect();
     let parent: std::collections::HashMap<_, _> =
         tool_env(&st.db, &env.session, None).into_iter().collect();
-    assert_ne!(own["PI_PORT"], parent["PI_PORT"]);
-    assert_eq!(PathBuf::from(&own["PI_WORKTREE_ROOT"]), root);
+    assert_ne!(own["OCODE_PORT"], parent["OCODE_PORT"]);
+    assert_eq!(PathBuf::from(&own["OCODE_WORKTREE_ROOT"]), root);
 }
 
 /// AC10 + AC11: two writing subagents edit one file in parallel without

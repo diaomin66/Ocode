@@ -77,11 +77,11 @@ let resolveFails = false;
 let pluginOperationFails = false;
 
 const workPanelTabs = loadModule("../src/lib/work-panel-tabs.ts", {});
-const shared = await import("@pi-desktop/shared");
+const shared = await import("@ocode/shared");
 const { useOpenPreviewTarget } = loadModule("../src/hooks/use-preview-target.ts", {
   react: React,
   "react-i18next": { useTranslation: () => ({ t: (key, values) => `${key}:${values?.name ?? ""}` }) },
-  "@pi-desktop/shared": shared,
+  "@ocode/shared": shared,
   "../stores/app-store": { useAppStore },
   "../lib/api": {
     api: {
@@ -108,7 +108,7 @@ const { useOpenPreviewTarget } = loadModule("../src/hooks/use-preview-target.ts"
     },
   },
   "../lib/chat-links": loadModule("../src/lib/chat-links.ts", {
-    "@pi-desktop/shared": await import("@pi-desktop/shared"),
+    "@ocode/shared": await import("@ocode/shared"),
     "./chat-link-scanner.ts": loadModule("../src/lib/chat-link-scanner.ts", {
       "./render-diagnostics.ts": { beginRenderDiagnostic: () => () => {} },
     }),

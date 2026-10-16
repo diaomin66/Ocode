@@ -3,7 +3,7 @@
 - Status: Accepted for model import semantics; original Settings placement
   superseded by ADR 0319 / D645
 - Date: 2026-09-08
-- Deciders: PI-Desktop core
+- Deciders: Ocode core
 - Related: D007, D342, ADR 0012,
   ADR 0188,
   `04-ux/06-settings-ia.md`, `04-ux/08-component-spec.md` §18.5,
@@ -14,9 +14,9 @@
 At the time this decision was recorded, Settings → Import scanned Claude Code,
 Codex, OpenCode, and Pi session stores. The same tools keep provider URLs,
 model ids, and often API keys in well-known files. Users who switch to
-PI-Desktop otherwise retype those endpoints on Settings → Models.
+Ocode otherwise retype those endpoints on Settings → Models.
 
-D007 forbids auto-import of `~/.pi` so PI-Desktop owns `~/.pi-desktop`. That
+D007 forbids auto-import of `~/.pi` so Ocode owns `~/.ocode`. That
 must stay true for model configuration: a scan is an explicit action, and
 nothing is written until Import selected.
 
@@ -24,7 +24,7 @@ Secrets cannot cross the renderer. Session import already keeps `filePath`
 in the main-process scan cache; model import must keep keys the same way.
 
 OAuth/subscription grants from those tools (Codex ChatGPT login, Claude
-subscription, OpenCode `type: oauth`) are not PI-Desktop vendor-account
+subscription, OpenCode `type: oauth`) are not Ocode vendor-account
 credentials. Copying refresh tokens would be the wrong security boundary.
 
 ## Decision
@@ -49,7 +49,7 @@ credentials. Copying refresh tokens would be the wrong security boundary.
      credential is not listed twice; a different credential remains visible.
 
 3. **IPC** (Electron only, no host protocol bump):
-   `pi-desktop/modelConfig/importScan` returns public drafts
+   `ocode/modelConfig/importScan` returns public drafts
    (`source`, `externalId`, `name`, `baseUrl`, `apiStyle`, `modelIds`,
    `hasSecret`). `importRun` looks the selection up in the latest scan
    cache and calls host `providers.create`.
@@ -76,7 +76,7 @@ credentials. Copying refresh tokens would be the wrong security boundary.
 
 - Switching from another local agent can bring both transcripts and the
   models those transcripts used, without pasting keys into Settings.
-- PI-Desktop still does not silently ingest `~/.pi`.
+- Ocode still does not silently ingest `~/.pi`.
 - Users with only a ChatGPT/Claude subscription still sign in through
   Vendor accounts; import cannot impersonate that grant.
 

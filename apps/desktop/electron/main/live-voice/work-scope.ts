@@ -1,4 +1,4 @@
-import { sessionWorkspaceIdentity } from "@pi-desktop/host-runtime";
+import { sessionWorkspaceIdentity } from "@ocode/host-runtime";
 
 type WorkSessionSummary = {
   id?: unknown;

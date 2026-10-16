@@ -6,7 +6,7 @@ import type {
   ConfigSyncPendingApproval,
   ConfigSyncProgress,
   ConfigSyncState,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { api } from "../../lib/api";
 import { Badge, Button, PasswordInput, SettingsToggle } from "../ui";
 import { IconCloudDown, IconRefresh, IconShield } from "../icons";

@@ -11,13 +11,13 @@ import {
   type ShortcutPlatform,
   type ThinkingLevel,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type {
   PluginCompleteResult,
   PluginNativeNotificationInput,
   PluginNativeNotificationResult,
   PluginNotificationPermission,
-} from "@pi-desktop/plugin-sdk";
+} from "@ocode/plugin-sdk";
 import {
   asPluginThinkingLevel,
   listReadyPluginModels,
@@ -29,7 +29,7 @@ import type { LegacyPromptEnhancementSettings } from "../plugin-prompt-enhanceme
 import {
   completeOneShot,
   type RuntimeProviderConfig,
-} from "@pi-desktop/agent-runtime";
+} from "@ocode/agent-runtime";
 import { createFsConsentService } from "../plugin-fs-consent";
 import { pluginWorkspaceInfo, projectFolderPaths } from "../workspace-roots";
 import { createDesktopConsentService } from "../plugin-desktop-consent";
@@ -346,7 +346,7 @@ export function createPluginServices({
       const detail = await getHost()!.call<{
         session?: {
           messages?: UiMessage[];
-          compaction?: import("@pi-desktop/shared").ContextCompactionRecord;
+          compaction?: import("@ocode/shared").ContextCompactionRecord;
           providerId?: string;
           modelId?: string;
           thinkingLevel?: string;

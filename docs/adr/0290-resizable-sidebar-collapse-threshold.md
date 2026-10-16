@@ -43,7 +43,7 @@ fold the sidebar rather than leave a cramped strip.
    threshold. Preview mode (MainChat unmounted) caps the sidebar so the panel
    keeps at least its 244px minimum.
 4. Renderer only. No IPC, native-window bounds, host protocol, or storage
-   schema change. The existing `pi.desktop.sidebarWidth` preference is the
+   schema change. The existing `ocode.desktop.sidebarWidth` preference is the
    persistence key.
 
 ## Consequences

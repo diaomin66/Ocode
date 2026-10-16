@@ -1,14 +1,14 @@
 /**
  * Renderer-side IPC wrapper for voice operations.
- * Uses window.piDesktop bridge exposed by the preload script.
+ * Uses window.ocode bridge exposed by the preload script.
  * All invoke calls return Result<T>; unwrap extracts .data or throws.
  */
 
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@ocode/shared";
 
 async function invoke<T = unknown>(channel: string, ...args: unknown[]): Promise<T> {
-  const bridge = window.piDesktop;
-  if (!bridge) throw new Error("piDesktop bridge unavailable");
+  const bridge = window.ocode;
+  if (!bridge) throw new Error("ocode bridge unavailable");
   const result = await bridge.invoke<T>(channel, ...args);
   if (!(result as any).ok) {
     throw new Error((result as any).message ?? "IPC call failed");
@@ -46,13 +46,13 @@ export const voiceIpc = {
     invoke<boolean>(IPC.invoke.voiceRequestPermission),
 
   onStateChanged: (callback: (state: unknown) => void) => {
-    const bridge = window.piDesktop;
+    const bridge = window.ocode;
     if (!bridge) return () => {};
     return bridge.on(IPC.event.voiceStateChanged, callback);
   },
 
   onModelProgress: (callback: (data: { modelId: string; progress: number }) => void) => {
-    const bridge = window.piDesktop;
+    const bridge = window.ocode;
     if (!bridge) return () => {};
     return bridge.on(IPC.event.voiceModelProgress, callback as (...args: unknown[]) => void);
   },

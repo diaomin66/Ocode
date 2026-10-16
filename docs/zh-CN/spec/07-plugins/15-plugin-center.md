@@ -33,7 +33,7 @@
 | 分发镜像 | 插件中心 | 分发仓库的 CNB Git 镜像 |
 | 安装决定 | 用户 | 桌面端权限审查 |
 
-插件源码绝不会被复制进 PI-Desktop 拥有的 Git 仓库。中心为构建和审查证据保留固定
+插件源码绝不会被复制进 Ocode 拥有的 Git 仓库。中心为构建和审查证据保留固定
 commit 的不可变快照；该快照是存储，不是 Git 镜像，也不对外发布。
 
 ## 3. 仓库划分与制品托管
@@ -275,7 +275,7 @@ evaluator 失败、证据缺失或依赖服务不可用时，只能进入 `needs
 1. 提交把 release 标记为已发布并写入制品摘要的数据库事务。
 2. 发出 outbox 事件。
 3. 在 `pi-plugin-center` 写入 registry 条目，并据此重建目录。
-4. 把安装包与重建后的 `catalog.json` 以**同一个** commit 提交进 `pi-desktop-plugins`。
+4. 把安装包与重建后的 `catalog.json` 以**同一个** commit 提交进 `ocode-plugins`。
 5. 由 CNB Git 镜像复制该 commit。
 
 第 4 步刻意合成一个 commit：否则在两个 commit 之间抓取目录的客户端，会看到一条
@@ -399,7 +399,7 @@ policy evaluator、签名密钥、目录版次与回滚、客户端签名校验�
 
 ## 14. 明确不做
 
-- 把发布者源码复制进 PI-Desktop 的仓库。
+- 把发布者源码复制进 Ocode 的仓库。
 - 把个人访问令牌当作发布凭证。
 - 在 API 进程中执行插件代码、安装依赖或运行测试。
 - 让前端、普通管理路由或模型输出把状态置为 `published`。

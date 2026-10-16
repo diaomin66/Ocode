@@ -64,7 +64,7 @@ export async function bundleAgentRuntime(outputDir = join(packageRoot, "dist-bun
       outdir: stagingDir,
       entryNames: "sidecar",
       chunkNames: "chunks/[name]-[hash]",
-      define: { PI_BUNDLED_NODE: "true" },
+      define: { OCODE_BUNDLED_NODE: "true" },
       banner: { js: banner },
     });
 

@@ -21,7 +21,7 @@ import {
   type SkillCatalogEntry,
   type SkillMarketSource,
   type SourcedSkillEntry,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 export type CatalogRequest = (
   url: string,

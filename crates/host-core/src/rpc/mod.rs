@@ -172,7 +172,7 @@ const MAX_STDIN_LINE_BYTES: u64 = 64 * 1024 * 1024;
 
 fn spawn_stdin_reader(tx: mpsc::UnboundedSender<StdinEvent>) -> io::Result<thread::JoinHandle<()>> {
     thread::Builder::new()
-        .name("pi-host-stdin".into())
+        .name("ocode-host-stdin".into())
         .spawn(move || {
             let stdin = io::stdin();
             let mut reader = StdBufReader::new(stdin.lock());
@@ -272,7 +272,7 @@ fn spawn_stdout_writer(
     done_tx: oneshot::Sender<Option<String>>,
 ) -> io::Result<thread::JoinHandle<()>> {
     thread::Builder::new()
-        .name("pi-host-stdout".into())
+        .name("ocode-host-stdout".into())
         .spawn(move || {
             let stdout = io::stdout();
             let mut writer = stdout.lock();
@@ -307,7 +307,7 @@ pub async fn serve(state: Arc<Mutex<AppState>>) -> Result<()> {
         .map_err(|error| anyhow!("host stdout writer unavailable: {error}"))?;
     // Electron's RegisterHotKey cannot claim Windows' Alt+Space system-menu
     // chord. Keep the native fallback beside the host transport so it remains
-    // active even when PI-Desktop is unfocused.
+    // active even when Ocode is unfocused.
     crate::keyboard::start(tx.clone());
     // Fan background-task state changes out to the renderer. The supervisors
     // bump a static counter (no AppState lock involved); this loop watches it
@@ -1913,7 +1913,7 @@ async fn handle_request(
             Ok(json!({ "enabled": enabled }))
         }
         "app.getVersion" => Ok(json!({
-            "name": "pi-desktop-host-core",
+            "name": "ocode-host-core",
             "version": HOST_VERSION,
             "protocolVersion": PROTOCOL_VERSION
         })),
@@ -5458,14 +5458,14 @@ mod tests {
         let disabled = handle_request(
             state.clone(),
             "skills.setBuiltinEnabled",
-            json!({ "id": "pi-desktop/imagegen", "enabled": false }),
+            json!({ "id": "ocode/imagegen", "enabled": false }),
             tx.clone(),
         )
         .await
         .unwrap();
         assert_eq!(
             disabled,
-            json!({ "id": "pi-desktop/imagegen", "enabled": false })
+            json!({ "id": "ocode/imagegen", "enabled": false })
         );
 
         let current = handle_request(
@@ -5476,19 +5476,19 @@ mod tests {
         )
         .await
         .unwrap();
-        assert_eq!(current, json!({ "disabled": ["pi-desktop/imagegen"] }));
+        assert_eq!(current, json!({ "disabled": ["ocode/imagegen"] }));
 
         let enabled = handle_request(
             state.clone(),
             "skills.setBuiltinEnabled",
-            json!({ "id": "pi-desktop/imagegen", "enabled": true }),
+            json!({ "id": "ocode/imagegen", "enabled": true }),
             tx,
         )
         .await
         .unwrap();
         assert_eq!(
             enabled,
-            json!({ "id": "pi-desktop/imagegen", "enabled": true })
+            json!({ "id": "ocode/imagegen", "enabled": true })
         );
         let current = handle_request(
             state,

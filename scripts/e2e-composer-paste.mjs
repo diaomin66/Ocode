@@ -30,7 +30,7 @@ try {
       "process.env.NODE_ENV": '"production"',
     },
     alias: {
-      "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
+      "@ocode/i18n": join(root, "packages/i18n/src/index.ts"),
       react: join(root, "apps/desktop/node_modules/react"),
       "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
     },
@@ -92,7 +92,7 @@ const history = [];
 const opened = [];
 let completeOpens;
 const opensDone = new Promise(resolve => { completeOpens = resolve; });
-ipcMain.handle("pi-desktop/composer/pasteFiles", async (_event, input) => {
+ipcMain.handle("ocode/composer/pasteFiles", async (_event, input) => {
   const files = await saveComposerPasteFiles(__dirname, input.sessionId, input.files);
   for (let i = 0; i < files.length; i++) {
     assert.deepEqual(await fs.readFile(files[i].path), Buffer.from(input.files[i].data));
@@ -109,17 +109,17 @@ ipcMain.handle("pi-desktop/composer/pasteFiles", async (_event, input) => {
   });
   return { ok: true, data: { files } };
 });
-ipcMain.handle("pi-desktop/fs/readImageDataUrl", async (_event, input) => ({
+ipcMain.handle("ocode/fs/readImageDataUrl", async (_event, input) => ({
   ok: true,
   data: await readOpenableImage(input.ref, null, [path.join(__dirname, "scratch")], input.mimeType),
 }));
-ipcMain.handle("pi-desktop/fs/read", async (_event, input) => ({
+ipcMain.handle("ocode/fs/read", async (_event, input) => ({
   ok: true,
   data: input.path === "untrusted.sh"
     ? { kind: "tooLarge", size: 512 * 1024 + 1 }
     : await readOpenableFile(input.path, null, [path.join(__dirname, "scratch"), path.join(__dirname, "attachments")], input.mimeType),
 }));
-ipcMain.handle("pi-desktop/fs/resolveRef", async (_event, input) => {
+ipcMain.handle("ocode/fs/resolveRef", async (_event, input) => {
   const scratchRoot = path.join(__dirname, "scratch") + path.sep;
   if (input.ref.startsWith(scratchRoot)) {
     return { ok: true, data: { match: {
@@ -134,7 +134,7 @@ ipcMain.handle("pi-desktop/fs/resolveRef", async (_event, input) => {
     absolutePath: path.join(__dirname, "attachments", hash), matchedBy: "exact-relative",
   } } };
 });
-ipcMain.handle("pi-desktop/fs/open", async (_event, input) => {
+ipcMain.handle("ocode/fs/open", async (_event, input) => {
   const target = await resolveRealOpenablePath(input.path, null, [path.join(__dirname, "scratch"), path.join(__dirname, "attachments")]);
   assert(target, "host rejected the MP4 attachment path");
   const openPath = await openableMp4Path(__dirname, target, input.mimeType);
@@ -142,7 +142,7 @@ ipcMain.handle("pi-desktop/fs/open", async (_event, input) => {
   if (opened.length === 3) completeOpens();
   return { ok: true, data: { ok: true } };
 });
-ipcMain.handle("pi-desktop/clipboard/recordPaste", (_event, input) => {
+ipcMain.handle("ocode/clipboard/recordPaste", (_event, input) => {
   history.push(input.text);
   return { ok: true, data: null };
 });
@@ -154,15 +154,15 @@ app.whenReady().then(async () => {
         sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false,
       } });
       window.webContents.on("console-message", (event) => {
-        if (!event.message.startsWith("PI_PREVIEW_KEY:")) return;
-        const key = event.message.slice("PI_PREVIEW_KEY:".length);
+        if (!event.message.startsWith("OCODE_PREVIEW_KEY:")) return;
+        const key = event.message.slice("OCODE_PREVIEW_KEY:".length);
         assert(["Escape", "Tab", "ArrowUp", "ArrowDown", "Enter"].includes(key));
         const keyCode = key === "ArrowUp" ? "Up" : key === "ArrowDown" ? "Down" : key;
         window.webContents.sendInputEvent({ type: "keyDown", keyCode });
         window.webContents.sendInputEvent({ type: "keyUp", keyCode });
       });
       await window.loadFile(path.join(__dirname, "index.html"));
-      await window.webContents.executeJavaScript('globalThis.composerPreviewPressKey = key => new Promise(resolve => { document.addEventListener("keyup", () => requestAnimationFrame(resolve), { once: true }); console.log("PI_PREVIEW_KEY:" + key); }); void 0');
+      await window.webContents.executeJavaScript('globalThis.composerPreviewPressKey = key => new Promise(resolve => { document.addEventListener("keyup", () => requestAnimationFrame(resolve), { once: true }); console.log("OCODE_PREVIEW_KEY:" + key); }); void 0');
       const result = await window.webContents.executeJavaScript('globalThis.composerHistoryProbe("verify")');
       assert.equal(result.ok, true, JSON.stringify(result));
       console.log("COMPOSER_HISTORY_RESTART " + JSON.stringify(result));
@@ -188,32 +188,32 @@ app.whenReady().then(async () => {
     const { nodeId } = await window.webContents.debugger.sendCommand("DOM.querySelector", { nodeId: root.nodeId, selector: "#native-files" });
     await window.webContents.debugger.sendCommand("DOM.setFileInputFiles", { nodeId, files: [path.join(__dirname, "native-image.png"), path.join(__dirname, "native notes.txt")] });
     window.webContents.on("console-message", async (event) => {
-      if (!event.message.startsWith("PI_PREVIEW_KEY:")) return;
-      const key = event.message.slice("PI_PREVIEW_KEY:".length);
+      if (!event.message.startsWith("OCODE_PREVIEW_KEY:")) return;
+      const key = event.message.slice("OCODE_PREVIEW_KEY:".length);
       assert(["Escape", "Tab", "ArrowUp", "ArrowDown", "Enter"].includes(key));
       const keyCode = key === "ArrowUp" ? "Up" : key === "ArrowDown" ? "Down" : key;
       window.webContents.sendInputEvent({ type: "keyDown", keyCode });
       window.webContents.sendInputEvent({ type: "keyUp", keyCode });
     });
-    await window.webContents.executeJavaScript('globalThis.composerPreviewPressKey = key => new Promise(resolve => { document.addEventListener("keyup", () => requestAnimationFrame(resolve), { once: true }); console.log("PI_PREVIEW_KEY:" + key); }); void 0');
-    if (process.env.PI_COMPOSER_PREVIEW_SCREENSHOT) {
+    await window.webContents.executeJavaScript('globalThis.composerPreviewPressKey = key => new Promise(resolve => { document.addEventListener("keyup", () => requestAnimationFrame(resolve), { once: true }); console.log("OCODE_PREVIEW_KEY:" + key); }); void 0');
+    if (process.env.OCODE_COMPOSER_PREVIEW_SCREENSHOT) {
       window.webContents.on("console-message", async (event) => {
-        if (event.message !== "PI_PREVIEW_CAPTURE") return;
-        await fs.writeFile(process.env.PI_COMPOSER_PREVIEW_SCREENSHOT, (await window.webContents.capturePage()).toPNG());
+        if (event.message !== "OCODE_PREVIEW_CAPTURE") return;
+        await fs.writeFile(process.env.OCODE_COMPOSER_PREVIEW_SCREENSHOT, (await window.webContents.capturePage()).toPNG());
         await window.webContents.executeJavaScript("globalThis.composerPreviewCaptureDone()");
       });
-      await window.webContents.executeJavaScript('globalThis.composerPreviewCapture = () => new Promise(resolve => { globalThis.composerPreviewCaptureDone = resolve; console.log("PI_PREVIEW_CAPTURE"); }); void 0');
+      await window.webContents.executeJavaScript('globalThis.composerPreviewCapture = () => new Promise(resolve => { globalThis.composerPreviewCaptureDone = resolve; console.log("OCODE_PREVIEW_CAPTURE"); }); void 0');
     }
     window.webContents.on("console-message", async (event) => {
-      if (!event.message.startsWith("PI_PREVIEW_POINTER:")) return;
-      const input = JSON.parse(event.message.slice("PI_PREVIEW_POINTER:".length));
+      if (!event.message.startsWith("OCODE_PREVIEW_POINTER:")) return;
+      const input = JSON.parse(event.message.slice("OCODE_PREVIEW_POINTER:".length));
       assert(["mousePressed", "mouseMoved", "mouseReleased"].includes(input.type));
       await window.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
         ...input, button: "left", buttons: input.type === "mouseReleased" ? 0 : 1, clickCount: 1,
       });
       await window.webContents.executeJavaScript("globalThis.composerPreviewPointerDone()");
     });
-    await window.webContents.executeJavaScript('globalThis.composerPreviewPointer = input => new Promise(resolve => { globalThis.composerPreviewPointerDone = resolve; console.log("PI_PREVIEW_POINTER:" + JSON.stringify(input)); }); void 0');
+    await window.webContents.executeJavaScript('globalThis.composerPreviewPointer = input => new Promise(resolve => { globalThis.composerPreviewPointerDone = resolve; console.log("OCODE_PREVIEW_POINTER:" + JSON.stringify(input)); }); void 0');
     const result = await window.webContents.executeJavaScript("globalThis.composerPasteProbe()");
     await opensDone;
     assert.deepEqual(opened.map(path.extname), [".mp4", ".mp4", ".mp4"]);

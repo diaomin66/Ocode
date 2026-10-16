@@ -7,7 +7,7 @@ import {
   type ShortcutPlatform,
   type SessionThinkingLevel,
   type PluginComposerTransformMeta,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type { AppState } from "../../../stores/app-store";
 import { ComposerPermissionPicker } from "./ComposerPermissionPicker";
 import { ContextUsageInspector } from "../../../components/ContextUsageInspector";
@@ -108,7 +108,7 @@ export function ComposerToolbar({
   workSessionId,
   workSessionLabel,
 }: ComposerToolbarProps) {
-  const platform = (window.piDesktop?.platform ?? "darwin") as ShortcutPlatform;
+  const platform = (window.ocode?.platform ?? "darwin") as ShortcutPlatform;
   const steeringShortcut = keybindingDisplayParts("Alt+Enter", platform).join("+");
   return (
     <div className="composer-toolbar">

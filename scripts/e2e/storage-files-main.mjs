@@ -6,7 +6,7 @@ import { join, relative, resolve } from "node:path";
 import { migrateFiles, validateTarget } from "../../apps/desktop/electron/main/storage/files.ts";
 import { storageLinkTypes } from "../../apps/desktop/electron/main/storage/link-types.ts";
 
-const artifacts = process.env.PI_STORAGE_FILES_ARTIFACTS;
+const artifacts = process.env.OCODE_STORAGE_FILES_ARTIFACTS;
 app.setPath("userData", join(artifacts, "electron-profile"));
 const cases = [];
 void (async () => {

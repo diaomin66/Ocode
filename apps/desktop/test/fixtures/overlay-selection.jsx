@@ -3,8 +3,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { ReleaseNotesDialog } from "../../src/components/ReleaseNotesDialog";
 import { MarkdownTable } from "../../src/components/MarkdownTable";
 import { ProjectInstructionsDialog } from "../../src/components/ProjectInstructionsDialog";
@@ -28,7 +28,7 @@ window.clearTimeout = (handle) => { timers.delete(handle); clearTimer(handle); }
 const session = { id: "selection-session", title: "Selectable session title for copying across the card boundary",
   mode: "agent", updatedAt: "2026-09-26T12:00:00Z" };
 let finishSave;
-window.piDesktop = {
+window.ocode = {
   platform: "win32",
   on: () => () => {},
   async invoke(channel) {

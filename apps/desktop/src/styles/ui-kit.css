@@ -214,14 +214,14 @@
   color: var(--ds-warning);
 }
 
-#pi-desktop-overlays {
+#ocode-overlays {
   position: fixed;
   inset: 0;
   z-index: 40;
   pointer-events: none;
 }
 
-#pi-desktop-overlays > .overlay {
+#ocode-overlays > .overlay {
   pointer-events: auto;
 }
 

@@ -1,5 +1,5 @@
-import type { RacpRemoteError } from "@pi-desktop/shared";
-import { RACP_ERROR_CODES, type RacpErrorCode } from "@pi-desktop/shared";
+import type { RacpRemoteError } from "@ocode/shared";
+import { RACP_ERROR_CODES, type RacpErrorCode } from "@ocode/shared";
 
 /**
  * A failure that crosses the Agent Host boundary. The code is a shared

@@ -2,13 +2,13 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@ocode/shared";
 import { remoteEn, remoteZh } from "../../apps/desktop/src/locales/remote";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
 import { RemoteHostSessions } from "../../apps/desktop/src/components/settings/RemoteHostSessions";
 import { RemoteHostsPage } from "../../apps/desktop/src/components/settings/RemoteHostsPage";
 import { ChatSurface } from "../../apps/desktop/src/components/ChatSurface";
-import { catalogs } from "@pi-desktop/i18n";
+import { catalogs } from "@ocode/i18n";
 import { api } from "../../apps/desktop/src/lib/api";
 import { subscribeRemoteInteractions } from "../../apps/desktop/src/lib/remote-interactions";
 
@@ -19,7 +19,7 @@ const provider = { id: "fixture-provider", name: "Fixture provider", enabled: tr
 const calls = [];
 const listeners = new Map();
 let reconnects = 0;
-window.piDesktop = {
+window.ocode = {
   platform: "linux",
   on(channel, listener) {
     const group = listeners.get(channel) ?? new Set();

@@ -16,8 +16,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { ConfigSyncPage } from "../../apps/desktop/src/components/settings/ConfigSyncPage";
 import { Checkbox } from "../../apps/desktop/src/components/ui";
 import { selectionFromDraft } from "../../apps/desktop/src/features/settings/config-sync-form";
@@ -46,7 +46,7 @@ const history = () => [
   { revisionId: "older-" + state.prefix, createdAt: "2026-01-01T00:00:00Z", entityCount: 1, current: false },
 ];
 window.confirm = (message) => { confirmations.push(message); return true; };
-window.piDesktop = { platform: "darwin", channels: IPC,
+window.ocode = { platform: "darwin", channels: IPC,
   on(channel, callback) {
     if (!listeners.has(channel)) listeners.set(channel, new Set());
     listeners.get(channel).add(callback);
@@ -84,7 +84,7 @@ window.piDesktop = { platform: "darwin", channels: IPC,
     return { ok: true, data };
   },
 };
-localStorage.setItem("pi.desktop.configSyncDraft", JSON.stringify({ endpoint: "https://legacy.example.com" }));
+localStorage.setItem("ocode.desktop.configSyncDraft", JSON.stringify({ endpoint: "https://legacy.example.com" }));
 let view;
 const mount = () => { view = createRoot(document.getElementById("root")); flushSync(() => view.render(React.createElement(ConfigSyncPage))); };
 const check = (value, message) => { if (!value) throw new Error(message); };
@@ -135,7 +135,7 @@ window.configSyncProbe = async () => {
   check(disclosure("connectionTitle")?.open, "setup must show connection fields");
   check(disclosure("advancedTitle") && !disclosure("advancedTitle").open, "advanced fields must start collapsed");
   check(!input("region").checkVisibility(), "advanced region leaked into setup");
-  check(input("region").value === "us-east-1" && input("prefix").value === "pi-desktop/config", "advanced defaults changed");
+  check(input("region").value === "us-east-1" && input("prefix").value === "ocode/config", "advanced defaults changed");
   const page = document.querySelector(".settings-config-sync");
   for (const theme of ["light", "dark"]) {
     document.documentElement.dataset.theme = theme;
@@ -198,7 +198,7 @@ window.configSyncProbe = async () => {
   releaseSync();
   await until(() => button("backupNow") && !button("backupNow").disabled, "background sync did not complete after navigation");
   await ready();
-  await until(() => document.body.textContent.includes("older-pi-desktop/config"), "history missing");
+  await until(() => document.body.textContent.includes("older-ocode/config"), "history missing");
   flushSync(() => view.unmount()); mount(); await ready();
   check(input("bucket").value === "private-config", "saved connection not hydrated");
   check(!disclosure("connectionTitle").open, "saved connection must start collapsed");
@@ -230,7 +230,7 @@ window.configSyncProbe = async () => {
   flushSync(() => { for (const callback of listeners.get(IPC.event.configSyncChanged) ?? []) callback(state); });
   await until(() => document.body.textContent.includes("older-other-prefix"), "new connection history not loaded");
   releaseHistory(); await ready();
-  check(!document.body.textContent.includes("older-pi-desktop/config"), "stale history overwrote new connection");
+  check(!document.body.textContent.includes("older-ocode/config"), "stale history overwrote new connection");
   await expand("maintenanceTitle");
   await fill("currentBackupPassword", "test-password");
   await fill("newBackupPassword", "test-password-new");
@@ -248,7 +248,7 @@ window.configSyncProbe = async () => {
   await click("disconnect");
   await until(() => button("enable") && input("endpoint").value === "", "disconnect did not clear form");
   check(localStorage.getItem(CONFIG_SYNC_DRAFT_STORAGE_KEY) === null, "disconnect retained draft");
-  check(localStorage.getItem("pi.desktop.configSyncDraft") !== null, "legacy draft deleted");
+  check(localStorage.getItem("ocode.desktop.configSyncDraft") !== null, "legacy draft deleted");
   flushSync(() => view.unmount());
   check(listeners.get(IPC.event.configSyncChanged)?.size === 0 && listeners.get(IPC.event.configSyncProgress)?.size === 0, "subscriptions leaked");
   return { passed: true };
@@ -289,15 +289,15 @@ window.checkboxProbe = async () => {
 test("S3 settings user path preserves credentials, modes, history and legacy data", {
   skip: process.platform === "linux" && !process.env.DISPLAY ? "Electron requires a display" : false,
 }, async () => {
-  const temp = await mkdtemp(join(process.env.PI_SCRATCH_DIR ?? tmpdir(), "s3-settings-"));
+  const temp = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR ?? tmpdir(), "s3-settings-"));
   try {
     await build({
       stdin: { contents: fixture, resolveDir: join(root, "scripts/e2e"), loader: "tsx" },
       outfile: join(temp, "renderer.js"), bundle: true, platform: "browser", format: "esm", jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@ocode/i18n": join(root, "packages/i18n/src"),
+        "@ocode/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

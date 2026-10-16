@@ -15,8 +15,8 @@ const { sshHostRecord, sshMetadataOf, transportOf } = await import(
 );
 
 const VERSION = "0.15.1-beta.5";
-const ARTIFACT_NAME = `pi-host-${VERSION}-linux-x64.tar.gz`;
-const ARTIFACT_URL = `https://github.com/vastsa/PI-Desktop/releases/download/v${VERSION}/${ARTIFACT_NAME}`;
+const ARTIFACT_NAME = `ocode-host-${VERSION}-linux-x64.tar.gz`;
+const ARTIFACT_URL = `https://github.com/diaomin66/Ocode/releases/download/v${VERSION}/${ARTIFACT_NAME}`;
 const DIGEST = "0123456789abcdef".repeat(4);
 const RESERVED_PORT = 49_152;
 
@@ -24,10 +24,10 @@ const RESERVED_PORT = 49_152;
  * loopback port the host bound on the remote machine. */
 function scriptStdout({ version = VERSION, token = "ppt1.abc" } = {}) {
   return [
-    "PI_HOST_BOOTSTRAP download",
-    "PI_HOST_BOOTSTRAP ok",
-    `PI_HOST_READY ${JSON.stringify({ hostId: "host_x", host: "127.0.0.1", port: 41_234, version })}`,
-    `PI_HOST_PAIRING_TOKEN ${JSON.stringify({ token, expiresAt: 1_893_456_000_000 })}`,
+    "OCODE_HOST_BOOTSTRAP download",
+    "OCODE_HOST_BOOTSTRAP ok",
+    `OCODE_HOST_READY ${JSON.stringify({ hostId: "host_x", host: "127.0.0.1", port: 41_234, version })}`,
+    `OCODE_HOST_PAIRING_TOKEN ${JSON.stringify({ token, expiresAt: 1_893_456_000_000 })}`,
   ].join("\n");
 }
 
@@ -173,7 +173,7 @@ test("a remote host running a different release is refused before the forward", 
 
 test("an unpublished target fails without downloading anything", async () => {
   // macOS is in the bootstrap's `uname` vocabulary but the release publishes no
-  // pi-host bundle for it.
+  // ocode-host bundle for it.
   const transport = fakeTransport({ uname: "Darwin\nx86_64\n" });
   const { bootstrap, fetched } = harness({ transport });
   const error = await catchError(() => bootstrap.bootstrap(request()));
@@ -186,7 +186,7 @@ test("an unpublished target fails without downloading anything", async () => {
 test("an arm64 Linux remote installs the published arm64 bundle", async () => {
   // The arm64 lane publishes its own bundle, so the desktop resolves the arm64
   // artifact and pins its published digest instead of reusing the x64 one.
-  const arm64Artifact = `pi-host-${VERSION}-linux-arm64.tar.gz`;
+  const arm64Artifact = `ocode-host-${VERSION}-linux-arm64.tar.gz`;
   const transport = fakeTransport({ uname: "Linux\naarch64\n" });
   const { bootstrap, fetched } = harness({
     transport,
@@ -197,7 +197,7 @@ test("an arm64 Linux remote installs the published arm64 bundle", async () => {
 
   assert.equal(
     fetched[0],
-    `https://github.com/vastsa/PI-Desktop/releases/download/v${VERSION}/${arm64Artifact}.sha256`,
+    `https://github.com/diaomin66/Ocode/releases/download/v${VERSION}/${arm64Artifact}.sha256`,
   );
   assert.equal(outcome.ssh.version, VERSION);
   const upload = transport.calls.uploads[0];
@@ -207,7 +207,7 @@ test("an arm64 Linux remote installs the published arm64 bundle", async () => {
 
 test("a checksum file with no digest for this artifact fails the bootstrap", async () => {
   const transport = fakeTransport();
-  const { bootstrap } = harness({ transport, checksum: `${DIGEST}  pi-host-0.15.0-linux-x64.tar.gz\n` });
+  const { bootstrap } = harness({ transport, checksum: `${DIGEST}  ocode-host-0.15.0-linux-x64.tar.gz\n` });
   const error = await catchError(() => bootstrap.bootstrap(request()));
   assert.equal(error.errorCode, "HOST_BOOTSTRAP_FAILED");
   assert.deepEqual(transport.calls.uploads, [], "the script must not run without a digest to verify");
@@ -215,8 +215,8 @@ test("a checksum file with no digest for this artifact fails the bootstrap", asy
 
 test("a failed remote script reports the step it failed at", async () => {
   const transport = fakeTransport({
-    stdout: "PI_HOST_BOOTSTRAP download\nPI_HOST_BOOTSTRAP_FAILED checksum-mismatch\n",
-    stderr: "PI_HOST_BOOTSTRAP_FAILED checksum-mismatch\n",
+    stdout: "OCODE_HOST_BOOTSTRAP download\nOCODE_HOST_BOOTSTRAP_FAILED checksum-mismatch\n",
+    stderr: "OCODE_HOST_BOOTSTRAP_FAILED checksum-mismatch\n",
   });
   const { bootstrap } = harness({ transport });
   const error = await catchError(() => bootstrap.bootstrap(request()));
@@ -229,7 +229,7 @@ test("a failed remote script reports the step it failed at", async () => {
 
 test("a missing remote Node.js is reported as a Node version requirement", async () => {
   const transport = fakeTransport({
-    stdout: "PI_HOST_FAILED {\"code\":\"HOST_BOOTSTRAP_FAILED\",\"step\":\"missing-node\"}\n",
+    stdout: "OCODE_HOST_FAILED {\"code\":\"HOST_BOOTSTRAP_FAILED\",\"step\":\"missing-node\"}\n",
   });
   const { bootstrap } = harness({ transport });
   const error = await catchError(() => bootstrap.bootstrap(request()));

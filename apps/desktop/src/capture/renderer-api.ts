@@ -1,11 +1,11 @@
 /**
- * `window.__PI_DESKTOP__`: the tiny renderer automation surface used by the
+ * `window.__OCODE__`: the tiny renderer automation surface used by the
  * capture suite (electron/main) and the e2e plan runner (scripts/e2e-plan-ui).
  *
  * Only the navigation/toast shims are installed unconditionally. The
  * screenshot fixtures (seed* methods, `api.*` monkey-patches) live in
  * `capture-rig.ts` and are `import()`ed the first time one of them is called
- * with `window.__PI_CAPTURE__` set, so production bundles never evaluate them.
+ * with `window.__OCODE_CAPTURE__` set, so production bundles never evaluate them.
  * Once the rig has loaded, its methods replace the lazy stubs on the same
  * object, so later capture calls stay synchronous as before.
  */
@@ -33,9 +33,9 @@ export type RendererApi = {
 
 declare global {
   interface Window {
-    __PI_DESKTOP__?: RendererApi;
+    __OCODE__?: RendererApi;
     /** Set by the capture suite before it calls any fixture method. */
-    __PI_CAPTURE__?: unknown;
+    __OCODE_CAPTURE__?: unknown;
   }
 }
 
@@ -70,7 +70,7 @@ export function installRendererApi(): () => void {
         return installed;
       }
       rig = installed;
-      if (window.__PI_DESKTOP__ === surface) {
+      if (window.__OCODE__ === surface) {
         for (const name of CAPTURE_RIG_METHODS) {
           (surface as Record<string, unknown>)[name] = installed[name];
         }
@@ -84,7 +84,7 @@ export function installRendererApi(): () => void {
     CAPTURE_RIG_METHODS.map((name) => [
       name,
       async (...args: unknown[]) => {
-        if (!window.__PI_CAPTURE__) return undefined;
+        if (!window.__OCODE_CAPTURE__) return undefined;
         const loaded = await loadRig();
         const method = loaded[name] as (...params: unknown[]) => unknown;
         return method(...args);
@@ -104,12 +104,12 @@ export function installRendererApi(): () => void {
     showToast: (message, opts) => useAppStore.getState().showToast(message, opts),
     ...stubs,
   };
-  window.__PI_DESKTOP__ = surface;
+  window.__OCODE__ = surface;
 
   return () => {
     disposed = true;
     rig?.dispose();
     rig = null;
-    if (window.__PI_DESKTOP__ === surface) delete window.__PI_DESKTOP__;
+    if (window.__OCODE__ === surface) delete window.__OCODE__;
   };
 }

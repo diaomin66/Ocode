@@ -1,16 +1,16 @@
-import type { Principal, SessionSummary } from "@pi-desktop/agent-host";
+import type { Principal, SessionSummary } from "@ocode/agent-host";
 import type {
   FsEntry,
   FsReadResult,
   RacpProjectSummary,
   WorkspaceDiff,
   WorkspaceToolExecute, WorkspaceToolAbort, WorkspaceToolResult, CommandShellOption, WorkspaceFilesRequest,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 /**
  * Everything the RACP server delegates to the Host besides the Agent Host
  * module: session catalog mutations, projects, workspace reads, terminals.
- * `pi-host` implements these on host-core and its filesystem; a test hands
+ * `ocode-host` implements these on host-core and its filesystem; a test hands
  * the server fakes. The server itself never touches host-core RPC, a
  * filesystem, or a pty, so the boundary of security §7 holds by construction.
  */

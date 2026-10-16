@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
-import { usageForEvent, ownsUsageTurn, applyMessageUpdate, tagMessageToolLineage, toolCallLineage, type AgentEventEnvelope, type UiMessage } from "@pi-desktop/shared";
+import { usageForEvent, ownsUsageTurn, applyMessageUpdate, tagMessageToolLineage, toolCallLineage, type AgentEventEnvelope, type UiMessage } from "@ocode/shared";
 import type { FinishTurn } from "./plans";
 import type { RuntimeState } from "./context";
-import type { InflightCheckpointer } from "@pi-desktop/host-runtime";
+import type { InflightCheckpointer } from "@ocode/host-runtime";
 import type { Logger } from "../logger";
 import type { PersistenceOutbox } from "../persistence-outbox";
 import type { SessionCoordination } from "./session-coordination";

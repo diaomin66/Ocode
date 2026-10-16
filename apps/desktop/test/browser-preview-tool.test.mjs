@@ -79,7 +79,7 @@ test("main serves BrowserPreview from its originating session workspace", async 
     handler,
     /sendToRenderer\(IPC\.event\.browserPreview, \{\s*sessionId,\s*path: file,\s*\}\)/,
   );
-  assert.match(protocolSource, /browserPreview: "pi-desktop\/browser\/event\/preview"/);
+  assert.match(protocolSource, /browserPreview: "ocode\/browser\/event\/preview"/);
 });
 
 test("renderer routes browser preview events to the originating session", () => {
@@ -113,7 +113,7 @@ test("plugin HTML open routes through the active session without Browser CDP", (
   assert.ok(rendererHandler, "renderer Browser-open event handler exists");
   assert.match(rendererHandler, /state\.activeSessionId/);
   assert.match(rendererHandler, /openWorkPanelTabForSession\([\s\S]*browserPluginTab\(path\)/);
-  assert.match(protocolSource, /browserOpenFile: "pi-desktop\/browser\/event\/openFile"/);
+  assert.match(protocolSource, /browserOpenFile: "ocode\/browser\/event\/openFile"/);
   assert.match(pluginRuntimeSource, /openInBrowser: async \(pathFromRoot: string\) =>/);
   assert.match(pluginRuntimeSource, /api: "fs\.openInBrowser"/);
   assert.doesNotMatch(hostOpen, /browser\.cdp|invokeBrowser/);

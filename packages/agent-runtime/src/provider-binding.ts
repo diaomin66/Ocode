@@ -40,7 +40,7 @@ import {
   deepseekRequestCompat,
   zhipuRequestCompat,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { genericModelConfig } from "./model-capabilities.js";
 import { sessionAffinityCompat } from "./session-affinity.js";
 import type { ModelConfig } from "./thinking-level.js";
@@ -112,7 +112,7 @@ export function adapterAcceptsCustomFetch(api: Api | undefined): boolean {
   return api !== "google-generative-ai" && api !== "google-vertex";
 }
 
-const NO_AUTH_REQUEST_KEY = "pi-desktop-no-auth";
+const NO_AUTH_REQUEST_KEY = "ocode-no-auth";
 const API_KEY_HEADERS = new Set(["api-key", "x-api-key", "x-goog-api-key"]);
 
 function withoutNoAuthCredential(fetchFn: FetchFunction): FetchFunction {
@@ -511,7 +511,7 @@ export function createExtensionAgentModels(input: {
       auth: {
         apiKey: {
           name: `${input.providerName} plugin credential`,
-          resolve: async () => ({ auth: { apiKey: "pi-desktop-plugin-agent" } }),
+          resolve: async () => ({ auth: { apiKey: "ocode-plugin-agent" } }),
         },
       },
       api: input.stream,

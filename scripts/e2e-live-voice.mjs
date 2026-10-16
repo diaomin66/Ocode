@@ -24,7 +24,7 @@ const dataDir = join(temp, "data");
 const profile = join(temp, "profile");
 const home = join(temp, "home");
 const project = join(temp, "project");
-const evidence = process.env.PI_LIVE_VOICE_EVIDENCE_DIR || join(temp, "evidence");
+const evidence = process.env.OCODE_LIVE_VOICE_EVIDENCE_DIR || join(temp, "evidence");
 for (const path of [dataDir, profile, home, project, evidence]) await mkdir(path, { recursive: true });
 const fixture = await startLiveVoiceFixture(root, { plainHttp });
 const host = new Host(resolveHostBinary(), dataDir);

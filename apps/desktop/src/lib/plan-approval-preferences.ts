@@ -1,6 +1,6 @@
-import type { GlobalPermissionMode } from "@pi-desktop/shared";
+import type { GlobalPermissionMode } from "@ocode/shared";
 
-export const PLAN_APPROVAL_MODE_STORAGE_KEY = "pi.desktop.planApprovalMode";
+export const PLAN_APPROVAL_MODE_STORAGE_KEY = "ocode.desktop.planApprovalMode";
 export const PLAN_APPROVAL_FALLBACK_MODE: GlobalPermissionMode = "ask";
 
 function isApprovalMode(value: unknown): value is GlobalPermissionMode {

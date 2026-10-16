@@ -26,7 +26,7 @@ const connection = {
   endpoint: "https://s3.example.com",
   region: "us-east-1",
   bucket: "private-config",
-  prefix: "pi-desktop/config",
+  prefix: "ocode/config",
   accessKeyId: "test-access-id",
   pathStyle: true,
   mode: "sync",
@@ -58,10 +58,10 @@ test("S3 draft round-trips only typed non-sensitive choices", () => {
 test("old WebDAV drafts are ignored and left untouched", () => {
   const store = fakeStorage();
   const legacy = JSON.stringify({ endpoint: "https://dav.example.com", username: "alice", directory: "old" });
-  store.setItem("pi.desktop.configSyncDraft", legacy);
+  store.setItem("ocode.desktop.configSyncDraft", legacy);
   assert.deepEqual(preferences.readConfigSyncDraft(store), {});
   preferences.clearConfigSyncDraft(store);
-  assert.equal(store.getItem("pi.desktop.configSyncDraft"), legacy);
+  assert.equal(store.getItem("ocode.desktop.configSyncDraft"), legacy);
 });
 
 test("draft rejects malformed fields and strips injected credentials on read", () => {

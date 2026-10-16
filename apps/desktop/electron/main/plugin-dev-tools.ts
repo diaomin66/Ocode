@@ -5,8 +5,8 @@ import {
   pack,
   scaffold,
   type CheckResult,
-} from "@pi-desktop/plugin-devkit";
-import { resolveWithinRoot } from "@pi-desktop/host-runtime";
+} from "@ocode/plugin-devkit";
+import { resolveWithinRoot } from "@ocode/host-runtime";
 import type { AgentSidecar, LocalToolResult } from "./agent-sidecar";
 
 /**

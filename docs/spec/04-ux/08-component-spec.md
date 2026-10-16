@@ -76,7 +76,7 @@ Outer frame that positions Topbar, Sidebar, MainChat, and WorkPanel. Owns resize
   excludes the shell action lane in both sidebar states on every platform.
   On macOS, collapsed-sidebar preview reserves 88px in windowed mode and 8px
   in fullscreen through the shared `--ds-window-lead-inset` token — the
-  traffic-light cluster's right edge (76px, from `@pi-desktop/shared`) plus a
+  traffic-light cluster's right edge (76px, from `@ocode/shared`) plus a
   12px gap. The main process uses that same shared geometry.
 - Work panel resize: its inner left-edge handle changes the committed panel
   width in the renderer, so dragging left gives the panel more internal space
@@ -146,7 +146,7 @@ Outer frame that positions Topbar, Sidebar, MainChat, and WorkPanel. Owns resize
 
 | Platform | Top-level chrome | Application menu |
 |---|---|---|
-| macOS | Native inset traffic lights at `{x:16,y:16}`; expanded sidebar Collapse control at right, with no logo/title; work-panel toggle is viewport-fixed at the window's top-right | System menu: PI-Desktop, File, Edit, View, Window, Help |
+| macOS | Native inset traffic lights at `{x:16,y:16}`; expanded sidebar Collapse control at right, with no logo/title; work-panel toggle is viewport-fixed at the window's top-right | System menu: Ocode, File, Edit, View, Window, Help |
 | Windows | Frameless 46px titlebar; sidebar actions at left; work-panel toggle then minimize/maximize/close stay viewport-fixed at the window's top-right | None inside the window |
 | Linux | Frameless 46px titlebar; sidebar actions at left; work-panel toggle then minimize/maximize/close stay viewport-fixed at the window's top-right | None inside the window |
 
@@ -386,7 +386,7 @@ their hit areas remain in the layout so revealing them does not shift labels.
 Expanded (~275px, D034/D070):
 +---------------------------+
 | [lights]             [◧] |  macOS
-| [π] PI-Desktop       [◧] |  Windows/Linux
+| [π] Ocode       [◧] |  Windows/Linux
 | PINNED                   |
 |   • Pinned task  project-A|
 | SESSIONS         [msg+][↕]|
@@ -483,7 +483,7 @@ visually distinct from list content.
   transcript prefetch. Selection reuses an in-flight or recent cached result,
   revalidates it in the background, and never waits for an older superseded
   session read before starting the latest read.
-- On Windows/Linux, click the PI-Desktop brand to return the main pane to the
+- On Windows/Linux, click the Ocode brand to return the main pane to the
   chat home while preserving the active conversation and workspace; macOS
   intentionally omits this brand control from the sidebar header
 - Click the footer Plugins icon immediately right of Settings to open the
@@ -504,7 +504,7 @@ visually distinct from list content.
   hidden live workbench or durable preference across application restart.
 - Plugin detail, settings, permission-review, template, and install-progress
   surfaces are viewport-wide overlays. Their backdrops and surfaces mount on
-  `#pi-desktop-overlays`, outside the route scroll container and sidebar
+  `#ocode-overlays`, outside the route scroll container and sidebar
   stacking contexts, so an expanded sidebar cannot cover the surface or its
   close/cancel controls.
 - The footer action group stays on the left and the build/version chip stays
@@ -676,7 +676,7 @@ visually distinct from list content.
 
 ### 3.7 Brand and icon contract
 
-- The visible shell name is `PI-Desktop`; Codex is not used as the renderer
+- The visible shell name is `Ocode`; Codex is not used as the renderer
   identity.
 - A control with no label states `.icon-btn-square`, which pins both axes to
   `--ds-control-size` (28px). `.icon-btn` on its own takes its width from its
@@ -1247,7 +1247,7 @@ entirely inside the plugin's isolated page:
 - Persistence: all session contexts are renderer runtime state only. On app
   startup, open state, tabs, active-tab selection, file requests, and Browser
   resources reset; only the committed preferred `{width}` remains in
-  localStorage `pi.desktop.workPanel`. Opening and collapsing never request a
+  localStorage `ocode.desktop.workPanel`. Opening and collapsing never request a
   positive native reservation and never change native window bounds. The panel
   flexes inside the existing client area, so MainChat reflows beside it while
   retaining its 450px hard minimum; the expanded sidebar is the column that
@@ -1463,7 +1463,7 @@ near-zero duration. A folded group keeps its rows mounted, `aria-hidden`, and
   session path opens `<data_dir>/scratch/<sessionId>/` in the system file
   manager, creating the directory if it does not exist yet. Both actions
   appear only while developer mode is on.
-- Copy conversation link writes the `pi-desktop://session/<id>` reference to
+- Copy conversation link writes the `ocode://session/<id>` reference to
   the clipboard without developer mode. Pasting it into another conversation's
   Composer draft sends a bounded excerpt of that conversation with the turn,
   and the user message then shows it as a chip (§20B).
@@ -1803,7 +1803,7 @@ Single message render — either user (plaintext) or assistant (markdown streami
   plain after verification, while assistant references and tool paths remain
   clickable so the opener can explain the access limit. Home paths stay plain.
   Clicking a chip
-   completes the reference through `pi-desktop/fs/resolveRef` — the whole open
+   completes the reference through `ocode/fs/resolveRef` — the whole open
    project is searched, its group's folders primary first (ADR 0263) — and opens
    where it resolved: a project file in the bundled `pi.file-manager` work-panel
    view (the host `file:` tab when that view is unavailable), a session-scratch
@@ -2386,7 +2386,7 @@ twice.
 - A file path that a row or its result names is a link, not decoration: clicking
   the summary path of a `Read`, `Write`, `Edit`, or `fetch` row, or a path in a
   result's file list or match groups, completes the reference through the same
-  opener a chat chip uses (`pi-desktop/fs/resolveRef`) and opens where it
+  opener a chat chip uses (`ocode/fs/resolveRef`) and opens where it
   resolved — a project file in the bundled `pi.file-manager` view, a
   session-scratch or attachment file in the host `file:` tab, and a `.html` /
   `.htm` page of the project's primary folder in the side browser (ADR 0262,
@@ -3455,7 +3455,7 @@ Anatomy:
   main selects image blocks or path fallbacks from the exact model capability.
   Reference-only drafts are sendable. Builtin/plugin dispatch still bypasses
   the model-ready gate when no prompt text or file reference is sent.
-- A `pi-desktop://session/<id>` link in the draft is the reference itself: no
+- A `ocode://session/<id>` link in the draft is the reference itself: no
   new trigger symbol joins `@` files and `/` commands, and the link stays
   visible plaintext while the draft is unsent. Immediately before dispatch,
   main resolves each link to another conversation in the same project into a
@@ -3553,7 +3553,7 @@ Anatomy:
   chip from the message's `command` field instead of the expanded body.
 - Sent `@path` file references (quoted or unquoted) render as the same compact
   leaf-name chip as the draft. Clicking one completes the reference through
-  `pi-desktop/fs/resolveRef` — against the whole open project, its group's
+  `ocode/fs/resolveRef` — against the whole open project, its group's
   folders primary first (ADR 0263) — and opens where it resolved: a project file
   in the bundled `pi.file-manager` view (the host `file:` tab when that view is
   unavailable), a session-scratch or attachment file in the host `file:` tab,
@@ -4022,7 +4022,7 @@ default nor provider configuration. OAuth accounts remain in their separate sect
 | Busy row | Test/update/delete actions disabled for that card |
 
 ### 19.4 Interactions
-- Add provider opens a modal dialog on a full-window overlay portaled to `#pi-desktop-overlays` on the document element (it can shrink below its 1040px preferred width). The chooser groups unconfigured API-key providers declared by loaded plugins under their optional category, searches their category / plugin / provider / endpoint / model labels, and shows the plugin name and endpoint on each tile. Selecting one opens a Host-owned key form for its existing provider row; saving uses the provider secret path and removes that row from the chooser. Category and provider metadata render as text. Focused credential fields keep their 2px accent ring fully visible: the scrolling body reserves that gutter instead of clipping the ring. Cancel/close resets fields and dismisses the dialog
+- Add provider opens a modal dialog on a full-window overlay portaled to `#ocode-overlays` on the document element (it can shrink below its 1040px preferred width). The chooser groups unconfigured API-key providers declared by loaded plugins under their optional category, searches their category / plugin / provider / endpoint / model labels, and shows the plugin name and endpoint on each tile. Selecting one opens a Host-owned key form for its existing provider row; saving uses the provider secret path and removes that row from the chooser. Category and provider metadata render as text. Focused credential fields keep their 2px accent ring fully visible: the scrolling body reserves that gutter instead of clipping the ring. Cancel/close resets fields and dismisses the dialog
 - The model picker searches and toggles multiple models without using a native
   multiple select. Its portaled menu closes on outside press, Escape, scroll,
   and resize; model selection immediately adds or removes its configuration
@@ -4299,7 +4299,7 @@ TASKS (2)                     │ Nightly dependency check   [Enabled] [Run now]
 ### 20B.1 Purpose
 
 Carry another conversation into a turn without retyping it. The
-`pi-desktop://session/<id>` link is the whole interaction: a reader copies it
+`ocode://session/<id>` link is the whole interaction: a reader copies it
 from the conversation overflow menu and pastes it into a Composer draft (issue
 #1324, option B). Copy conversation ID stays the developer-mode identifier.
 
@@ -4332,7 +4332,7 @@ Conversation overflow                    Composer draft (unsent)
 
 ### 20B.4 Interaction
 
-- Copy conversation link writes `pi-desktop://session/<sessionId>` from the
+- Copy conversation link writes `ocode://session/<sessionId>` from the
   conversation overflow menu. The durable id is the reference; Copy
   conversation ID still exposes the bare id in developer mode.
 - Sending a turn whose draft holds the link attaches a bounded excerpt of the
@@ -4370,7 +4370,7 @@ Conversation overflow                    Composer draft (unsent)
 - The chip carries the button role with a catalog-built accessible name and a
   tooltip naming the conversation it opens; it is keyboard-activatable and leaves
   the surrounding selectable message text intact.
-- `pi-desktop://` is not yet an operating-system protocol handler; opening a
+- `ocode://` is not yet an operating-system protocol handler; opening a
   link from outside the app is a separate change (issue #1324, option A). This
   section covers the in-app reference.
 ## 21. Acceptance criteria (all components)

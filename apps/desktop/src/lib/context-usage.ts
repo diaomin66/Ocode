@@ -8,7 +8,7 @@ import {
   type ProviderPublic,
   type ToolTokenUsage,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 export const DEFAULT_CONTEXT_WINDOW = 128_000;
 

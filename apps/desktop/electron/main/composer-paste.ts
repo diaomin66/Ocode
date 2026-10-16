@@ -13,7 +13,7 @@ import {
   SVG_MIME_TYPE,
   type ComposerPasteFile,
   type ComposerPastedFile,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 const SAFE_SESSION_ID = /^[A-Za-z0-9_-]+$/;
 const MAX_FILES = 20;

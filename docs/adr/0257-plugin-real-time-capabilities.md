@@ -73,7 +73,7 @@ audit model rather than widening what plugin code may touch.
    keys.
 
 8. Existing Control semantics are unchanged. A voice assistant drives the app
-   through `pi.desktop.*` exactly as any other plugin does; dangerous
+   through `ocode.desktop.*` exactly as any other plugin does; dangerous
    operations keep their native confirmation even when a caller passes
    `confirm: true`, and `session/collaboration/*` remains reachable only from
    an authenticated plugin agent tool invocation.

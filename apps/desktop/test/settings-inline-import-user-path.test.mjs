@@ -18,8 +18,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { SettingsPage } from "../../apps/desktop/src/features/settings/SettingsPage";
 import { ToastHost } from "../../apps/desktop/src/components/Toast";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
@@ -61,7 +61,7 @@ const project = {
 const calls = [];
 let imported = false;
 const builtinSkill = {
-  id: "pi-desktop/imagegen",
+  id: "ocode/imagegen",
   name: "imagegen",
   description: "Generate and edit images.",
   enabled: true,
@@ -71,7 +71,7 @@ let builtinSkillSetCall;
 // Toast audio is optional feedback; this hidden fixture checks the visible
 // toast only and does not emit a sound during the automated UI run.
 Object.defineProperty(window, "AudioContext", { configurable: true, value: undefined });
-window.piDesktop = {
+window.ocode = {
   platform: "darwin",
   on() { return () => {}; },
   async invoke(channel, ...args) {
@@ -329,8 +329,8 @@ test("Settings disables a bundled skill and imports an external MCP server into 
       jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "true" },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@ocode/i18n": join(root, "packages/i18n/src"),
+        "@ocode/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),
@@ -344,7 +344,7 @@ test("Settings disables a bundled skill and imports an external MCP server into 
     const rendererHtml = await readFile(join(renderer, "index.html"), "utf8");
     const css = [...rendererHtml.matchAll(/href="([^" ]+\.css)"/g)]
       .map((match) => match[1]);
-    assert(css.length, "Run pnpm --filter @pi-desktop/desktop build before this test");
+    assert(css.length, "Run pnpm --filter @ocode/desktop build before this test");
     await cp(join(renderer, "assets"), join(temp, "assets"), { recursive: true });
     await writeFile(
       join(temp, "index.html"),
@@ -402,8 +402,8 @@ app.whenReady().then(async () => {
 
     assert.deepEqual(result.builtinToggleState, {
       persisted: {
-        channel: "pi-desktop/skill/builtin/setEnabled",
-        input: { id: "pi-desktop/imagegen", enabled: false },
+        channel: "ocode/skill/builtin/setEnabled",
+        input: { id: "ocode/imagegen", enabled: false },
       },
       visibleOff: true,
     });

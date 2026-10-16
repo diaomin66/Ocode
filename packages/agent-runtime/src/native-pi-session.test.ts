@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 function fixture(options: { newline?: boolean } = {}) {
-  const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-"));
+  const root = mkdtempSync(join(tmpdir(), "ocode-native-"));
   roots.push(root);
   const agentDir = join(root, "agent");
   const sessionRoot = join(agentDir, "sessions");
@@ -227,7 +227,7 @@ describe("NativePiSessionService", () => {
   it("reclaims a stale dead-owner lease only when the file stayed append-only", () => {
     const f = fixture();
     const first = acquireNativePiSessionLease(f.file);
-    const lockPath = `${f.file}.pi-desktop.lock`;
+    const lockPath = `${f.file}.ocode.lock`;
     const record = JSON.parse(readFileSync(lockPath, "utf8"));
     first.release();
     writeFileSync(lockPath, `${JSON.stringify({ ...record, pid: 2_147_483_647 })}\n`);
@@ -337,7 +337,7 @@ describe("native continuation review regressions", () => {
 
   it("settles retries once, rejects overlap without disposal, acknowledges distinct durable users, and keeps own idle lease usable", async () => {
     const f = await configuredFixture();
-    const events: import("@pi-desktop/shared").AgentEventEnvelope[] = [];
+    const events: import("@ocode/shared").AgentEventEnvelope[] = [];
     let calls = 0;
     const requestTools: unknown[] = [];
     let release!: () => void;
@@ -381,15 +381,15 @@ describe("native continuation review regressions", () => {
       const foreign = new NativePiSessionService(f);
       expect((await foreign.list())[0].readOnlyReason).toBe("busy");
     } finally { release(); service.disposeAll(); }
-    expect(existsSync(`${f.file}.pi-desktop.lock`)).toBe(false);
+    expect(existsSync(`${f.file}.ocode.lock`)).toBe(false);
   });
 
   it("makes reclaimable dead-owner leases reachable via list/detail without stealing live leases", async () => {
     const f = await configuredFixture();
     const lease = acquireNativePiSessionLease(f.file);
-    const record = JSON.parse(readFileSync(`${f.file}.pi-desktop.lock`, "utf8"));
+    const record = JSON.parse(readFileSync(`${f.file}.ocode.lock`, "utf8"));
     lease.release();
-    writeFileSync(`${f.file}.pi-desktop.lock`, JSON.stringify({ ...record, pid: 2147483647 }));
+    writeFileSync(`${f.file}.ocode.lock`, JSON.stringify({ ...record, pid: 2147483647 }));
     const service = new NativePiSessionService(f);
     const [summary] = await service.list();
     expect(summary.capabilities?.canPrompt).toBe(true);
@@ -452,7 +452,7 @@ describe("native continuation review regressions", () => {
     await expect(service.prompt(summary.id, "test", () => {})).rejects.toThrow("binding failed");
     expect(bind).toHaveBeenCalledOnce();
     expect(dispose).toHaveBeenCalledOnce();
-    expect(existsSync(`${f.file}.pi-desktop.lock`)).toBe(false);
+    expect(existsSync(`${f.file}.ocode.lock`)).toBe(false);
     expect(service.status(summary.id).status.isRunning).toBe(false);
   });
 
@@ -481,7 +481,7 @@ describe("native continuation review regressions", () => {
 
 describe("native fork children", () => {
   function forkFixture() {
-    const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-fork-"));
+    const root = mkdtempSync(join(tmpdir(), "ocode-native-fork-"));
     roots.push(root);
     const agentDir = join(root, "agent");
     const sessionRoot = join(agentDir, "sessions");
@@ -515,7 +515,7 @@ describe("native fork children", () => {
   }
 
   const groupEntries = (group: string) =>
-    readdirSync(group).filter((name) => !name.endsWith(".pi-desktop.lock")).sort();
+    readdirSync(group).filter((name) => !name.endsWith(".ocode.lock")).sort();
 
   const errorCode = (fn: () => unknown) => {
     try { fn(); return undefined; } catch (error) { return (error as { errorCode?: string }).errorCode; }
@@ -677,7 +677,7 @@ describe("native fork children", () => {
       return stream;
     });
     const service = new NativePiSessionService(f);
-    const events: import("@pi-desktop/shared").AgentEventEnvelope[] = [];
+    const events: import("@ocode/shared").AgentEventEnvelope[] = [];
     try {
       const [summary] = await service.list();
       await service.prompt(summary.id, "stream me", (envelope) => events.push(envelope), "optimistic-stream");
@@ -697,7 +697,7 @@ describe("native fork children", () => {
   });
 
   it("returns the whole child transcript and leaves general detail paging alone", async () => {
-    const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-longfork-"));
+    const root = mkdtempSync(join(tmpdir(), "ocode-native-longfork-"));
     roots.push(root);
     const agentDir = join(root, "agent");
     const sessionRoot = join(agentDir, "sessions");
@@ -739,7 +739,7 @@ describe("native fork children", () => {
   });
 
   it("normalizes the child cwd from the SDK header instead of the raw parent string", async () => {
-    const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-cwdfork-"));
+    const root = mkdtempSync(join(tmpdir(), "ocode-native-cwdfork-"));
     roots.push(root);
     const agentDir = join(root, "agent");
     const sessionRoot = join(agentDir, "sessions");
@@ -777,7 +777,7 @@ describe("native fork children", () => {
       const before = groupEntries(f.group);
       const parentBytes = readFileSync(f.file, "utf8");
       const foreign = acquireNativePiSessionLease(f.file);
-      const lockPath = `${f.file}.pi-desktop.lock`;
+      const lockPath = `${f.file}.ocode.lock`;
       const record = JSON.parse(readFileSync(lockPath, "utf8"));
       try {
         expect((await service.list()).find((row) => row.id === summary.id)?.readOnlyReason).toBe("busy");
@@ -1092,7 +1092,7 @@ describe("independent native ownership, identity and tool regressions", () => {
     const f = await configuredFixture();
     vi.spyOn(ModelRuntime.prototype, "streamSimple").mockImplementation(() => fauxStream());
     const service = new NativePiSessionService(f);
-    const events: import("@pi-desktop/shared").AgentEventEnvelope[] = [];
+    const events: import("@ocode/shared").AgentEventEnvelope[] = [];
     try {
       const [summary] = await service.list();
       for (const optimisticId of ["caller-1", "caller-2"]) {
@@ -1132,7 +1132,7 @@ describe("independent native ownership, identity and tool regressions", () => {
     const service = new NativePiSessionService(f);
     const [summary] = await service.list();
     await expect(service.prompt(summary.id, "bad startup", () => {})).rejects.toThrow("fixture startup failure");
-    expect(existsSync(`${f.file}.pi-desktop.lock`)).toBe(false);
+    expect(existsSync(`${f.file}.ocode.lock`)).toBe(false);
     rmSync(extension);
     vi.spyOn(ModelRuntime.prototype, "streamSimple").mockImplementation(() => fauxStream());
     try {
@@ -1171,7 +1171,7 @@ describe("native settlement and reclaim boundaries", () => {
   it("permits only complete same-file append extensions for dead-local capability recovery", async () => {
     const f = await configuredFixture();
     const lease = acquireNativePiSessionLease(f.file);
-    const lockPath = `${f.file}.pi-desktop.lock`;
+    const lockPath = `${f.file}.ocode.lock`;
     const record = JSON.parse(readFileSync(lockPath, "utf8"));
     lease.release();
     const service = new NativePiSessionService(f);

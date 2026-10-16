@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Derive PI-Desktop platform icon resources from the canonical logo.
+"""Derive Ocode platform icon resources from the canonical logo.
 
 The tracked ``apps/desktop/build/icon_1024.png`` file is the brand source of
 truth. This script preserves that file and emits:
 
   apps/desktop/build/icon.iconset/  - all macOS iconset sizes
-  apps/desktop/build/icon.icns      - via `iconutil` (macOS only)
+  apps/desktop/build/icon.icns      - iconutil or Pillow's portable ICNS writer
   apps/desktop/build/icon.ico       - multi-size Windows application icon
   apps/desktop/build/icon.png       - 512px Windows/Linux package icon
   apps/desktop/build/tray-icon-mac.png - transparent macOS template icon
@@ -59,7 +59,7 @@ def main() -> None:
     # macOS menu bar icons are template images: the opaque pixels are tinted
     # by the system. The application icon has an opaque light tile, so using
     # it directly would turn that tile into the tray silhouette. Derive the
-    # dark PI mark as a transparent, monochrome image instead.
+    # dark Ocode mark as a transparent, monochrome image instead.
     tray_icon = master.convert("L")
     tray_alpha = ImageChops.multiply(
         tray_icon.point(
@@ -67,19 +67,16 @@ def main() -> None:
         ),
         master.getchannel("A"),
     )
-    # The source artwork also contains a soft outline around its light app
-    # tile. Keep the known PI mark area so that outline cannot leak into the
-    # menu bar template silhouette.
+    # Exclude the light tile edge while keeping the complete O/slash mark.
     mark_clip = Image.new("L", master.size, 0)
     mark_draw = ImageDraw.Draw(mark_clip)
-    mark_draw.rectangle((120, 115, 850, 800), fill=255)
-    mark_draw.rectangle((120, 115, 250, 250), fill=0)
+    mark_draw.rectangle((180, 170, 844, 854), fill=255)
     tray_alpha = ImageChops.multiply(tray_alpha, mark_clip)
     tray_icon_mac = Image.new("RGBA", master.size, (0, 0, 0, 0))
     tray_icon_mac.putalpha(tray_alpha)
     mark_bounds = tray_alpha.getbbox()
     if mark_bounds is None:
-        raise ValueError("canonical logo does not contain a dark PI mark")
+        raise ValueError("canonical logo does not contain a dark Ocode mark")
     mark = tray_icon_mac.crop(mark_bounds).resize((768, 768), Image.LANCZOS)
     tray_icon_mac = Image.new("RGBA", master.size, (0, 0, 0, 0))
     tray_icon_mac.paste(mark, (128, 128), mark)
@@ -99,11 +96,13 @@ def main() -> None:
 
     iconutil = shutil.which("iconutil")
     if iconutil is None:
+        icns = BUILD / "icon.icns"
+        master.save(icns, format="ICNS")
         print(f"used {SOURCE}")
         print(f"wrote {windows_icon}")
         print(f"wrote {package_icon}")
         print(f"wrote {tray_icon_mac_path}")
-        print("skipped icon.icns (iconutil is unavailable)")
+        print(f"wrote {icns} (Pillow)")
         return
 
     icns = BUILD / "icon.icns"

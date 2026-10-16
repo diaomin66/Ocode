@@ -1,10 +1,16 @@
-# PI-Desktop Baseline Freeze
+# Ocode Baseline Freeze
 
 - Baseline Version: `0.4.22`
 - Date: `2026-10-08`
 - Status: `Frozen for implementation details (indefinite local permission approvals + Plan checkpoint artifact + approval/execution startup fence + protocol v11 + schema v16 + host-owned plugin session import/read/update/delete P0/P1 + selectable shell catalog + icon-free composer prompt row + turn-boundary context checkpoint compaction + session-scoped work panel + edge-specific work-panel/chat resize ownership + models.dev chat model catalog + provider/runtime safety + M5 hardening + settings IA + project archive + sidebar organization + app update delivery + three-platform release + Extensions page density and theme-readable actions + custom global UI font + ChatGPT-style logical project groups + categorized plugin providers in Add Service)`
 - Language policy: **English-first**
 - Backend policy: **Rust host core + pi agent sidecar**
+
+Ocode identity amendment: [product and distribution identity](../adr/ocode-product-identity.md)
+defines the fork's executable, installer, Host bundle, profile, IPC, CLI and
+brand resources. It supersedes upstream product coordinates only; process
+ownership, database schema, permission checks and Pi extension contracts remain
+unchanged. Ocode does not automatically adopt an upstream profile.
 
 > Version history: `0.3.4` froze provider/runtime-safety decisions
 > (D001–D033). `0.4.0` absorbs the Codex visual-parity decision series
@@ -89,7 +95,7 @@
 > open-licensed (SIL OFL 1.1) families — Geist, Inter, Noto Sans SC, and
 > LXGW WenKai — shipped locally with license texts, and installed system
 > families are enumerated by Electron main through the additive allowlisted
-> channel `pi-desktop/app/systemFonts`. D598 / ADR 0298 later removed the
+> channel `ocode/app/systemFonts`. D598 / ADR 0298 later removed the
 > bundled families: the app ships no font, the picker offers System default
 > plus installed system families, and every stack ends in the system-only CJK
 > fallback tier. No host protocol or storage schema changes.
@@ -127,7 +133,7 @@
 
 ## Frozen Decisions
 
-1. Product name: **PI-Desktop**
+1. Product name: **Ocode**
 2. Desktop shell: **Electron**
 3. UI: **React + TypeScript + Vite + Tailwind**
 4. UI language default: **English**
@@ -172,7 +178,7 @@
 35. Model policy: **no closed allowlist; models.dev chat metadata, live account IDs, generic unknown IDs, and free-form model IDs**
 36. Provider storage: **Rust SQLite configs + OS secret store references**
 37. Secrets backend: **safeStorage primary + encrypted file fallback**
-38. Workspace ignore: **denylist + defaults + `.pi-desktopignore`**
+38. Workspace ignore: **denylist + defaults + `.ocodeignore`**
 39. Tool result limits: **per-tool budgets (128KB / 4000 lines search, 96KB / 4000 lines shell); `truncated` only when a result is cut short**
 40. Settings directory: **General / AI / Shortcuts / Instructions / Models / Skills / MCP / Subagents / Project archive / Cloud sync / Remote Hosts / Info**;
     external model, skill, and MCP scans live in their owning pages; session

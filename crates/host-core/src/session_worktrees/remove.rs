@@ -214,7 +214,7 @@ mod tests {
                 "add",
                 "-q",
                 "-b",
-                "pi-desktop/t",
+                "ocode/t",
                 worktree.to_str().unwrap(),
                 "main",
             ],
@@ -226,7 +226,7 @@ mod tests {
 
         remove_worktree(
             &GitRunner::default(),
-            &row_for(&repo, &worktree, "pi-desktop/t"),
+            &row_for(&repo, &worktree, "ocode/t"),
         )
         .await
         .unwrap();
@@ -234,7 +234,7 @@ mod tests {
         assert!(!worktree.exists());
         assert!(outside.join("KEEP_ME.txt").is_file());
         assert!(outside.join("nested/KEEP_TOO.txt").is_file());
-        assert!(!git_cmd(&repo, &["branch", "--list", "pi-desktop/t"]).contains("pi-desktop/t"));
+        assert!(!git_cmd(&repo, &["branch", "--list", "ocode/t"]).contains("ocode/t"));
         assert_eq!(git_cmd(&repo, &["worktree", "list"]).lines().count(), 1);
     }
 
@@ -250,7 +250,7 @@ mod tests {
                 "add",
                 "-q",
                 "-b",
-                "pi-desktop/gone",
+                "ocode/gone",
                 worktree.to_str().unwrap(),
                 "main",
             ],
@@ -259,12 +259,12 @@ mod tests {
 
         remove_worktree(
             &GitRunner::default(),
-            &row_for(&repo, &worktree, "pi-desktop/gone"),
+            &row_for(&repo, &worktree, "ocode/gone"),
         )
         .await
         .unwrap();
 
         assert_eq!(git_cmd(&repo, &["worktree", "list"]).lines().count(), 1);
-        assert!(!git_cmd(&repo, &["branch", "--list"]).contains("pi-desktop/gone"));
+        assert!(!git_cmd(&repo, &["branch", "--list"]).contains("ocode/gone"));
     }
 }

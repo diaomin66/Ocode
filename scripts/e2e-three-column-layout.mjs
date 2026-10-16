@@ -14,8 +14,8 @@
  *     closes;
  *   - a manual reopen spends work-panel width first, otherwise targeting 460px.
  *
- * Prereqs: `pnpm --filter @pi-desktop/desktop build` (or `pnpm build:js`) and a
- * host-core binary (target/debug, target/release, or PI_DESKTOP_HOST_BIN).
+ * Prereqs: `pnpm --filter @ocode/desktop build` (or `pnpm build:js`) and a
+ * host-core binary (target/debug, target/release, or OCODE_HOST_BIN).
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
@@ -36,22 +36,22 @@ const electronBin =
   process.platform === "win32"
     ? join(appDir, "node_modules/electron/dist/electron.exe")
     : join(appDir, "node_modules/.bin/electron");
-const cdpPort = Number(process.env.PI_DESKTOP_LAYOUT_CDP_PORT || 9336);
+const cdpPort = Number(process.env.OCODE_LAYOUT_CDP_PORT || 9336);
 const MAIN_PANE_MIN_WIDTH = 450;
 const MAIN_PANE_REOPEN_TARGET_WIDTH = 460;
 
 function resolveHostBinary() {
   const candidates = [
-    process.env.PI_DESKTOP_HOST_BIN?.trim(),
-    join(root, "target", "debug", "pi-desktop-host-core"),
-    join(root, "target", "debug", "pi-desktop-host-core.exe"),
-    join(root, "target", "release", "pi-desktop-host-core"),
-    join(root, "target", "release", "pi-desktop-host-core.exe"),
+    process.env.OCODE_HOST_BIN?.trim(),
+    join(root, "target", "debug", "ocode-host-core"),
+    join(root, "target", "debug", "ocode-host-core.exe"),
+    join(root, "target", "release", "ocode-host-core"),
+    join(root, "target", "release", "ocode-host-core.exe"),
   ].filter(Boolean);
   const found = candidates.find((candidate) => existsSync(candidate));
   if (!found) {
     throw new Error(
-      `host-core binary not found; run cargo build -p host-core or set PI_DESKTOP_HOST_BIN\nchecked: ${candidates.join(", ")}`,
+      `host-core binary not found; run cargo build -p host-core or set OCODE_HOST_BIN\nchecked: ${candidates.join(", ")}`,
     );
   }
   return found;
@@ -307,7 +307,7 @@ function check(ok, label, detail = "") {
 
 async function main() {
   if (!existsSync(join(appDir, "out/main/index.js"))) {
-    console.error("desktop app not built. Run: pnpm --filter @pi-desktop/desktop build");
+    console.error("desktop app not built. Run: pnpm --filter @ocode/desktop build");
     process.exit(1);
   }
   if (!existsSync(electronBin)) {
@@ -342,9 +342,9 @@ async function main() {
       cwd: appDir,
       env: {
         ...process.env,
-        PI_DESKTOP_DATA_DIR: dataDir,
-        PI_DESKTOP_HOST_BIN: hostBinary,
-        PI_DESKTOP_START_MAXIMIZED: "0",
+        OCODE_DATA_DIR: dataDir,
+        OCODE_HOST_BIN: hostBinary,
+        OCODE_START_MAXIMIZED: "0",
         ELECTRON_RENDERER_URL: "",
       },
       detached: process.platform !== "win32",
@@ -392,7 +392,7 @@ async function main() {
 
     const measure = () => cdp.evaluate(MEASURE);
     const rig = async (expression) => {
-      await cdp.evaluate(`window.__PI_CAPTURE__ = 1; ${expression}`);
+      await cdp.evaluate(`window.__OCODE_CAPTURE__ = 1; ${expression}`);
       await delay(420);
     };
     const clickSidebarToggle = async () => {
@@ -455,12 +455,12 @@ async function main() {
       () => cdp.evaluate(`!document.querySelector(".startup-splash")`),
       "startup splash cleared",
     );
-    await rig(`window.__PI_DESKTOP__.ensureVisualFixtures()`);
+    await rig(`window.__OCODE__.ensureVisualFixtures()`);
     // The seeded workspace already holds more sessions than the capture fixture
     // is willing to add, so activate a seeded one: the shell needs an active
     // session before the work panel can open.
     await rig(
-      `window.__PI_DESKTOP__.selectSession(${JSON.stringify(sidebarSeed.alphaSessionIds[0])})`,
+      `window.__OCODE__.selectSession(${JSON.stringify(sidebarSeed.alphaSessionIds[0])})`,
     );
     await waitFor(
       () =>
@@ -488,7 +488,7 @@ async function main() {
         openProjectPaths: sidebarSeed.keys,
       };
       await cdp.evaluate(
-        `window.localStorage.setItem("pi.desktop.sidebarPreferences", ${JSON.stringify(JSON.stringify(sidebarPreferences))})`,
+        `window.localStorage.setItem("ocode.desktop.sidebarPreferences", ${JSON.stringify(JSON.stringify(sidebarPreferences))})`,
       );
       await cdp.send("Page.reload", {});
       const projectKeys = JSON.stringify(sidebarSeed.keys);
@@ -556,8 +556,8 @@ async function main() {
     );
 
     // 1. Opening the panel may not touch the native window.
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(720)`);
+    await rig(`window.__OCODE__.openWorkPanel()`);
+    await rig(`window.__OCODE__.setWorkPanelWidth(720)`);
     const opened = await measure();
     check(
       opened.windowWidth === baseline.windowWidth,
@@ -576,13 +576,13 @@ async function main() {
     );
 
     // 2. Divider drag with the sidebar expanded: floor holds mid-drag.
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__OCODE__.collapseWorkPanel()`);
     await delay(700);
     if ((await measure()).sidebarKind !== "sidebar") {
       await clickSidebarToggle();
     }
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(244)`);
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
+    await rig(`window.__OCODE__.setWorkPanelWidth(244)`);
+    await rig(`window.__OCODE__.openWorkPanel()`);
     const dragStart = await measure();
     const drag = await dragDivider(26);
     check(
@@ -613,7 +613,7 @@ async function main() {
     );
 
     // 3. Reopen spends panel width first, otherwise targeting 460px.
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(720)`);
+    await rig(`window.__OCODE__.setWorkPanelWidth(720)`);
     if ((await measure()).sidebarKind === "sidebar") {
       await clickSidebarToggle();
     }
@@ -642,9 +642,9 @@ async function main() {
     );
 
     // 4. Closing the panel restores a layout-collapsed sidebar only.
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(720)`);
+    await rig(`window.__OCODE__.setWorkPanelWidth(720)`);
     const pressed = await measure();
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__OCODE__.collapseWorkPanel()`);
     await delay(700);
     const restored = await measure();
     check(
@@ -698,12 +698,12 @@ async function main() {
     );
 
     // 5. Preview (maximize) mode: MainChat yields its width to the panel.
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
+    await rig(`window.__OCODE__.openWorkPanel()`);
     await waitFor(
       () => cdp.evaluate(`!!document.querySelector('[data-testid="work-panel"]')`),
       "work panel mounted for preview mode",
     );
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(500)`);
+    await rig(`window.__OCODE__.setWorkPanelWidth(500)`);
     await waitFor(
       () => cdp.evaluate(`!!document.querySelector(".work-panel-new-tab")`),
       "work panel new-tab action",
@@ -829,7 +829,7 @@ async function main() {
         document.querySelector('.window-chrome-row [data-nav="new-task"]');
       const firstActionBox = firstAction?.getBoundingClientRect();
       return {
-        platform: window.piDesktop?.platform ?? "unknown",
+        platform: window.ocode?.platform ?? "unknown",
         fullscreen: document.documentElement.dataset.fullscreen === "true",
         firstActionLeft: firstActionBox ? Math.round(firstActionBox.left) : null,
         // Read the reserve as the layout resolved it instead of restating the
@@ -1015,16 +1015,16 @@ async function main() {
         ),
       "home route returns after preview navigation",
     );
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
+    await rig(`window.__OCODE__.openWorkPanel()`);
     await waitFor(
       () => cdp.evaluate(`!!document.querySelector('[data-testid="work-panel"]')`),
       "work panel remounted after preview navigation",
     );
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(500)`);
+    await rig(`window.__OCODE__.setWorkPanelWidth(500)`);
 
     // 6. Preview-mode details: inert divider, sidebar interop, persistence.
     const storedBefore = await cdp.evaluate(
-      `localStorage.getItem("pi.desktop.workPanel")`,
+      `localStorage.getItem("ocode.desktop.workPanel")`,
     );
     await cdp.evaluate(
       `document.querySelector(".work-panel-maximize")?.dispatchEvent(new MouseEvent("click", { bubbles: true }))`,
@@ -1079,7 +1079,7 @@ async function main() {
       JSON.stringify(afterDividerDrag),
     );
     const storedAfterPreview = await cdp.evaluate(
-      `localStorage.getItem("pi.desktop.workPanel")`,
+      `localStorage.getItem("ocode.desktop.workPanel")`,
     );
     check(
       storedBefore === storedAfterPreview,
@@ -1100,7 +1100,7 @@ async function main() {
       JSON.stringify(previewWithSidebar),
     );
     const storedAfterReopen = await cdp.evaluate(
-      `localStorage.getItem("pi.desktop.workPanel")`,
+      `localStorage.getItem("ocode.desktop.workPanel")`,
     );
     // Preview is transient: reopening the sidebar changes only the current
     // rectangle and must not rewrite the user's preferred width.
@@ -1109,7 +1109,7 @@ async function main() {
       "reopening the sidebar from preview mode preserves the preferred width",
       `${storedAfterPreview} -> ${storedAfterReopen}`,
     );
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__OCODE__.collapseWorkPanel()`);
     await delay(900);
     const closedFromPreview = await measure();
     check(
@@ -1152,7 +1152,7 @@ async function main() {
         bandZ: band ? Number(getComputedStyle(band).zIndex) : null,
         bandHeight: band ? Math.round(band.getBoundingClientRect().height) : null,
         bandPointerEvents: band ? getComputedStyle(band).pointerEvents : null,
-        platform: window.piDesktop?.platform ?? "unknown",
+        platform: window.ocode?.platform ?? "unknown",
         fullscreen: document.documentElement.dataset.fullscreen === "true",
         firstActionLeft: firstActionBox ? Math.round(firstActionBox.left) : null,
         bandInset,
@@ -1167,7 +1167,7 @@ async function main() {
         panelToggle: !!document.querySelector(".app-work-panel-toggle"),
         sidebarWidth: sidebar ? Math.round(sidebar.getBoundingClientRect().width) : null,
         handleVisible: handle ? getComputedStyle(handle).display !== "none" : false,
-        storedWidth: window.localStorage.getItem("pi.desktop.sidebarWidth"),
+        storedWidth: window.localStorage.getItem("ocode.desktop.sidebarWidth"),
         previewActionGroupRight: previewActionGroupBox
           ? Math.round(previewActionGroupBox.right)
           : null,
@@ -1254,7 +1254,7 @@ async function main() {
     await cdp.evaluate(`document.querySelector(".work-panel-maximize")?.click?.()`);
     await e2eChromeSettle(900);
 
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__OCODE__.collapseWorkPanel()`);
     const originalTheme = await cdp.evaluate(`document.documentElement.dataset.theme`);
     const routeActionSelector = ".main-titlebar .title-nav-btn";
     const readChromeAction = (selector) => cdp.evaluate(`(() => {
@@ -1278,7 +1278,7 @@ async function main() {
     };
     for (const route of ["plugins", "scheduled"]) {
       if ((await measure()).sidebarKind !== "sidebar") await clickSidebarToggle();
-      await rig(`window.__PI_DESKTOP__.setPage(${JSON.stringify(route)})`);
+      await rig(`window.__OCODE__.setPage(${JSON.stringify(route)})`);
       await waitFor(
         () => cdp.evaluate(`!!document.querySelector(".route-page .page-frame") && !!document.querySelector(".main-titlebar")`),
         `${route} route mounted`,
@@ -1293,7 +1293,7 @@ async function main() {
         `${route} exercises the ordinary titlebar, not preview chrome`,
       );
       for (const theme of ["light", "dark"]) {
-        await cdp.evaluate(`window.__PI_DESKTOP__.setThemeAttr(${JSON.stringify(theme)})`);
+        await cdp.evaluate(`window.__OCODE__.setThemeAttr(${JSON.stringify(theme)})`);
         await movePointer(500, 300);
         const reference = await readChromeAction(".app-work-panel-toggle");
         await movePointer(reference.x, reference.y);
@@ -1515,7 +1515,7 @@ async function main() {
       openProjectPaths: sidebarSeed.keys,
     };
     await cdp.evaluate(
-      `window.localStorage.setItem("pi.desktop.sidebarPreferences", ${JSON.stringify(JSON.stringify(sidebarPreferences))})`,
+      `window.localStorage.setItem("ocode.desktop.sidebarPreferences", ${JSON.stringify(JSON.stringify(sidebarPreferences))})`,
     );
     await cdp.send("Page.reload", {});
     // The retained-tab list is renderer-local and only read at startup, so the
@@ -1801,7 +1801,7 @@ async function main() {
     await cdp.evaluate(`document.documentElement.dataset.theme = ${JSON.stringify(originalTheme)}`);
 
     await checkSidebarSettings({
-      cdp, check, waitFor, artifactDir: process.env.PI_DESKTOP_LAYOUT_ARTIFACT_DIR,
+      cdp, check, waitFor, artifactDir: process.env.OCODE_LAYOUT_ARTIFACT_DIR,
     });
 
     const crashSentinel = `renderer-crash-${Date.now()}`;

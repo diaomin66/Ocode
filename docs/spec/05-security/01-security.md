@@ -274,7 +274,7 @@ The local MCP control server is an explicit automation boundary, not a general
 remote-control listener:
 
 - It is disabled by default and only starts with
-  `PI_DESKTOP_MCP_CONTROL=1`.
+  `OCODE_MCP_CONTROL=1`.
 - It binds `127.0.0.1` only and refuses to start if the listen address is not
   loopback. There is no configuration path for a LAN or public interface, and
   the feature does not revive the deferred remote Gateway / WebUI scope.
@@ -361,7 +361,7 @@ hashes of canonical path plus verified header id. Every discovery/open resolves
 the real path below the configured Pi session root and revalidates header id and
 cwd; path traversal and symlink escape are rejected.
 
-Writable continuation requires a mode-0600 cooperative PI-Desktop lease beside
+Writable continuation requires a mode-0600 cooperative Ocode lease beside
 the session and full-byte identity checks before each SDK append. After an
 append, the adapter accepts only the unchanged prior prefix plus exactly one
 entry whose id and parent match the SDK operation. Any foreign/interleaved

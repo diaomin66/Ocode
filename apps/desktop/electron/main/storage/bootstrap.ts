@@ -4,8 +4,8 @@ import { realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { catalogs, resolveLocale } from "@pi-desktop/i18n";
-import type { StorageProgress } from "@pi-desktop/shared";
+import { catalogs, resolveLocale } from "@ocode/i18n";
+import type { StorageProgress } from "@ocode/shared";
 import { resolveHostBinary } from "../host-process";
 import { clearCaches, migrateFiles, removeBackups } from "./files";
 import { readStoragePreferences, STORAGE_PREFERENCE_FILE, writeStoragePreferences, type StoragePreferences } from "./preferences";
@@ -39,7 +39,7 @@ export async function prepareStorage(defaultData: string, overridden: boolean): 
       const canRecoverMissingDefault = missingData && hasPersistedPreferences && !preferences.pending;
       const canResumeEmptyInstallMigration = missingData && !missingBrowser && preferences.pending?.kind === "migrate";
       if (!isDefaultStorage || !(isFirstLaunch || canRecoverMissingDefault || canResumeEmptyInstallMigration)) {
-        throw new Error("The selected storage directory is unavailable. Reconnect its drive before starting PI-Desktop.");
+        throw new Error("The selected storage directory is unavailable. Reconnect its drive before starting Ocode.");
       }
       if (canRecoverMissingDefault) {
         const recovered = await recoverMissingDefaultStorage(file, defaults, preferences);
@@ -69,7 +69,7 @@ export async function prepareStorage(defaultData: string, overridden: boolean): 
   const job = preferences.pending;
   // Chromium initializes the default session when the first window is created.
   // That must not land in the profile this job is about to copy or clean.
-  const maintenanceSession = join(app.getPath("temp"), `pi-desktop-storage-${job.id}`);
+  const maintenanceSession = join(app.getPath("temp"), `ocode-storage-${job.id}`);
   mkdirSync(maintenanceSession, { recursive: true });
   app.setPath("sessionData", maintenanceSession);
   await app.whenReady();

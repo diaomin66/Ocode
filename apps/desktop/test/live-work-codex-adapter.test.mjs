@@ -32,24 +32,24 @@ async function codexHarness(t) {
     onLiveVoicePort: () => () => {},
     async invoke(channel, input) {
       const routes = {
-        "pi-desktop/settings/get": () => settings,
-        "pi-desktop/voice/live/status": () => service.status(),
-        "pi-desktop/voice/live/prepare": () => service.prepare(owner, input),
-        "pi-desktop/voice/live/connect": () => service.connect(owner, input),
-        "pi-desktop/voice/live/setMuted": () => service.setMuted(owner, input),
-        "pi-desktop/voice/live/reportMedia": () => service.reportMedia(owner, input),
-        "pi-desktop/voice/live/reportPlayback": () => service.reportPlayback(owner, input),
-        "pi-desktop/voice/live/reportDelegation": () => service.reportDelegation(owner, input),
-        "pi-desktop/voice/live/reportControlApplied": () => service.reportControlApplied(owner, input),
-        "pi-desktop/voice/live/end": () => service.end(owner, input),
-        "pi-desktop/voice/live/heartbeat": () => service.heartbeat(owner, input.callId),
+        "ocode/settings/get": () => settings,
+        "ocode/voice/live/status": () => service.status(),
+        "ocode/voice/live/prepare": () => service.prepare(owner, input),
+        "ocode/voice/live/connect": () => service.connect(owner, input),
+        "ocode/voice/live/setMuted": () => service.setMuted(owner, input),
+        "ocode/voice/live/reportMedia": () => service.reportMedia(owner, input),
+        "ocode/voice/live/reportPlayback": () => service.reportPlayback(owner, input),
+        "ocode/voice/live/reportDelegation": () => service.reportDelegation(owner, input),
+        "ocode/voice/live/reportControlApplied": () => service.reportControlApplied(owner, input),
+        "ocode/voice/live/end": () => service.end(owner, input),
+        "ocode/voice/live/heartbeat": () => service.heartbeat(owner, input.callId),
       };
       assert.ok(routes[channel], `unexpected fixture IPC: ${channel}`);
       return { ok: true, data: await routes[channel]() };
     },
   };
   Object.defineProperty(globalThis, "window", { configurable: true, value: {
-    piDesktop: ipc, location: { origin: "null" }, addEventListener() {}, removeEventListener() {},
+    ocode: ipc, location: { origin: "null" }, addEventListener() {}, removeEventListener() {},
   } });
   Object.defineProperty(globalThis, "navigator", { configurable: true, value: { mediaDevices: { getUserMedia: async () => ({ getAudioTracks: () => tracks, getTracks: () => tracks }) } } });
   class FakePeer extends EventTarget {
@@ -93,9 +93,9 @@ async function codexHarness(t) {
       async fetchImpl(url, init) { requests.push({ url, init }); return new Response("v=0\r\n", { status: 201 }); },
     }),
     createPcmBridge() { throw new Error("Codex must not use PCM transport"); },
-    sendView: (_owner, view) => emit("pi-desktop/voice/live/event/changed", view),
-    sendControl: (_owner, event) => { controls.push(event); emit("pi-desktop/voice/live/event/control", event); },
-    sendTranscript: (_owner, event) => emit("pi-desktop/voice/live/event/transcript", event),
+    sendView: (_owner, view) => emit("ocode/voice/live/event/changed", view),
+    sendControl: (_owner, event) => { controls.push(event); emit("ocode/voice/live/event/control", event); },
+    sendTranscript: (_owner, event) => emit("ocode/voice/live/event/transcript", event),
     ownerAlive: () => true, acquireMicrophone: () => () => {},
     resolveWorkBinding: async () => ({ workSessionId: WORK_SESSION_ID, workBindingRevision: 3, label: "Production fixture", contextEnabled: false }),
     openWorkScope: (callId, binding) => production.openCall(callId, binding),

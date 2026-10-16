@@ -11,7 +11,7 @@ describe("foldFullwidthHeaderValue", () => {
   });
 
   it("folds the ideographic space but keeps interior ASCII text", () => {
-    expect(foldFullwidthHeaderValue("PI\u3000Desktop")).toBe("PI Desktop");
+    expect(foldFullwidthHeaderValue("Ocode\u3000Desktop")).toBe("Ocode Desktop");
   });
 
   it("leaves halfwidth katakana alone", () => {
@@ -32,7 +32,7 @@ describe("foldFullwidthHeaderValue", () => {
 describe("firstHeaderValueFault", () => {
   it("accepts printable ASCII, HTAB, and Latin-1", () => {
     expect(firstHeaderValueFault("")).toBeNull();
-    expect(firstHeaderValueFault("pi-desktop/0.15.3")).toBeNull();
+    expect(firstHeaderValueFault("ocode/0.15.3")).toBeNull();
     expect(firstHeaderValueFault("a\tb")).toBeNull();
     expect(firstHeaderValueFault("caf\u00E9")).toBeNull();
   });
@@ -70,8 +70,8 @@ describe("inspectHeaderValue", () => {
   });
 
   it("marks an untouched value as not folded", () => {
-    expect(inspectHeaderValue("  pi-desktop  ")).toEqual({
-      value: "pi-desktop",
+    expect(inspectHeaderValue("  ocode  ")).toEqual({
+      value: "ocode",
       folded: false,
       fault: null,
     });

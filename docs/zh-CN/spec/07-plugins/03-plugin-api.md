@@ -91,7 +91,7 @@ pi.plugin.getDataPath(): Promise<string> // plugin-private directory
 支持生成字符串、数字、布尔、枚举、JSON 和 `shortcut` 控件。生成式 `title` /
 `description` / `enum[].label` 是作者语言纯字符串，宿主不会在这些字段上解析 locale
 map。需要本地化设置页的插件应贡献 `settingsDestinations` 并读取 `pi.app.getLocale`
-（ADR 0280）。快捷键仅属于插件域：只有在 PI-Desktop 窗口聚焦且插件激活范围匹配当前项目时，
+（ADR 0280）。快捷键仅属于插件域：只有在 Ocode 窗口聚焦且插件激活范围匹配当前项目时，
 才会调用声明的命令；本版本不会注册操作系统全局快捷键。用户编辑后，主机会向插件发送
 `plugin:settingsChanged`，便于刷新内存中的配置。
 
@@ -553,7 +553,7 @@ type SessionCollaborationOperation =
   | "session/collaboration/result"
   | "session/collaboration/cancel"
 
-// 所有调用均使用 pi.desktop.invoke({ operation, args: [input] })。
+// 所有调用均使用 ocode.desktop.invoke({ operation, args: [input] })。
 type SpawnInput = {
   task: string
   title?: string
@@ -790,13 +790,13 @@ pi.net.websocket.close(input: { socketId: string; code?: number; reason?: string
 ### 桌面控制（需要 `desktop.control`）
 
 ```ts
-pi.desktop.listOperations(): Promise<Array<{
+ocode.desktop.listOperations(): Promise<Array<{
   id: string
   description: string
   risk: "read" | "write" | "dangerous"
 }>>
 
-pi.desktop.invoke(input: {
+ocode.desktop.invoke(input: {
   operation: string
   args?: unknown[]
   confirm?: boolean
@@ -806,7 +806,7 @@ pi.desktop.invoke(input: {
 这是第一方插件通往与可选启用的本地 MCP 控制平面共用同一份已审查操作目录的
 网关（ADR 0203 / D370）。两份目录的差异仅在于标记为 plugin-only 的操作：六个
 `session/collaboration/*` 操作可以通过该网关调用，却被刻意排除在 MCP 可见目录
-之外（`tools/list`、`pi_control_describe` 以及 `pi_desktop_invoke` 的枚举），
+之外（`tools/list`、`pi_control_describe` 以及 `ocode_invoke` 的枚举），
 因为它们需要已认证的插件调用上下文，且渲染器没有任何变更通道。返回的目录省略
 Electron 通道名，插件也永远拿不到 MCP bearer token。调用复用控制器、IPC 处理器、
 生命周期检查、完成事件和审计边界；插件无法触达任意 Electron IPC。
@@ -895,7 +895,7 @@ type PluginGlobalShortcut = {
 也只是属于该插件的一条命令。
 
 `command` 必须已经由调用插件注册；否则以 `INVALID_ARGUMENT` 失败。被操作
-系统保留、被 PI-Desktop 自己当前占用（默认 `Alt+Space` 打开插件启动器、
+系统保留、被 Ocode 自己当前占用（默认 `Alt+Space` 打开插件启动器、
 `Alt+Shift+W` 呼出或隐藏窗口；用户改绑后释放出来的加速键可以再次被插件使用）或
 已被另一个插件持有的加速键会被拒绝而不是被抢走，被拒绝的重新注册会保留原来
 的绑定。拒绝是返回的结果，不是抛出的异常：

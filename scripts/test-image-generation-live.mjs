@@ -22,10 +22,10 @@ if (process.argv.includes("--stdin")) {
   reader.close();
   inputConfig = JSON.parse(line);
 }
-const base = inputConfig.baseUrl || process.env.PI_IMAGE_TEST_BASE_URL;
-const chatKey = inputConfig.chatKey || process.env.PI_IMAGE_TEST_CHAT_KEY;
-const imageKey = inputConfig.imageKey || process.env.PI_IMAGE_TEST_IMAGE_KEY;
-const imageModel = inputConfig.imageModel || process.env.PI_IMAGE_TEST_MODEL;
+const base = inputConfig.baseUrl || process.env.OCODE_IMAGE_TEST_BASE_URL;
+const chatKey = inputConfig.chatKey || process.env.OCODE_IMAGE_TEST_CHAT_KEY;
+const imageKey = inputConfig.imageKey || process.env.OCODE_IMAGE_TEST_IMAGE_KEY;
+const imageModel = inputConfig.imageModel || process.env.OCODE_IMAGE_TEST_MODEL;
 assert(base && chatKey && imageKey && imageModel, "Set the opt-in image test environment first.");
 const apiBase = new URL(base);
 if (!apiBase.pathname.replace(/\/+$/, "")) apiBase.pathname = "/v1";
@@ -44,7 +44,7 @@ try {
     .map((row) => row.id)
     .filter((id) => typeof id === "string");
   const chatModel =
-    process.env.PI_IMAGE_TEST_CHAT_MODEL ||
+    process.env.OCODE_IMAGE_TEST_CHAT_MODEL ||
     ["deepseek", "deepseek-chat", "deepseek-v3"].find((id) => ids.includes(id)) ||
     ids.find((id) => /deepseek/i.test(id));
   assert(chatModel, "No DeepSeek model was advertised by the supplied endpoint.");

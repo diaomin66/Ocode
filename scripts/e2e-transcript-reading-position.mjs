@@ -12,7 +12,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(join(root, "packages/agent-runtime/package.json"));
 const { build } = require("esbuild");
 const { electronBinary } = resolveElectronBinary(root);
-const temp = await mkdtemp(join(process.env.PI_SCRATCH_DIR ?? root, "reading-position-"));
+const temp = await mkdtemp(join(process.env.OCODE_SCRATCH_DIR ?? root, "reading-position-"));
 try {
   await build({
     entryPoints: [join(root, "scripts/e2e/transcript-reading-position.tsx")],

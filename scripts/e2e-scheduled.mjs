@@ -21,7 +21,7 @@ mkdirSync(alternateProject);
 // The Host canonicalizes the workspace path it is given, and macOS hands out
 // `TMPDIR` under the `/var` symlink, so compare resolved paths on both sides.
 const canonical = (value) => realpathSync(value).replaceAll("\\", "/").toLowerCase();
-const evidence = process.env.PI_SCHEDULED_EVIDENCE_DIR;
+const evidence = process.env.OCODE_SCHEDULED_EVIDENCE_DIR;
 if (evidence) mkdirSync(evidence, { recursive: true });
 const model = scheduledModelFixture();
 const server = createServer(model.handler);
@@ -66,11 +66,11 @@ await host.call("settings.set", {
 await host.stop();
 
 const { appDir, electronBinary } = resolveElectronBinary();
-const port = Number(process.env.PI_SCHEDULED_CDP_PORT || 9378);
+const port = Number(process.env.OCODE_SCHEDULED_CDP_PORT || 9378);
 const env = {
   ...process.env,
-  PI_DESKTOP_DATA_DIR: dataDir,
-  PI_DESKTOP_START_MAXIMIZED: "0",
+  OCODE_DATA_DIR: dataDir,
+  OCODE_START_MAXIMIZED: "0",
   ELECTRON_RENDERER_URL: "",
 };
 delete env.ELECTRON_RUN_AS_NODE;
@@ -144,7 +144,7 @@ try {
   };
   const invoke = (name, ...args) =>
     evaluate(
-      `(async () => { const r = await window.piDesktop.invoke(window.piDesktop.channels.invoke[${JSON.stringify(name)}], ...${JSON.stringify(args)}); if (!r.ok) throw new Error(JSON.stringify(r.error)); return r.data; })()`,
+      `(async () => { const r = await window.ocode.invoke(window.ocode.channels.invoke[${JSON.stringify(name)}], ...${JSON.stringify(args)}); if (!r.ok) throw new Error(JSON.stringify(r.error)); return r.data; })()`,
     );
   await send("Page.enable");
   const click = async (text, selector = "button", byLabel = false) => {

@@ -1,4 +1,4 @@
-# PI-Desktop Spec
+# Ocode Spec
 
 > Frozen baseline: `0.4.20` · current app line: `0.14.x`
 > Updated: `2026-10-02`

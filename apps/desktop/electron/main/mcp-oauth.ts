@@ -6,7 +6,7 @@ import {
   type McpOAuthLoginEvent,
   type McpServerRecord,
   type McpServerStatus,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { allowInsecureUserEndpointsEnabled } from "./endpoint-policy.ts";
 import { authorizationMetadataUrls, parseBearerChallenge, selectOAuthScope } from "./mcp-oauth-discovery.ts";
 export type StoredMcpOAuthToken = {
@@ -221,7 +221,7 @@ export class McpOAuthManager {
           params: {
             protocolVersion: "2025-06-18",
             capabilities: {},
-            clientInfo: { name: "PI-Desktop", version: "1" },
+            clientInfo: { name: "Ocode", version: "1" },
           },
         }),
       });
@@ -327,7 +327,7 @@ export class McpOAuthManager {
     registrationEndpoint: string,
     redirectUris: string | string[],
     trustedUrl?: string,
-    clientName = "PI-Desktop",
+    clientName = "Ocode",
   ): Promise<{ clientId: string; clientSecret?: string }> {
     assertTlsProtectedUrl(registrationEndpoint, "registration_endpoint", trustedUrl);
     const uris = Array.isArray(redirectUris) ? redirectUris : [redirectUris];
@@ -619,7 +619,7 @@ export class McpOAuthManager {
             res.end(
               this.renderHtml(
                 true,
-                "Authorization successful! You can close this tab and return to PI-Desktop.",
+                "Authorization successful! You can close this tab and return to Ocode.",
               ),
             );
 
@@ -677,7 +677,7 @@ export class McpOAuthManager {
               clientSecret = registered.clientSecret;
               redirectUrisToStore = registered.redirectUris;
             } else {
-              clientId = "pi-desktop";
+              clientId = "ocode";
             }
 
             const authUrl = new URL(metadata.authorizationEndpoint);

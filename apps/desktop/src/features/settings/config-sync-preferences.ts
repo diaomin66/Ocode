@@ -4,7 +4,7 @@ import type {
   ConfigSyncHistoryEntry,
   ConfigSyncMode,
   ConfigSyncState,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 /**
  * The draft is deliberately limited to non-sensitive connection fields.
@@ -29,7 +29,7 @@ export type ConfigSyncDraft = {
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-export const CONFIG_SYNC_DRAFT_STORAGE_KEY = "pi.desktop.configSyncS3Draft.v1";
+export const CONFIG_SYNC_DRAFT_STORAGE_KEY = "ocode.desktop.configSyncS3Draft.v1";
 export const CONFIG_SYNC_HISTORY_CACHE_TTL_MS = 30_000;
 
 const TEXT_FIELDS = ["endpoint", "region", "bucket", "prefix", "accessKeyId", "deviceLabel"] as const;

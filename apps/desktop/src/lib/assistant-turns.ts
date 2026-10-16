@@ -3,8 +3,8 @@ import type {
   HostedSearchRound,
   MessageUsage,
   UiMessage,
-} from "@pi-desktop/shared";
-import { addUsage, hostedSearchRounds } from "@pi-desktop/shared";
+} from "@ocode/shared";
+import { addUsage, hostedSearchRounds } from "@ocode/shared";
 import { getToolAction, isDelegationStartTool } from "./tool-display";
 import { messageContentFacts } from "./transcript-summary";
 

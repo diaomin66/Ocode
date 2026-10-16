@@ -13,7 +13,7 @@ import {
   type ComposerTrigger,
   type FsIndexEntry,
   type FuzzyMatch,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { api } from "../lib/api";
 import {
   fetchComposerCommands,

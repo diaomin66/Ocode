@@ -1,4 +1,4 @@
-import { shellQuote, type PiHostReadyLine } from "./pi-host-bootstrap-script.js";
+import { shellQuote, type OcodeHostReadyLine } from "./ocode-host-bootstrap-script.js";
 import { REMOTE_DEPLOY_LOCK_SCRIPT } from "./remote-deploy-lock.js";
 import type { SshTransport } from "./ssh-transport.js";
 
@@ -28,10 +28,10 @@ export function buildRemoteHostSupervisorScript(readyTimeoutSec = 30): string {
   return `#!/bin/sh
 set -eu
 umask 077
-die() { printf '%s\\n' "PI_HOST_SUPERVISOR_FAILED $1" >&2; exit 1; }
+die() { printf '%s\\n' "OCODE_HOST_SUPERVISOR_FAILED $1" >&2; exit 1; }
 [ -n "\${HOME:-}" ] || die no-home
-base="$HOME/.pi-desktop/pi-host"
-entry="$base/current/pi-host.js"
+base="$HOME/.ocode/ocode-host"
+entry="$base/current/ocode-host.js"
 work="$base/.bootstrap"
 [ ! -L "$work" ] || die unsafe-work-directory
 mkdir -p "$work"
@@ -40,15 +40,15 @@ ${REMOTE_DEPLOY_LOCK_SCRIPT}
 trap release_deploy_lock EXIT
 trap 'exit 1' HUP INT TERM
 [ -f "$entry" ] || die host-not-installed
-log="$work/pi-host.log"
-err="$work/pi-host.err"
-pidfile="$work/pi-host.pid"
+log="$work/ocode-host.log"
+err="$work/ocode-host.err"
+pidfile="$work/ocode-host.pid"
 for file in "$log" "$err" "$pidfile"; do
   [ ! -L "$file" ] || die unsafe-state-file
   [ ! -e "$file" ] || [ -f "$file" ] || die unsafe-state-file
 done
-# Match the installed entry point, not a generic node or pi-host process.
-physical_entry="$(cd "$base/current" && pwd -P)/pi-host.js"
+# Match the installed entry point, not a generic node or ocode-host process.
+physical_entry="$(cd "$base/current" && pwd -P)/ocode-host.js"
 is_host() {
   kill -0 "$host_pid" 2>/dev/null || return 1
   command_line=$(ps -p "$host_pid" -o command= 2>/dev/null) || die host-process-unreadable
@@ -79,8 +79,8 @@ fi
 waited=0
 while [ "$waited" -lt ${shellQuote(String(readyTimeoutSec))} ]; do
   kill -0 "$host_pid" 2>/dev/null || die host-exited
-  grep -q '^PI_HOST_FAILED ' "$log" 2>/dev/null && die host-start-failed
-  ready=$(grep -m1 '^PI_HOST_READY ' "$log" 2>/dev/null || true)
+  grep -q '^OCODE_HOST_FAILED ' "$log" 2>/dev/null && die host-start-failed
+  ready=$(grep -m1 '^OCODE_HOST_READY ' "$log" 2>/dev/null || true)
   if [ -n "$ready" ]; then
     is_host || die host-exited
     # Never echo a historic single-use pairing token.
@@ -95,13 +95,13 @@ die ready-timeout
 }
 
 /** Treat SSH stdout as an untrusted boundary; never include it in diagnostics. */
-export function parseRemoteHostReady(stdout: string, options: RemoteHostSupervisorOptions): PiHostReadyLine {
+export function parseRemoteHostReady(stdout: string, options: RemoteHostSupervisorOptions): OcodeHostReadyLine {
   const lines = stdout.trim().split(/\r?\n/);
-  if (lines.length !== 1 || !lines[0]?.startsWith("PI_HOST_READY ")) {
+  if (lines.length !== 1 || !lines[0]?.startsWith("OCODE_HOST_READY ")) {
     throw failure("Remote Host did not report a single ready line");
   }
   let value: unknown;
-  try { value = JSON.parse(lines[0].slice("PI_HOST_READY ".length)); }
+  try { value = JSON.parse(lines[0].slice("OCODE_HOST_READY ".length)); }
   catch { throw failure("Remote Host reported malformed readiness"); }
   if (!value || typeof value !== "object") throw failure("Remote Host reported malformed readiness");
   const { hostId, host, port, version } = value as Record<string, unknown>;
@@ -125,7 +125,7 @@ export function parseRemoteHostReady(stdout: string, options: RemoteHostSupervis
 export async function ensureRemoteHostReady(
   transport: SshTransport,
   options: RemoteHostSupervisorOptions,
-): Promise<PiHostReadyLine> {
+): Promise<OcodeHostReadyLine> {
   const timeout = options.readyTimeoutSec ?? 30;
   const result = await transport.execWithInput("sh -s", buildRemoteHostSupervisorScript(timeout), {
     timeoutMs: (120 + timeout + 15) * 1000,

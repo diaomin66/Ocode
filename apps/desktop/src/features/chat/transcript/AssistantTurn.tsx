@@ -8,8 +8,8 @@ import { useTranslation } from "react-i18next";
 import type {
   AgentActivity,
   ContextCompactionMark,
-} from "@pi-desktop/shared";
-import { formatCompactTokenCount } from "@pi-desktop/shared";
+} from "@ocode/shared";
+import { formatCompactTokenCount } from "@ocode/shared";
 import {
   reuseReadonlyMap,
   type AssistantTurnEntry,

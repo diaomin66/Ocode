@@ -37,7 +37,7 @@ import type {
   PluginProviderOAuthEvent,
   PluginProviderOAuthPrompt,
   PluginProviderOAuthRequest,
-} from "@pi-desktop/plugin-sdk";
+} from "@ocode/plugin-sdk";
 import { registerBunOAuthFlows } from "@earendil-works/pi-ai/bun-oauth";
 import { builtinModels } from "@earendil-works/pi-ai/providers/all";
 import {
@@ -48,7 +48,7 @@ import {
   runWithProviderHeaders,
   type ModelConfig,
   type VendorModelBinding,
-} from "@pi-desktop/agent-runtime";
+} from "@ocode/agent-runtime";
 import {
   isConversationModelId,
   parseVendorModelIds,
@@ -57,7 +57,7 @@ import {
   vendorModelListRequest,
   wireForLiveModel,
 } from "./vendor-live-models.ts";
-import type { ThinkingLevel } from "@pi-desktop/shared";
+import type { ThinkingLevel } from "@ocode/shared";
 import {
   OAUTH_AUTH_KIND,
   type OAuthLoginEvent,
@@ -66,7 +66,7 @@ import {
   type OAuthStartResult,
   type OAuthVendor,
   type ModelBinding,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 export { OAUTH_AUTH_KIND };
 

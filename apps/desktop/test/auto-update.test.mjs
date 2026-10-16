@@ -103,7 +103,7 @@ test("updater gates delivery mode by platform and delivery policy", () => {
   assert.match(updaterSource, /resolveUpdateModePolicy/);
   assert.match(updaterSource, /resolveDefaultUpdatePreference/);
   assert.match(updaterSource, /supportsAutomaticUpdates/);
-  assert.match(updaterSource, /piDistribution/);
+  assert.match(updaterSource, /ocodeDistribution/);
   assert.match(updaterSource, /autoUpdater\.autoDownload = false/);
   assert.match(updaterSource, /autoUpdater\.autoInstallOnAppQuit = false/);
   assert.match(updaterSource, /autoUpdater\.autoDownload = mode === "in-app"/);
@@ -141,7 +141,7 @@ test("updater gates delivery mode by platform and delivery policy", () => {
   assert.match(updaterSource, /autoUpdater\.on\("error"/);
   assert.match(
     updaterSource,
-    /github\.com\/vastsa\/PI-Desktop\/releases/,
+    /github\.com\/diaomin66\/Ocode\/releases/,
     "releases fallback URL",
   );
   assert.match(
@@ -257,8 +257,8 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
   const pkg = JSON.parse(pkgSource);
   assert.ok(pkg.dependencies["electron-updater"], "electron-updater dependency");
   assert.equal(pkg.build.publish[0].provider, "github");
-  assert.equal(pkg.build.publish[0].owner, "vastsa");
-  assert.equal(pkg.build.publish[0].repo, "PI-Desktop");
+  assert.equal(pkg.build.publish[0].owner, "diaomin66");
+  assert.equal(pkg.build.publish[0].repo, "Ocode");
   const windowsUpdateConfigResource = pkg.build.win.extraResources.find(
     ({ from }) => from === "resources/app-update.yml",
   );
@@ -282,7 +282,7 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     provider: pkg.build.publish[0].provider,
     owner: pkg.build.publish[0].owner,
     repo: pkg.build.publish[0].repo,
-    updaterCacheDirName: `${pkg.name.replaceAll("/", "")}-updater`,
+    updaterCacheDirName: "@ocodedesktop-updater",
   });
   const macTargets = pkg.build.mac.target.map((entry) => entry.target);
   assert.ok(macTargets.includes("zip"), "mac zip target (Squirrel.Mac feed)");
@@ -296,7 +296,7 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     );
   }
   assert.match(pkg.scripts.dist, /build-desktop-release\.mjs/);
-  assert.equal(pkg.build.linux.executableName, "pi-desktop");
+  assert.equal(pkg.build.linux.executableName, "ocode");
   const linuxTargets = pkg.build.linux.target.map((entry) => entry.target);
   assert.deepEqual(
     linuxTargets,
@@ -304,12 +304,12 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     "Linux release targets",
   );
   // Scoped package name is not a valid deb/rpm package or file name.
-  assert.equal(pkg.build.deb.packageName, "pi-desktop");
-  assert.equal(pkg.build.rpm.packageName, "pi-desktop");
+  assert.equal(pkg.build.deb.packageName, "ocode");
+  assert.equal(pkg.build.rpm.packageName, "ocode");
   assert.ok(!pkg.build.deb.artifactName.includes("${name}"), "deb artifactName");
   assert.equal(
     pkg.build.rpm.artifactName,
-    "pi-desktop-${version}-${arch}.${ext}",
+    "ocode-${version}-${arch}.${ext}",
     "rpm artifactName",
   );
   assert.deepEqual(
@@ -318,23 +318,23 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     "rpm build-id configuration",
   );
   // GitHub asset URLs mangle spaces; keep Windows artifact names space-free.
-  assert.equal(pkg.build.nsis.artifactName, "PI-Desktop-Setup-${version}.${ext}");
+  assert.equal(pkg.build.nsis.artifactName, "Ocode-Setup-${version}.${ext}");
   const winTargets = pkg.build.win.target.map((entry) => entry.target);
   assert.deepEqual(winTargets, ["nsis", "zip", "portable"], "Windows release targets");
-  assert.equal(pkg.build.portable.artifactName, "PI-Desktop-Portable-${version}.${ext}", "portable artifact name");
+  assert.equal(pkg.build.portable.artifactName, "Ocode-Portable-${version}.${ext}", "portable artifact name");
   assert.equal(
     pkg.build.win.artifactName,
-    "PI-Desktop-Portable-${version}.${ext}",
+    "Ocode-Portable-${version}.${ext}",
   );
-  assert.equal(pkg.build.extraMetadata.piDistribution, "installed");
+  assert.equal(pkg.build.extraMetadata.ocodeDistribution, "installed");
   assert.match(pkg.scripts["dist:win"], /build-desktop-release\.mjs win/);
   assert.match(buildReleaseSource, /"--win",\s*"nsis"/);
   assert.match(buildReleaseSource, /"--win",\s*"zip"/);
   assert.match(buildReleaseSource, /"--win",\s*"portable"/);
-  assert.match(buildReleaseSource, /piDistribution=portable/);
+  assert.match(buildReleaseSource, /ocodeDistribution=portable/);
   assert.match(buildReleaseSource, /"--publish",\s*"never"/);
-  assert.match(buildReleaseSource, /piDistribution=installed/);
-  assert.match(buildReleaseSource, /piDistribution=zip/);
+  assert.match(buildReleaseSource, /ocodeDistribution=installed/);
+  assert.match(buildReleaseSource, /ocodeDistribution=zip/);
   assert.match(
     buildReleaseSource,
     /shell:\s*process\.platform === "win32"/,
@@ -367,7 +367,7 @@ test("shared shipped-locale changelog is the in-app notes source of truth", () =
 test("update cache relocation and cleanup preserve the delta-update path", async () => {
   const updateCacheSource = await read("../electron/main/update-cache.ts");
   const maintenanceSource = await read("../electron/main/update-cache-maintenance.ts");
-  assert.match(updateCacheSource, /PI_DESKTOP_UPDATE_CACHE_DIR/);
+  assert.match(updateCacheSource, /OCODE_UPDATE_CACHE_DIR/);
   assert.match(updaterSource, /new RelocatedNsisUpdater\(baseCachePath\)/);
   assert.match(updaterSource, /relocateUpdateCacheBasePath\(this\.app, baseCachePath\)/);
   assert.match(maintenanceSource, /readFileSync\([\s\S]*app-update\.yml/);

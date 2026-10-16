@@ -64,7 +64,7 @@ test("a bound work session's pending decision reaches the voice surfaces", async
       location: { origin: "http://localhost" },
       addEventListener() {},
       removeEventListener() {},
-      piDesktop: {
+      ocode: {
         on: () => () => undefined,
         invoke: async () => ({ ok: true, data: status }),
       },

@@ -105,7 +105,7 @@ function workspace({
   storeHash = HASH,
   lockHash = HASH,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), "pi-desktop-patches-"));
+  const dir = mkdtempSync(join(tmpdir(), "ocode-patches-"));
 
   write(
     dir,

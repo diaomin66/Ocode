@@ -1,5 +1,5 @@
 import { pinyin } from "pinyin-pro";
-import type { PluginSummary } from "@pi-desktop/shared";
+import type { PluginSummary } from "@ocode/shared";
 
 function normalizeSearchText(value: string): string {
   return value

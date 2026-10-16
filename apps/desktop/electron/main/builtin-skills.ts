@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseSkillFrontmatter } from "@pi-desktop/plugin-sdk";
-import type { PluginSkillDef } from "@pi-desktop/agent-runtime";
+import { parseSkillFrontmatter } from "@ocode/plugin-sdk";
+import type { PluginSkillDef } from "@ocode/agent-runtime";
 import type { LoadedSkillDocument } from "./skill-document";
 import { getModuleDirectory } from "./module-path";
 
 /**
- * Skills PI-Desktop ships itself.
+ * Skills Ocode ships itself.
  *
  * These ride the same catalog-plus-`Skill`-tool path as plugin-contributed
  * skills (D174), so a first-party skill and a third-party one are
@@ -16,8 +16,8 @@ import { getModuleDirectory } from "./module-path";
 
 /** Bundled skill teaching the plugin-development loop. */
 export const PLUGIN_DEV_SKILL_FILE = "plugin-development.md";
-export const PLUGIN_DEV_SKILL_ID = "pi-desktop/plugin-development";
-export const IMAGE_GENERATION_SKILL_ID = "pi-desktop/imagegen";
+export const PLUGIN_DEV_SKILL_ID = "ocode/plugin-development";
+export const IMAGE_GENERATION_SKILL_ID = "ocode/imagegen";
 const IMAGE_GENERATION_SKILL_FILE = "image-generation.md";
 
 /** electron-builder copies `resources/skills` to `<resources>/skills`. */

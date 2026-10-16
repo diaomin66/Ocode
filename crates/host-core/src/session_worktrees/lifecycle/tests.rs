@@ -94,7 +94,7 @@ async fn an_isolated_session_works_outside_an_untouched_project() {
     assert!(!canonical(&root).starts_with(canonical(&env.project)));
     assert!(root.join("f.txt").is_file());
     assert_eq!(created.worktree.status, WorktreeStatus::Active);
-    assert!(created.worktree.branch.starts_with("pi-desktop/"));
+    assert!(created.worktree.branch.starts_with("ocode/"));
     let after: Vec<_> = fs::read_dir(&env.project)
         .unwrap()
         .map(|e| e.unwrap().file_name())
@@ -168,12 +168,12 @@ async fn each_worktree_gets_its_own_port_block_and_environment() {
     let st = env.state.lock().await;
     let env_a: HashMap<_, _> = tool_env(&st.db, &a).into_iter().collect();
     let env_b: HashMap<_, _> = tool_env(&st.db, &b).into_iter().collect();
-    let port_a: i64 = env_a["PI_PORT"].parse().unwrap();
-    let port_b: i64 = env_b["PI_PORT"].parse().unwrap();
+    let port_a: i64 = env_a["OCODE_PORT"].parse().unwrap();
+    let port_b: i64 = env_b["OCODE_PORT"].parse().unwrap();
     assert!((port_a - port_b).abs() >= registry::PORT_BLOCK);
-    assert_eq!(PathBuf::from(&env_a["PI_WORKTREE_ROOT"]), root_a);
+    assert_eq!(PathBuf::from(&env_a["OCODE_WORKTREE_ROOT"]), root_a);
     assert_eq!(
-        canonical(Path::new(&env_a["PI_PROJECT_ROOT"])),
+        canonical(Path::new(&env_a["OCODE_PROJECT_ROOT"])),
         canonical(&env.project)
     );
 }
@@ -199,11 +199,11 @@ async fn the_setup_command_runs_once_and_its_failure_does_not_block() {
         let session = new_session_blocking(&st.db, &env.project);
         drop(session);
         let command = if default_shell_is_powershell() {
-            "Copy-Item \"$env:PI_PROJECT_ROOT/.env\" .env; \
-             Set-Content -NoNewline -Path port.txt -Value $env:PI_PORT; \
+            "Copy-Item \"$env:OCODE_PROJECT_ROOT/.env\" .env; \
+             Set-Content -NoNewline -Path port.txt -Value $env:OCODE_PORT; \
              Write-Output prepared"
         } else {
-            "cp \"$PI_PROJECT_ROOT/.env\" .env && printf %s \"$PI_PORT\" > port.txt && echo prepared"
+            "cp \"$OCODE_PROJECT_ROOT/.env\" .env && printf %s \"$OCODE_PORT\" > port.txt && echo prepared"
         };
         assert!(set_setup_command(&st.db, &env.project.to_string_lossy(), Some(command)).unwrap());
     }
@@ -341,7 +341,7 @@ async fn startup_reconcile_drops_partial_rows_and_marks_vanished_worktrees() {
                 path: &partial_path.to_string_lossy(),
                 common_dir: &env.project.join(".git").to_string_lossy(),
                 prefix: "",
-                branch: "pi-desktop/partial",
+                branch: "ocode/partial",
                 owner_branch: "main",
                 port_base: None,
             },

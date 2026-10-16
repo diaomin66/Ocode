@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC, KEYBOARD_SHORTCUTS, keybindingMatchesEvent, resolveKeybinding } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
+import { IPC, KEYBOARD_SHORTCUTS, keybindingMatchesEvent, resolveKeybinding } from "@ocode/shared";
 import { useAppStore } from "../../src/stores/app-store";
 import { PortalVisibilityProvider } from "../../src/lib/portal-visibility";
 import { LiveVoiceControls } from "../../src/features/voice/live/LiveVoiceControls";
@@ -167,7 +167,7 @@ async function handleInvoke(channel, request) {
       throw new Error(`Unexpected fixture IPC: ${channel}`);
   }
 }
-window.piDesktop = {
+window.ocode = {
   platform: navigator.platform.includes("Mac") ? "darwin" : "linux",
   on(channel, listener) {
     const group = listeners.get(channel) ?? new Set();
@@ -261,7 +261,7 @@ function SimulatedShell() {
     // Production matcher + dispatcher, not the unrelated full AppShell runtime.
     const onKeyDown = (event) => {
       if (event.repeat || event.defaultPrevented) return;
-      const platform = window.piDesktop.platform;
+      const platform = window.ocode.platform;
       const shortcut = KEYBOARD_SHORTCUTS.find((item) => ["voiceToggle", "voiceCancel"].includes(item.id)
         && keybindingMatchesEvent(resolveKeybinding(item, settings.keybindings, platform), event, platform));
       if (shortcut && runLiveVoiceShortcut(shortcut.id)) event.preventDefault();

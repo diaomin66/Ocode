@@ -5,7 +5,7 @@ import type {
   GlobalPermissionMode,
   PluginScenicThemesDestinationMeta,
   ShortcutPlatform,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import { useAppStore } from "../../stores/app-store";
 import { api } from "../../lib/api";
 import {
@@ -86,7 +86,7 @@ export function SettingsPage() {
   const settings = useAppStore((s) => s.settings);
   const version = useAppStore((s) => s.version);
   const refreshProviders = useAppStore((s) => s.refreshProviders);
-  const platform = (window.piDesktop?.platform ?? "darwin") as ShortcutPlatform;
+  const platform = (window.ocode?.platform ?? "darwin") as ShortcutPlatform;
 
   // Experimental feature surfaces remain available in development builds only.
   const includeDevelopmentOnly = import.meta.env.DEV;
@@ -615,7 +615,7 @@ export function SettingsPage() {
             <div className="settings-stack">
               <div className="settings-about-hero">
                 <div className="settings-about-hero-name">
-                  {version?.name || "PI-Desktop"}
+                  {version?.name || "Ocode"}
                 </div>
                 <div className="settings-about-hero-version">
                   {t("settings.aboutVersion", { version: version?.version ?? "" })}

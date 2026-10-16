@@ -11,7 +11,7 @@ import {
   PLUGIN_TRIGGER_TIMEOUT_MS,
   composerTriggerKey,
   type PluginComposerTrigger,
-} from "@pi-desktop/plugin-sdk";
+} from "@ocode/plugin-sdk";
 
 export type PluginTriggerMatch = {
   readonly trigger: PluginComposerTrigger;

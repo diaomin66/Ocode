@@ -5,13 +5,13 @@ import { pack } from "./pack.js";
 import { publish } from "./publish.js";
 import { TEMPLATE_NAMES, isTemplateName, scaffold } from "./templates.js";
 
-const USAGE = `pi-plugin — PI-Desktop plugin development commands
+const USAGE = `ocode-plugin — Ocode plugin development commands
 
 Usage:
-  pi-plugin init <template> <dir> [--id <id>] [--name <name>]
-  pi-plugin check <dir>
-  pi-plugin pack <dir> [--out <dir>]
-  pi-plugin publish <dir> [--out <dir>] [--ref <ref>] [--channel stable|beta] [--allow-dirty]
+  ocode-plugin init <template> <dir> [--id <id>] [--name <name>]
+  ocode-plugin check <dir>
+  ocode-plugin pack <dir> [--out <dir>]
+  ocode-plugin publish <dir> [--out <dir>] [--ref <ref>] [--channel stable|beta] [--allow-dirty]
 
 Templates:
 ${TEMPLATE_NAMES.map((name) => `  ${name}`).join("\n")}
@@ -49,7 +49,7 @@ function formatBytes(bytes: number): string {
 async function runInit(flags: Flags): Promise<number> {
   const [template, dir] = flags.positional;
   if (!template || !dir) {
-    process.stderr.write("pi-plugin init needs a template and a target directory\n\n");
+    process.stderr.write("ocode-plugin init needs a template and a target directory\n\n");
     process.stderr.write(USAGE);
     return 2;
   }
@@ -68,7 +68,7 @@ async function runInit(flags: Flags): Promise<number> {
   process.stdout.write(`Created ${result.name} (${result.id}) in ${result.dir}\n`);
   for (const file of result.files) process.stdout.write(`  ${file}\n`);
   process.stdout.write(
-    "\nNext: load it from the Plugins page with \"Load development plugin\", then run `pi-plugin pack`.\n",
+    "\nNext: load it from the Plugins page with \"Load development plugin\", then run `ocode-plugin pack`.\n",
   );
   return 0;
 }

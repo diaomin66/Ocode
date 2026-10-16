@@ -13,7 +13,7 @@ const root = repositoryRoot();
 assertDesktopBuild(root);
 const { build } = createRequire(new URL("../packages/agent-runtime/package.json", import.meta.url))("esbuild");
 const temp = await mkdtemp(join(tmpdir(), "pi-dialog-layout-"));
-const artifacts = process.env.PI_DIALOG_ARTIFACT_DIR ? resolve(process.env.PI_DIALOG_ARTIFACT_DIR) : temp;
+const artifacts = process.env.OCODE_DIALOG_ARTIFACT_DIR ? resolve(process.env.OCODE_DIALOG_ARTIFACT_DIR) : temp;
 await mkdir(artifacts, { recursive: true });
 const assets = join(root, "apps/desktop/out/renderer/assets");
 const stylesheet = (await readdir(assets)).find((name) => /^index-.*\.css$/.test(name));
@@ -38,7 +38,7 @@ const server = createServer(async (req, res) => {
 await new Promise((resolvePromise) => server.listen(0, "127.0.0.1", resolvePromise));
 const url = `http://127.0.0.1:${server.address().port}`;
 
-const env = { ...process.env, PI_DIALOG_FIXTURE_URL: url, PI_DIALOG_ARTIFACT_DIR: artifacts }; delete env.ELECTRON_RUN_AS_NODE;
+const env = { ...process.env, OCODE_DIALOG_FIXTURE_URL: url, OCODE_DIALOG_ARTIFACT_DIR: artifacts }; delete env.ELECTRON_RUN_AS_NODE;
 try {
   const child = spawn(resolveElectronBinary(root).electronBinary, [`--user-data-dir=${join(temp, "profile")}`, join(root, "apps/desktop/test/fixtures/dialog-overflow-runner.cjs")], { env, windowsHide: true, stdio: "inherit" });
   const code = await new Promise((resolvePromise, reject) => { child.on("exit", resolvePromise); child.on("error", reject); });

@@ -26,7 +26,7 @@ await build({
   define: { "process.env.NODE_ENV": '"production"' },
   loader: { ".css": "empty" },
   alias: {
-    "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
+    "@ocode/i18n": join(root, "packages/i18n/src/index.ts"),
     react: join(root, "apps/desktop/node_modules/react"),
     "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
   },
@@ -61,7 +61,7 @@ function electronProbe() {
   app.setPath("userData", path.join(__dirname, "profile"));
   function nativeHits(hwnd, scale, points) {
     return new Promise((resolve, reject) => {
-      const child = spawn(process.env.PI_TEST_PYTHON || "python", [path.join(__dirname, "hit-test.py"), hwnd, String(scale)], { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+      const child = spawn(process.env.OCODE_TEST_PYTHON || "python", [path.join(__dirname, "hit-test.py"), hwnd, String(scale)], { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
       let out = "", err = "";
       child.stdout.on("data", (data) => out += data);
       child.stderr.on("data", (data) => err += data);

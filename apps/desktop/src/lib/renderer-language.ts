@@ -4,8 +4,8 @@ import {
   isAppLocale,
   resolveLocale,
   type AppLocale,
-} from "@pi-desktop/i18n/locale-info";
-import type { AppSettings } from "@pi-desktop/shared";
+} from "@ocode/i18n/locale-info";
+import type { AppSettings } from "@ocode/shared";
 import { loadRendererCatalog } from "./renderer-catalogs.ts";
 
 export type AppLanguageSetting = NonNullable<AppSettings["language"]>;
@@ -19,7 +19,7 @@ export type AppLanguageSetting = NonNullable<AppSettings["language"]>;
  */
 export function resolveOsLocale(): string {
   return (
-    window.piDesktop?.locale ||
+    window.ocode?.locale ||
     navigator.language ||
     (navigator as { userLanguage?: string }).userLanguage ||
     "en-US"

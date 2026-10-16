@@ -89,7 +89,7 @@ export function recordRenderDiagnostic(
 
 declare global {
   interface Window {
-    __piDesktopRenderDiagnostics?: {
+    __ocodeRenderDiagnostics?: {
       clear: typeof clearRenderDiagnosticSamples;
       read: typeof readRenderDiagnosticSamples;
     };
@@ -97,7 +97,7 @@ declare global {
 }
 
 if (enabled() && typeof window !== "undefined") {
-  window.__piDesktopRenderDiagnostics = {
+  window.__ocodeRenderDiagnostics = {
     clear: clearRenderDiagnosticSamples,
     read: readRenderDiagnosticSamples,
   };

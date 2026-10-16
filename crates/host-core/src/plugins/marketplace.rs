@@ -36,7 +36,7 @@ impl MarketChannel {
 /// Dev builds and tests point this at a local catalog so they never touch
 /// persisted settings, and it outranks the channel on purpose.
 pub(crate) fn market_source_env_override() -> Option<String> {
-    std::env::var("PI_DESKTOP_PLUGIN_MARKET_URL")
+    std::env::var("OCODE_PLUGIN_MARKET_URL")
         .ok()
         .map(|url| url.trim().to_string())
         .filter(|url| !url.is_empty())
@@ -450,9 +450,9 @@ impl PluginManager {
         }
         if !host_supports_version(&selected) {
             bail!(
-                "PLUGIN_HOST_TOO_OLD: version {} requires PI-Desktop {} or newer, this host is {}",
+                "PLUGIN_HOST_TOO_OLD: version {} requires Ocode {} or newer, this host is {}",
                 selected.version,
-                selected.min_pi_desktop.as_deref().unwrap_or("newer"),
+                selected.min_ocode.as_deref().unwrap_or("newer"),
                 crate::state::HOST_VERSION
             );
         }
@@ -625,7 +625,7 @@ impl PluginManager {
     /// Whether the catalog in effect is the official catalog.
     ///
     /// The comparison stays on the effective URL, so a catalog reached through
-    /// `PI_DESKTOP_PLUGIN_MARKET_URL` is trusted only when it names the official
+    /// `OCODE_PLUGIN_MARKET_URL` is trusted only when it names the official
     /// source.
     fn is_trusted_channel(&self) -> bool {
         self.market_source_url() == OFFICIAL_CHANNEL_CATALOG_URL
@@ -633,7 +633,7 @@ impl PluginManager {
 }
 
 pub(crate) fn host_supports_version(version: &MarketVersion) -> bool {
-    let Some(required) = version.min_pi_desktop.as_deref().map(str::trim) else {
+    let Some(required) = version.min_ocode.as_deref().map(str::trim) else {
         return true;
     };
     if required.is_empty() || ParsedPluginVersion::parse(required).is_none() {

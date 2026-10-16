@@ -42,7 +42,7 @@ test("the stdio environment copies profile keys and still strips host secrets", 
       LOCALAPPDATA: "C:\\Users\\pi\\AppData\\Local",
       PATHEXT: ".EXE;.CMD",
       ComSpec: "C:\\Windows\\System32\\cmd.exe",
-      PI_LEAKED_SECRET: "must-not-cross",
+      OCODE_LEAKED_SECRET: "must-not-cross",
       OPENAI_API_KEY: "sk-no",
     },
   );
@@ -54,7 +54,7 @@ test("the stdio environment copies profile keys and still strips host secrets", 
   assert.equal(env.LOCALAPPDATA, "C:\\Users\\pi\\AppData\\Local");
   assert.equal(env.PATHEXT, ".EXE;.CMD");
   assert.equal(env.ComSpec, "C:\\Windows\\System32\\cmd.exe");
-  assert.equal(env.PI_LEAKED_SECRET, undefined);
+  assert.equal(env.OCODE_LEAKED_SECRET, undefined);
   assert.equal(env.OPENAI_API_KEY, undefined);
 });
 

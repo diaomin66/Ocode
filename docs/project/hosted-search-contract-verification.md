@@ -9,7 +9,7 @@ Implementation qualification was completed on the uncommitted `fix/hosted-search
 ## Baseline and dependency identity
 
 - Refreshed `origin/main` and task HEAD: `46d4ee4ee3b608d103c5dacab2fbb754bacd6eca` (2026-09-22 local date).
-- Isolated worktree: `$PI_SCRATCH_DIR/hosted-search-worktree`.
+- Isolated worktree: `$OCODE_SCRATCH_DIR/hosted-search-worktree`.
 - At implementation qualification, the main checkout was clean at `0111e306c120ad5820688d7608cb37bad8fbcc1f`, with no task commit, push or PR. Follow-up PR delivery is separately authorized; no merge, release or application installation is included.
 - Node `24.21.0`, pnpm `10.34.5`. Installed `@earendil-works/pi-ai`, `pi-agent-core`, and `pi-coding-agent` are all **0.86.1**. The main checkout's stale 0.85.1 installation was not used for qualification.
 - Initial locked install reused 809 packages with zero downloads. Final patch generation and `pnpm install --frozen-lockfile` succeeded; package-patch generation is not a Git commit.
@@ -55,7 +55,7 @@ The package archives contain distributed JavaScript/declarations, not an upstrea
 
 ## Red-to-green evidence
 
-All logs and fixture artifacts below are retained under `$PI_SCRATCH_DIR`, not committed as user/session data.
+All logs and fixture artifacts below are retained under `$OCODE_SCRATCH_DIR`, not committed as user/session data.
 
 | Regression | Observed red evidence | Final protection |
 | --- | --- | --- |
@@ -79,11 +79,11 @@ Run from the task worktree. Tests use synthetic/in-process or loopback external 
 | --- | --- | --- |
 | Three `pnpm patch-commit` operations, then `pnpm install --frozen-lockfile` | PASS; latest core optional-field correction regenerated and reinstalled successfully | `hosted-patch-*-final*.log`, `hosted-patched-install-final2.log` |
 | Installed package byte/version/hash comparison | PASS; 1,093 files, all three versions 0.86.1 | `hosted-final-dependency-identity.json` |
-| `pnpm --filter @pi-desktop/agent-runtime test` | PASS; **58 files / 916 tests** | `hosted-runtime-final2.log` |
+| `pnpm --filter @ocode/agent-runtime test` | PASS; **58 files / 916 tests** | `hosted-runtime-final2.log` |
 | Native-session coverage within runtime suite | PASS; **36 tests** (also independently run, not additional to 916) | `native-pi-session.json` |
-| `pnpm --filter @pi-desktop/shared test` | PASS; 80 files / 928 collected tests, including compiled mirrors | `hosted-shared-final.log` |
-| `pnpm --filter @pi-desktop/shared exec vitest run src` | PASS; **40 source files / 464 tests**; use this non-duplicated source count | `hosted-shared-source-final.log` |
-| `pnpm --filter @pi-desktop/host-runtime test` | PASS; **7 files / 38 tests**, including three new real stdio decoder cases | `hosted-host-runtime-final.log` |
+| `pnpm --filter @ocode/shared test` | PASS; 80 files / 928 collected tests, including compiled mirrors | `hosted-shared-final.log` |
+| `pnpm --filter @ocode/shared exec vitest run src` | PASS; **40 source files / 464 tests**; use this non-duplicated source count | `hosted-shared-source-final.log` |
+| `pnpm --filter @ocode/host-runtime test` | PASS; **7 files / 38 tests**, including three new real stdio decoder cases | `hosted-host-runtime-final.log` |
 | `node --test apps/desktop/test/error-code-registry.test.mjs apps/desktop/test/rpc-lifecycle-contract.test.mjs apps/desktop/test/runtime-build-contract.test.mjs` | PASS; **20 tests** | `hosted-cross-process-final.log` |
 | `pnpm build:js` | PASS; all **11** recursive build projects, no downstream failures | `hosted-build-js-final2.log` |
 | `pnpm -r --if-present typecheck` | PASS; all **10** packages with that script; docs has no typecheck script | `hosted-typecheck-all-final2.log` |
@@ -97,7 +97,7 @@ The root `test` / Rust build, `verify:ui:*`, application installation, real prov
 
 ### Final artifact scenarios
 
-Final evidence directory: `$PI_SCRATCH_DIR/hosted-search-e2e-CS9uZW`. The bundle is copied to immutable `sidecar.mjs`. `result.json` records Node/pnpm, installed versions, baseline, lock hash, bundle hash and source fingerprints. The 251-file source scope fingerprint is `34ee5bac7d9dd0af5d7a828624d92a0439fe63fda7daca3c6e53ee7a54aa9b15` before and after; the original bundle hash also remains unchanged. Source identity unavailable/changed or bundle rewrite makes qualification fail.
+Final evidence directory: `$OCODE_SCRATCH_DIR/hosted-search-e2e-CS9uZW`. The bundle is copied to immutable `sidecar.mjs`. `result.json` records Node/pnpm, installed versions, baseline, lock hash, bundle hash and source fingerprints. The 251-file source scope fingerprint is `34ee5bac7d9dd0af5d7a828624d92a0439fe63fda7daca3c6e53ee7a54aa9b15` before and after; the original bundle hash also remains unchanged. Source identity unavailable/changed or bundle rewrite makes qualification fail.
 
 | Scenario | Result | Provider requests |
 | --- | --- | --- |
@@ -243,8 +243,8 @@ backend rejection normally. No OAuth token or live API request was used.
 - Base: `origin/main` at `ea5890b94`; it is an ancestor of the task candidate.
 - pi-ai: `0.87.1`; patch SHA-256 and `pnpm-lock.yaml` patch hash both
   `6cf3998c09e8bba22cd63ceebe74a33332d9fd0c9ef3d5046941cb53513973f8`.
-- `pnpm --filter @pi-desktop/shared test`: PASS, 84 files / 1,012 tests.
-- `pnpm --filter @pi-desktop/agent-runtime test`: PASS, 68 files / 1,029 tests.
+- `pnpm --filter @ocode/shared test`: PASS, 84 files / 1,012 tests.
+- `pnpm --filter @ocode/agent-runtime test`: PASS, 68 files / 1,029 tests.
 - `pnpm build:js`, `pnpm -r --if-present typecheck`, `pnpm lint`, and
   `pnpm docs:check`: PASS.
 - `pnpm test:e2e:hosted-search`: PASS, 7/7 offline sidecar scenarios; bundle
@@ -252,7 +252,7 @@ backend rejection normally. No OAuth token or live API request was used.
 - Codex adapter contract uses a synthetic JWT, captures the body at
   `onPayload`, then aborts before fetch. It verifies opt-in body fields and
   opt-out omission without contacting a provider.
-- `TMPDIR=$PI_SCRATCH_DIR pnpm test:e2e:provider-api-style`: PASS; the
+- `TMPDIR=$OCODE_SCRATCH_DIR pnpm test:e2e:provider-api-style`: PASS; the
   production `VendorAccountDialog` checkbox starts off, can be enabled for a
   synthetic Codex OAuth account, and saves `nativeWebSearch` in both locales.
   Discovery is stubbed; no Host persistence or live provider is exercised.

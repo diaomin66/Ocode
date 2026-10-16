@@ -1,8 +1,9 @@
 # ADR 0289: Signed macOS GitHub Releases and in-app update delivery
 
-- Status: Accepted
+- Status: Accepted upstream; Ocode signing identity amended by
+  [Ocode product identity](ocode-product-identity.md)
 - Date: 2026-09-18
-- Deciders: PI-Desktop core
+- Deciders: Upstream Ocode maintainers
 - Decision: D450
 - Amends: ADR 0022, ADR 0145, ADR 0191, ADR 0204, D078
 - Related: D120, D126, D164, D364, ADR 0197, ADR 0232, ADR 0257, ADR 0278, E2E-196a, E2E-196c, E2E-067A
@@ -17,8 +18,9 @@ cannot provide a qualified in-app upgrade. Local packaging without a
 certificate must stay possible (D078). Contributors must not commit
 certificate material.
 
-A Developer ID Application certificate for team `DUV63RKYTW` is now available
-for the official `vastsa/PI-Desktop` release lane.
+The upstream release lane configured Developer ID signing for its own Apple
+Developer team. Those personal certificate and team values are not Ocode
+credentials and must never be used by this derivative.
 
 ## Decision
 
@@ -32,12 +34,12 @@ for the official `vastsa/PI-Desktop` release lane.
    retried at most six times with a 10-second delay by the signing watchdog;
    all other `xcrun` calls pass through. The DMG stapler has the same bounded
    retry policy. Retries only occur after Apple accepts the matching
-   notarization submission. Missing signing or notarization secrets fail the job;
-   unsigned macOS artifacts must not be published from a tag.
-2. The signing certificate is
-   `Developer ID Application: XingYu Liu (DUV63RKYTW)`; Apple team id
-   `DUV63RKYTW`. CI pins it with `CSC_NAME=XingYu Liu (DUV63RKYTW)`. The name
-   must be the bare common name: electron-builder 26 rejects an identity that
+2. A signing identity is read from maintainer-owned Actions secrets. Its team
+   must equal the configured `APPLE_TEAM_ID`; an empty identity, malformed team
+   identifier or mismatch fails closed. The certificate name must be the bare
+   common name: electron-builder 26 rejects an identity that keeps the
+   `Developer ID Application:` prefix, and the verification step re-adds that
+   prefix when comparing the `codesign` authority.
    keeps the `Developer ID Application:` prefix, and the verification step
    re-adds that prefix when it compares the `codesign` authority.
 3. Certificate material stays in GitHub Actions secrets:
@@ -55,7 +57,7 @@ for the official `vastsa/PI-Desktop` release lane.
    timing are unchanged.
 6. Do not reintroduce `afterPack` / `afterSign` adhoc codesign (ADR 0278).
    electron-builder's Developer ID pass signs the app, helpers, and the
-   `pi-desktop-host-core` sidecar.
+   `ocode-host-core` sidecar.
 7. The unsigned first-launch note and ZIP helper remain for trusted local or
    debug unsigned builds. Official GitHub Release DMGs are signed and
    notarized and must not claim otherwise.
@@ -67,7 +69,7 @@ for the official `vastsa/PI-Desktop` release lane.
 
 ## Consequences
 
-- Users who download a tagged DMG should open PI-Desktop without a
+- Users who download a tagged DMG should open Ocode without a
   Gatekeeper “unidentified developer” or quarantine-damaged warning.
 - Packaged macOS installs can check GitHub Releases, download the arch ZIP,
   and restart into the new version. Existing unsigned installs may still need

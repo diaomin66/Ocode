@@ -2,8 +2,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { en } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { en } from "@ocode/i18n";
+import { IPC } from "@ocode/shared";
 import { BackgroundTasksBar } from "../../apps/desktop/src/components/BackgroundTasksBar";
 import { TodoDock } from "../../apps/desktop/src/components/TodoDock";
 import { AskToolCard } from "../../apps/desktop/src/components/AskToolCard";
@@ -40,7 +40,7 @@ function output(id: string): BackgroundTaskOutput {
   };
 }
 
-Object.defineProperty(window, "piDesktop", {
+Object.defineProperty(window, "ocode", {
   value: {
     invoke: async (channel: string, payload?: { id: string }) => {
       const call = async () => {

@@ -18,8 +18,8 @@
  *
  *   - every child line is forwarded live with a `[sign] ` prefix (redacted),
  *   - `codesign` is wrapped by scripts/macos-codesign-shim.sh so each call is
- *     timed through $PI_CODESIGN_LOG (see --codesign-log),
- *   - when PI_STAPLER_MAX_ATTEMPTS is set, `xcrun stapler staple` is wrapped
+ *     timed through $OCODE_CODESIGN_LOG (see --codesign-log),
+ *   - when OCODE_STAPLER_MAX_ATTEMPTS is set, `xcrun stapler staple` is wrapped
  *     with bounded retries; every other xcrun invocation passes through,
  *   - a heartbeat reports phase/idle time/active codesign while output is
  *     silent, plus a bounded stall diagnostic dump,
@@ -56,7 +56,7 @@ const STAPLER_SHIM_SOURCE_PATH = fileURLToPath(
 );
 const DEFAULT_CODESIGN_LOG = join(
   tmpdir(),
-  `pi-desktop-codesign-timing-${process.pid}.log`,
+  `ocode-codesign-timing-${process.pid}.log`,
 );
 const DEFAULT_TIMEOUT_SECONDS = 2400;
 const DEFAULT_STALL_SECONDS = 300;
@@ -112,12 +112,12 @@ function usage() {
     "",
     "Options:",
     "  --label <name>            Label used in the summary (default: basename of the command).",
-    "  --timeout-seconds <n>     Hard timeout in seconds (default: 2400, env PI_SIGNING_TIMEOUT_SECONDS).",
-    "  --stall-seconds <n>       Silence that counts as a stall, in seconds (default: 300, env PI_SIGNING_STALL_SECONDS).",
-    "  --heartbeat-seconds <n>   Heartbeat interval while output is silent (default: 60, env PI_SIGNING_HEARTBEAT_SECONDS).",
-    "  --codesign-log <path>     codesign timing log (default: $TMPDIR/pi-desktop-codesign-timing.log).",
+    "  --timeout-seconds <n>     Hard timeout in seconds (default: 2400, env OCODE_SIGNING_TIMEOUT_SECONDS).",
+    "  --stall-seconds <n>       Silence that counts as a stall, in seconds (default: 300, env OCODE_SIGNING_STALL_SECONDS).",
+    "  --heartbeat-seconds <n>   Heartbeat interval while output is silent (default: 60, env OCODE_SIGNING_HEARTBEAT_SECONDS).",
+    "  --codesign-log <path>     codesign timing log (default: $TMPDIR/ocode-codesign-timing.log).",
     "  --summary-file <path>     Also write the summary lines to this file.",
-    "  --no-codesign-shim        Do not inject the codesign timing shim (env PI_SIGNING_NO_CODESIGN_SHIM).",
+    "  --no-codesign-shim        Do not inject the codesign timing shim (env OCODE_SIGNING_NO_CODESIGN_SHIM).",
     "",
     "Everything after `--` is the command to run; its stdout/stderr is forwarded line by line.",
   ].join("\n");
@@ -148,23 +148,23 @@ function parseArgv(argv) {
   const options = {
     label: "",
     timeoutSeconds: numberFromEnv(
-      "PI_SIGNING_TIMEOUT_SECONDS",
+      "OCODE_SIGNING_TIMEOUT_SECONDS",
       DEFAULT_TIMEOUT_SECONDS,
     ),
     stallSeconds: numberFromEnv(
-      "PI_SIGNING_STALL_SECONDS",
+      "OCODE_SIGNING_STALL_SECONDS",
       DEFAULT_STALL_SECONDS,
     ),
     heartbeatSeconds: numberFromEnv(
-      "PI_SIGNING_HEARTBEAT_SECONDS",
+      "OCODE_SIGNING_HEARTBEAT_SECONDS",
       DEFAULT_HEARTBEAT_SECONDS,
     ),
     codesignLog: DEFAULT_CODESIGN_LOG,
     summaryFile: "",
-    // The shim only adds timing; `PI_SIGNING_NO_CODESIGN_SHIM=1` is the
+    // The shim only adds timing; `OCODE_SIGNING_NO_CODESIGN_SHIM=1` is the
     // rollback switch if a keychain ever refuses to hand the key to a
     // wrapped codesign invocation.
-    codesignShim: !isEnabledEnv("PI_SIGNING_NO_CODESIGN_SHIM"),
+    codesignShim: !isEnabledEnv("OCODE_SIGNING_NO_CODESIGN_SHIM"),
     command: [],
   };
 
@@ -455,8 +455,8 @@ function run() {
   const isDarwin = process.platform === "darwin";
   const useCodesignShim = options.codesignShim && isDarwin;
   const useStaplerShim =
-    typeof process.env.PI_STAPLER_MAX_ATTEMPTS === "string" &&
-    process.env.PI_STAPLER_MAX_ATTEMPTS.trim() !== "";
+    typeof process.env.OCODE_STAPLER_MAX_ATTEMPTS === "string" &&
+    process.env.OCODE_STAPLER_MAX_ATTEMPTS.trim() !== "";
   const useShim = useCodesignShim || useStaplerShim;
   let shimRoot = "";
   let childEnv = { ...process.env };
@@ -465,7 +465,7 @@ function run() {
   let staplerShimActive = false;
   if (useShim) {
     try {
-      shimRoot = mkdtempSync(join(tmpdir(), "pi-desktop-signing-watchdog-"));
+      shimRoot = mkdtempSync(join(tmpdir(), "ocode-signing-watchdog-"));
       const shimDir = join(shimRoot, "bin");
       mkdirSync(shimDir, { recursive: true });
       if (useCodesignShim) {
@@ -478,8 +478,8 @@ function run() {
         writeFileSync(options.codesignLog, "");
         childEnv = {
           ...childEnv,
-          PI_CODESIGN_LOG: options.codesignLog,
-          PI_CODESIGN_REAL: realCodesign,
+          OCODE_CODESIGN_LOG: options.codesignLog,
+          OCODE_CODESIGN_REAL: realCodesign,
         };
         codesignShimActive = true;
       }
@@ -488,7 +488,7 @@ function run() {
         const shimPath = join(shimDir, "xcrun");
         writeFileSync(shimPath, readFileSync(STAPLER_SHIM_SOURCE_PATH));
         chmodSync(shimPath, 0o755);
-        childEnv = { ...childEnv, PI_XCRUN_REAL: realXcrun };
+        childEnv = { ...childEnv, OCODE_XCRUN_REAL: realXcrun };
         staplerShimActive = true;
       }
       childEnv = {

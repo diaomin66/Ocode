@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { prepareStorage } from "../../apps/desktop/electron/main/storage/bootstrap.ts";
 import { registerStorageIpc } from "../../apps/desktop/electron/main/storage/ipc.ts";
 
-const config = JSON.parse(process.env.PI_STORAGE_E2E_CONFIG);
+const config = JSON.parse(process.env.OCODE_STORAGE_E2E_CONFIG);
 app.setPath("userData", config.anchor);
 if (!app.requestSingleInstanceLock()) throw new Error("Isolated fixture lock unavailable");
 let window;

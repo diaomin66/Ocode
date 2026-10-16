@@ -11,7 +11,7 @@ from botocore.exceptions import ClientError
 def run(data):
     connection = data["connection"]
     prefix = connection["prefix"]
-    if not re.fullmatch(r"pi-desktop-tests/s3-config-sync-[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}", prefix):
+    if not re.fullmatch(r"ocode-tests/s3-config-sync-[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}", prefix):
         raise ValueError("unsafe test prefix")
     prefix += "/"
     client = boto3.client(

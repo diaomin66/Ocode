@@ -3,7 +3,7 @@ import type {
   LifecycleDialogChoice,
   LifecycleDialogKind,
   LifecycleDialogRequest,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 export const LIFECYCLE_DIALOG_TIMEOUT_MS = 10_000;
 

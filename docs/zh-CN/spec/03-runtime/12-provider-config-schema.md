@@ -18,7 +18,7 @@
 
 ```json
 {
-  "$id": "pi-desktop.provider.v1",
+  "$id": "ocode.provider.v1",
   "type": "object",
   "required": ["id", "name", "vendorKey", "type", "protocol", "enabled", "authKind"],
   "properties": {
@@ -233,8 +233,8 @@ IPC 方法、存储 schema 或权限边界。
 
 OpenCode Go（以及任何 `opencode.ai` 主机）的 LLM 请求必须带稳定的
 `x-opencode-session`。agent-runtime 在会话、子代理、插件拥有的提示词增强与其它插件 one-shot
-上发送该头，并附带 `x-opencode-client: pi-desktop` 与
-`User-Agent: pi-desktop/<APP_VERSION>`。行上可选的 `headers` 会覆盖这些默认值；留空则保持适配器默认。
+上发送该头，并附带 `x-opencode-client: ocode` 与
+`User-Agent: ocode/<APP_VERSION>`。行上可选的 `headers` 会覆盖这些默认值；留空则保持适配器默认。
 
 每行（AI 服务或 OAuth 账户）可在高级选项中用键值行编辑自定义请求头。空映射保持 pi-ai / `claude-cli` / OpenCode 默认。fetch 包装器是最后写入者，因此 Codex 与 Anthropic SDK 无法覆盖。pi-ai 的 Google 适配器改为通过流选项标头接收同样的值，因为它们会拒绝任何其他 `fetch`（issue #1072）。禁止 `Authorization` / `Host` / `Content-Type` 等保留头。遗留的 `userAgent` 读取时迁入 `headers["User-Agent"]`。首次 OAuth 登录不收集请求头，登录后再编辑。覆盖 Anthropic OAuth 的 `claude-cli/…` 可能导致 Claude Pro/Max 拒绝请求。
 
@@ -487,7 +487,7 @@ Chat Completions 配置使用同源 Responses。关闭搜索后恢复原配置�
 
 #### 端点解析
 
-用户填写的 Base URL 会先被解析，再进行任何探测。解析是 `@pi-desktop/shared/provider-endpoint`
+用户填写的 Base URL 会先被解析，再进行任何探测。解析是 `@ocode/shared/provider-endpoint`
 中的一层纯逻辑，设置对话框与 Electron main 共用，因此「显示的地址」「探测的地址」「保存的
 地址」不会互相矛盾：
 

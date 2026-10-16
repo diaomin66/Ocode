@@ -23,9 +23,9 @@ const styles = [...appHtml.matchAll(/href="([^" ]+\.css)"/g)].map((match) => mat
 if (!styles.length) throw new Error("Build the Desktop renderer before running the table test");
 await cp(join(renderer, "assets"), join(temp, "assets"), { recursive: true });
 await writeFile(join(temp, "index.html"), `<!doctype html><html><head><meta charset="utf-8">${csp}${styles.map((path) => `<link rel="stylesheet" href="${path}">`).join("")}<link rel="stylesheet" href="./fixture.css"></head><body><div id="root"></div><script type="module" src="./fixture.js"></script></body></html>`);
-const env = { ...process.env, PI_TABLE_TEST_DIR: temp };
+const env = { ...process.env, OCODE_TABLE_TEST_DIR: temp };
 delete env.ELECTRON_RUN_AS_NODE;
-const electron = process.env.PI_TABLE_ELECTRON ?? resolveElectronBinary(root).electronBinary;
+const electron = process.env.OCODE_TABLE_ELECTRON ?? resolveElectronBinary(root).electronBinary;
 const child = spawn(electron, [`--user-data-dir=${join(temp, "profile")}`, join(root, "apps/desktop/test/fixtures/markdown-table-runner.cjs")], { env, stdio: "inherit" });
 process.exitCode = await new Promise((resolve, reject) => { child.on("exit", (code) => resolve(code ?? 1)); child.on("error", reject); });
 console.log(`Table test artifacts: ${temp}`);

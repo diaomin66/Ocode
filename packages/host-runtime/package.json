@@ -1,5 +1,5 @@
 {
-  "name": "@pi-desktop/host-runtime",
+  "name": "@ocode/host-runtime",
   "version": "0.21.0-beta.1",
   "private": true,
   "type": "module",
@@ -18,9 +18,9 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@pi-desktop/agent-host": "workspace:*",
-    "@pi-desktop/agent-runtime": "workspace:*",
-    "@pi-desktop/shared": "workspace:*"
+    "@ocode/agent-host": "workspace:*",
+    "@ocode/agent-runtime": "workspace:*",
+    "@ocode/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

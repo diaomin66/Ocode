@@ -48,9 +48,9 @@ Local OpenAI-Audio-compatible servers use an `openai_compatible` provider and
 ## 4. IPC
 
 ```
-pi-desktop/speech/getStatus → SpeechStatus (no secrets)
-pi-desktop/speech/transcribe
-pi-desktop/speech/synthesize
+ocode/speech/getStatus → SpeechStatus (no secrets)
+ocode/speech/transcribe
+ocode/speech/synthesize
 ```
 
 Errors: `SPEECH_NOT_CONFIGURED`, `SPEECH_PROTOCOL_UNSUPPORTED`,

@@ -94,7 +94,7 @@ heads, and immutable authenticated revision/resource objects:
 <bucket>/<prefix>/vault/<opaque-vault-id>/objects/<object-id>
 ```
 
-The S3 head format is `pi-desktop-config-sync-s3`, version 1. Each head indexes
+The S3 head format is `ocode-config-sync-s3`, version 1. Each head indexes
 at most 30 revisions, newest first. Sync and backup have separate heads,
 history, and authentication purposes; neither mode follows an unbounded parent
 graph. Immutable objects remain stored indefinitely. This bounds history
@@ -104,7 +104,7 @@ AWS Signature V4 signs requests, including conditional headers and optional
 session tokens. Both path-style and virtual-hosted bucket addressing are
 supported. The input uses `endpoint`, `region`, `bucket`, `prefix`,
 `accessKeyId`, optional `secretAccessKey`, optional `sessionToken`, and
-`pathStyle`. Defaults are `us-east-1`, `pi-desktop/config`, and path style.
+`pathStyle`. Defaults are `us-east-1`, `ocode/config`, and path style.
 The bucket must already exist and remain private; Host never creates it or
 changes ACLs. Scope credentials to this bucket/prefix. Normal operation needs
 object GET/PUT and deletion of the random probe objects; it does not list the
@@ -216,7 +216,7 @@ Collapsing content does not reset form values or issue a Host request.
 
 Reopening the page paints cached redacted state/history and a validated,
 non-sensitive draft, then refreshes in the background. The S3 draft key is
-`pi.desktop.configSyncS3Draft.v1`; old WebDAV drafts are ignored, not deleted.
+`ocode.desktop.configSyncS3Draft.v1`; old WebDAV drafts are ignored, not deleted.
 Only endpoint, region, bucket, prefix, access key ID, addressing style, mode,
 device label, automatic-run choice, and categories are persisted. Passwords,
 secret access keys, and session tokens remain transient input memory and are

@@ -1,4 +1,4 @@
-# PI-Desktop Spec Navigation
+# Ocode Spec Navigation
 
 ## Overview
 - [README.md](README.md)

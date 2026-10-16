@@ -2,7 +2,7 @@ import {
   SESSION_THINKING_LEVELS,
   type SessionThinkingLevel,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 
 const THINKING_LEVELS: ThinkingLevel[] = [
   "off",

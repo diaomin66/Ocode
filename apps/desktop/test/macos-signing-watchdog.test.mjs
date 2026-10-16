@@ -21,7 +21,7 @@ const WATCHDOG_GUARD_MS = 20_000;
 
 /**
  * Run the watchdog and capture everything it printed. The environment is
- * neutralized first: a caller's PI_SIGNING_* / GITHUB_STEP_SUMMARY must not
+ * neutralized first: a caller's OCODE_SIGNING_* / GITHUB_STEP_SUMMARY must not
  * change what the tests observe.
  */
 function runWatchdog(args, { env = {}, cwd = repoRoot } = {}) {
@@ -31,14 +31,14 @@ function runWatchdog(args, { env = {}, cwd = repoRoot } = {}) {
       cwd,
       env: {
         ...process.env,
-        PI_SIGNING_TIMEOUT_SECONDS: "",
-        PI_SIGNING_STALL_SECONDS: "",
-        PI_SIGNING_HEARTBEAT_SECONDS: "",
-        PI_CODESIGN_LOG: "",
-        PI_CODESIGN_REAL: "",
-        PI_STAPLER_MAX_ATTEMPTS: "",
-        PI_STAPLER_RETRY_DELAY_SECONDS: "",
-        PI_XCRUN_REAL: "",
+        OCODE_SIGNING_TIMEOUT_SECONDS: "",
+        OCODE_SIGNING_STALL_SECONDS: "",
+        OCODE_SIGNING_HEARTBEAT_SECONDS: "",
+        OCODE_CODESIGN_LOG: "",
+        OCODE_CODESIGN_REAL: "",
+        OCODE_STAPLER_MAX_ATTEMPTS: "",
+        OCODE_STAPLER_RETRY_DELAY_SECONDS: "",
+        OCODE_XCRUN_REAL: "",
         GITHUB_STEP_SUMMARY: "",
         ...env,
       },
@@ -73,7 +73,7 @@ function runWatchdog(args, { env = {}, cwd = repoRoot } = {}) {
 }
 
 async function makeTempDir(t) {
-  const root = await mkdtemp(join(tmpdir(), "pi-desktop-signing-watchdog-"));
+  const root = await mkdtemp(join(tmpdir(), "ocode-signing-watchdog-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }
@@ -104,7 +104,7 @@ test("forwards child output with a [sign] prefix and reports a clean exit", asyn
     "--",
     "bash",
     "-c",
-    'echo "Walking... /tmp/PI-Desktop.app/Contents"; echo "notice: nothing to see"; echo "Signing... /tmp/PI-Desktop.app/Contents/MacOS/PI-Desktop"',
+    'echo "Walking... /tmp/Ocode.app/Contents"; echo "notice: nothing to see"; echo "Signing... /tmp/Ocode.app/Contents/MacOS/Ocode"',
   ]);
 
   assert.equal(status, 0);
@@ -349,11 +349,11 @@ test("the app stapler shim retries only stapler staple and preserves arguments",
   await writeFile(
     join(fakeBin, "xcrun"),
     `#!/bin/bash
-printf '<%s>\\n' "$@" >> "$PI_TEST_XCRUN_LOG"
-printf 'call\\n' >> "$PI_TEST_XCRUN_INVOCATIONS"
+printf '<%s>\\n' "$@" >> "$OCODE_TEST_XCRUN_LOG"
+printf 'call\\n' >> "$OCODE_TEST_XCRUN_INVOCATIONS"
 if [[ "$1 $2" == "stapler staple" ]]; then
-  PI_TEST_CALLS="$(wc -l < "$PI_TEST_XCRUN_INVOCATIONS" | tr -d ' ')"
-  if (( PI_TEST_CALLS <= PI_TEST_XCRUN_FAILURES )); then
+  OCODE_TEST_CALLS="$(wc -l < "$OCODE_TEST_XCRUN_INVOCATIONS" | tr -d ' ')"
+  if (( OCODE_TEST_CALLS <= OCODE_TEST_XCRUN_FAILURES )); then
     echo "The network connection was lost." >&2
     exit 68
   fi
@@ -376,16 +376,16 @@ exit 0
       "bash",
       "stapler",
       "staple",
-      "/tmp/PI Desktop.app",
+      "/tmp/Ocode.app",
     ],
     {
       env: {
         PATH: `${fakeBin}:${process.env.PATH}`,
-        PI_TEST_XCRUN_LOG: callLog,
-        PI_TEST_XCRUN_INVOCATIONS: invocationLog,
-        PI_TEST_XCRUN_FAILURES: "2",
-        PI_STAPLER_MAX_ATTEMPTS: "3",
-        PI_STAPLER_RETRY_DELAY_SECONDS: "0",
+        OCODE_TEST_XCRUN_LOG: callLog,
+        OCODE_TEST_XCRUN_INVOCATIONS: invocationLog,
+        OCODE_TEST_XCRUN_FAILURES: "2",
+        OCODE_STAPLER_MAX_ATTEMPTS: "3",
+        OCODE_STAPLER_RETRY_DELAY_SECONDS: "0",
       },
     },
   );
@@ -414,7 +414,7 @@ test("the app stapler shim fails after its configured bound", async (t) => {
   await writeFile(
     join(fakeBin, "xcrun"),
 `#!/bin/bash
-printf 'call\\n' >> "$PI_TEST_XCRUN_INVOCATIONS"
+printf 'call\\n' >> "$OCODE_TEST_XCRUN_INVOCATIONS"
 exit 68
 `,
   );
@@ -428,14 +428,14 @@ exit 68
       "--",
       "bash",
       "-c",
-      "xcrun stapler staple /tmp/PI-Desktop.app",
+      "xcrun stapler staple /tmp/Ocode.app",
     ],
     {
       env: {
         PATH: `${fakeBin}:${process.env.PATH}`,
-        PI_TEST_XCRUN_INVOCATIONS: callLog,
-        PI_STAPLER_MAX_ATTEMPTS: "3",
-        PI_STAPLER_RETRY_DELAY_SECONDS: "0",
+        OCODE_TEST_XCRUN_INVOCATIONS: callLog,
+        OCODE_STAPLER_MAX_ATTEMPTS: "3",
+        OCODE_STAPLER_RETRY_DELAY_SECONDS: "0",
       },
     },
   );
@@ -454,7 +454,7 @@ test("the app stapler shim passes non-stapling xcrun commands through once", asy
   await writeFile(
     join(fakeBin, "xcrun"),
     `#!/bin/bash
-printf '<%s>\\n' "$@" >> "$PI_TEST_XCRUN_LOG"
+printf '<%s>\\n' "$@" >> "$OCODE_TEST_XCRUN_LOG"
 exit 0
 `,
   );
@@ -472,14 +472,14 @@ exit 0
       "bash",
       "notarytool",
       "submit",
-      "/tmp/PI Desktop.app",
+      "/tmp/Ocode.app",
     ],
     {
       env: {
         PATH: `${fakeBin}:${process.env.PATH}`,
-        PI_TEST_XCRUN_LOG: callLog,
-        PI_STAPLER_MAX_ATTEMPTS: "6",
-        PI_STAPLER_RETRY_DELAY_SECONDS: "0",
+        OCODE_TEST_XCRUN_LOG: callLog,
+        OCODE_STAPLER_MAX_ATTEMPTS: "6",
+        OCODE_STAPLER_RETRY_DELAY_SECONDS: "0",
       },
     },
   );
@@ -488,7 +488,7 @@ exit 0
   assert.deepEqual((await readFile(callLog, "utf8")).trim().split("\n"), [
     "<notarytool>",
     "<submit>",
-    "</tmp/PI Desktop.app>",
+    "</tmp/Ocode.app>",
   ]);
   assert.doesNotMatch(stderr, /stapler staple attempt/);
 });
@@ -506,13 +506,13 @@ test("--no-codesign-shim runs the command untouched and reports zero calls", asy
     "--",
     "bash",
     "-c",
-    'echo "PI_CODESIGN_LOG=${PI_CODESIGN_LOG:-unset}"; echo "PI_CODESIGN_REAL=${PI_CODESIGN_REAL:-unset}"',
+    'echo "OCODE_CODESIGN_LOG=${OCODE_CODESIGN_LOG:-unset}"; echo "OCODE_CODESIGN_REAL=${OCODE_CODESIGN_REAL:-unset}"',
   ]);
 
   assert.equal(status, 0);
   assert.match(stdout, /codesign-shim=off/);
-  assert.ok(stdout.includes("PI_CODESIGN_LOG=unset"));
-  assert.ok(stdout.includes("PI_CODESIGN_REAL=unset"));
+  assert.ok(stdout.includes("OCODE_CODESIGN_LOG=unset"));
+  assert.ok(stdout.includes("OCODE_CODESIGN_REAL=unset"));
   assert.equal(summaryNumber(stdout, "codesign-calls"), 0);
   await assert.rejects(readFile(codesignLog, "utf8"));
 });
@@ -545,8 +545,8 @@ test("appends a markdown summary to GITHUB_STEP_SUMMARY", async (t) => {
 
 test("recognizes signing phases from the builder output in order", async () => {
   const script = [
-    'console.log("Walking... /tmp/PI-Desktop.app/Contents");',
-    'console.log("Signing... /tmp/PI-Desktop.app/Contents/MacOS/PI-Desktop");',
+    'console.log("Walking... /tmp/Ocode.app/Contents");',
+    'console.log("Signing... /tmp/Ocode.app/Contents/MacOS/Ocode");',
     'console.log("notarizing using notarytool");',
   ].join("\n");
 
@@ -564,5 +564,5 @@ test("recognizes signing phases from the builder output in order", async () => {
     .split("\n")
     .filter((line) => line.startsWith("[sign] phase:"))
     .map((line) => line.slice("[sign] phase: ".length));
-  assert.deepEqual(phases, ["walking", "signing:PI-Desktop", "notarizing"]);
+  assert.deepEqual(phases, ["walking", "signing:Ocode", "notarizing"]);
 });

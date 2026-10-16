@@ -2,7 +2,7 @@ const { app, BrowserWindow, clipboard } = require("electron");
 const assert = require("node:assert/strict");
 const { readFileSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
-const dir = process.env.PI_TABLE_TEST_DIR;
+const dir = process.env.OCODE_TABLE_TEST_DIR;
 let passed = 0;
 const watchdog = setTimeout(() => {
   console.error("Table interaction test exceeded 45 seconds");

@@ -173,7 +173,7 @@ pub struct MessageAttachment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<i64>,
     /// Bounded excerpt of a referenced conversation (`kind: "session"`), written
-    /// by Electron main when the prompt carried a `pi-desktop://session/<id>`
+    /// by Electron main when the prompt carried a `ocode://session/<id>`
     /// link. Travels with the user message so the model keeps reading it.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -4271,7 +4271,7 @@ mod tests {
     use crate::workspace::simple_canonicalize;
 
     fn test_db() -> Database {
-        let dir = std::env::temp_dir().join(format!("pi-desktop-test-{}", Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("ocode-test-{}", Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         Database::open(&dir.join("test.sqlite")).unwrap()
     }
@@ -5908,7 +5908,7 @@ mod tests {
                     {
                         "id": "srvtoolu_01",
                         "status": "completed",
-                        "query": "pi-desktop release notes",
+                        "query": "ocode release notes",
                         "sources": [
                             { "url": "https://example.com/a", "title": "A" }
                         ]
@@ -5920,7 +5920,7 @@ mod tests {
                         "phase": "server_tool_use",
                         "blockId": "srvtoolu_01",
                         "name": "web_search",
-                        "input": { "query": "pi-desktop release notes" }
+                        "input": { "query": "ocode release notes" }
                     }
                 ]
             })),
@@ -5940,7 +5940,7 @@ mod tests {
                     {
                         "id": "srvtoolu_01",
                         "status": "completed",
-                        "query": "pi-desktop release notes",
+                        "query": "ocode release notes",
                         "sources": [
                             { "url": "https://example.com/a", "title": "A" }
                         ]
@@ -5952,7 +5952,7 @@ mod tests {
                         "phase": "server_tool_use",
                         "blockId": "srvtoolu_01",
                         "name": "web_search",
-                        "input": { "query": "pi-desktop release notes" }
+                        "input": { "query": "ocode release notes" }
                     }
                 ]
             })
@@ -5967,7 +5967,7 @@ mod tests {
                     {
                         "id": "srvtoolu_01",
                         "status": "completed",
-                        "query": "pi-desktop release notes",
+                        "query": "ocode release notes",
                         "sources": [
                             { "url": "https://example.com/a", "title": "A" }
                         ]
@@ -5979,7 +5979,7 @@ mod tests {
                         "phase": "server_tool_use",
                         "blockId": "srvtoolu_01",
                         "name": "web_search",
-                        "input": { "query": "pi-desktop release notes" }
+                        "input": { "query": "ocode release notes" }
                     }
                 ]
             }))

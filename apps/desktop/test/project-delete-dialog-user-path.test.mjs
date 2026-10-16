@@ -15,14 +15,14 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
+import { catalogs, flattenCatalog } from "@ocode/i18n";
 import { ProjectDeleteDialog } from "../../apps/desktop/src/components/ProjectDeleteDialog";
 import { useAppStore } from "../../apps/desktop/src/stores/app-store";
 
 await i18n.use(initReactI18next).init({ lng: "en", keySeparator: false,
   resources: { en: { translation: flattenCatalog(catalogs.en) } },
   interpolation: { escapeValue: false } });
-window.piDesktop = { platform: "darwin", on() { return () => {}; },
+window.ocode = { platform: "darwin", on() { return () => {}; },
   invoke() { throw new Error("Unexpected IPC in project-delete dialog test"); } };
 const deleteCalls = [];
 let closeCount = 0;
@@ -91,8 +91,8 @@ test("project-delete dialog X cancels and explicit confirmation deletes", {
       jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@ocode/i18n": join(root, "packages/i18n/src"),
+        "@ocode/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

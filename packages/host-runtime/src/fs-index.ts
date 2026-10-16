@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { FsIndexEntry, FsIndexResult } from "@pi-desktop/shared";
+import type { FsIndexEntry, FsIndexResult } from "@ocode/shared";
 import { isIgnoredName } from "./workspace-files.js";
 
 /**

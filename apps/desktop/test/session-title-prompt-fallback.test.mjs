@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import i18n from "i18next";
-import { catalogs } from "@pi-desktop/i18n";
+import { catalogs } from "@ocode/i18n";
 import {
   isDefaultSessionTitle,
   promptFallbackSessionTitle,
@@ -56,7 +56,7 @@ test("the fallback only fires for a still-untitled session the owning host can t
   assert.match(queueSlice, /isDefaultSessionTitle\(current\?\.title\)/);
   assert.match(queueSlice, /current\?\.source !== "pi-native"/);
   // A remote session derives on its own host through this same call — the
-  // backend router forwards it to the owning `pi-host` — so the gate must not
+  // backend router forwards it to the owning `ocode-host` — so the gate must not
   // exclude remote ids: doing so left every remote task unnamed.
   assert.doesNotMatch(queueSlice, /!isRemoteSession\(/);
   assert.doesNotMatch(
@@ -68,7 +68,7 @@ test("the fallback only fires for a still-untitled session the owning host can t
 });
 
 test("the fallback travels the existing ipc bridge into host-core", () => {
-  assert.match(protocol, /sessionDeriveTitle: "pi-desktop\/session\/deriveTitle"/);
+  assert.match(protocol, /sessionDeriveTitle: "ocode\/session\/deriveTitle"/);
   assert.match(api, /invoke<\{ updated: boolean \}>\(IPC\.invoke\.sessionDeriveTitle, id, title\)/);
   assert.match(main, /handle\(IPC\.invoke\.sessionDeriveTitle/);
   assert.match(main, /host\.call\("session\.deriveTitle", \{ id, title \}\)/);

@@ -1,4 +1,4 @@
-import { ErrorCodes } from "@pi-desktop/shared";
+import { ErrorCodes } from "@ocode/shared";
 
 export type SpeechHttpBody =
   | { type: "json"; value: unknown }

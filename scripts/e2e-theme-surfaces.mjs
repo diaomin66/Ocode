@@ -64,10 +64,10 @@ app.whenReady().then(async () => {
       for (const custom of [false, true, false]) {
         const result = await window.webContents.executeJavaScript("globalThis.${probeName}(" + JSON.stringify(theme) + "," + custom + ")");
         checks.push(result);
-        if (process.env.PI_E2E_ARTIFACT_DIR) {
+        if (process.env.OCODE_E2E_ARTIFACT_DIR) {
           const fs = require("node:fs");
-          fs.mkdirSync(process.env.PI_E2E_ARTIFACT_DIR, { recursive: true });
-          fs.writeFileSync(path.join(process.env.PI_E2E_ARTIFACT_DIR, "surfaces-" + theme + "-" + custom + ".png"), (await window.webContents.capturePage()).toPNG());
+          fs.mkdirSync(process.env.OCODE_E2E_ARTIFACT_DIR, { recursive: true });
+          fs.writeFileSync(path.join(process.env.OCODE_E2E_ARTIFACT_DIR, "surfaces-" + theme + "-" + custom + ".png"), (await window.webContents.capturePage()).toPNG());
         }
       }
     }

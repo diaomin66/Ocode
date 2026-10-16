@@ -18,10 +18,10 @@ import type {
   AgentActivity,
   AgentActivityAgent,
   ProposalKind,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import {
   PROVIDER_RETRY_MAX_RETRIES,
-} from "@pi-desktop/shared";
+} from "@ocode/shared";
 import type {
   AssistantActivityItem,
 } from "../../../lib/assistant-turns";

@@ -111,7 +111,7 @@ Generated `title` / `description` / `enum[].label` are author-language strings;
 the host does not resolve locale maps on them. A plugin that needs a localized
 settings surface ships `settingsDestinations` and reads `pi.app.getLocale`
 (ADR 0280). Shortcut settings are plugin-local: they invoke the declared
-`command` only while the PI-Desktop app window is focused and while the plugin's
+`command` only while the Ocode app window is focused and while the plugin's
 activation scope matches the current project. They are never registered as
 OS-global shortcuts in this release. The host emits `plugin:settingsChanged`
 after a user edit so a plugin can refresh in-memory configuration.
@@ -696,7 +696,7 @@ type SessionCollaborationOperation =
   | "session/collaboration/result"
   | "session/collaboration/cancel"
 
-// All calls use pi.desktop.invoke({ operation, args: [input] }).
+// All calls use ocode.desktop.invoke({ operation, args: [input] }).
 type SpawnInput = {
   task: string
   title?: string
@@ -994,13 +994,13 @@ hold, and `PERMISSION_DENIED` when the host is not in the allowlist.
 ### desktop control (requires `desktop.control`)
 
 ```ts
-pi.desktop.listOperations(): Promise<Array<{
+ocode.desktop.listOperations(): Promise<Array<{
   id: string
   description: string
   risk: "read" | "write" | "dangerous"
 }>>
 
-pi.desktop.invoke(input: {
+ocode.desktop.invoke(input: {
   operation: string
   args?: unknown[]
   confirm?: boolean
@@ -1017,7 +1017,7 @@ with the opt-in local MCP control plane (ADR 0203 / D370). The two catalogs
 differ only for operations marked plugin-only: the six
 `session/collaboration/*` operations are callable through this gateway but are
 deliberately absent from the MCP-visible catalog (`tools/list`,
-`pi_control_describe`, and the `pi_desktop_invoke` enum), because they require
+`pi_control_describe`, and the `ocode_invoke` enum), because they require
 an authenticated plugin invocation context and no renderer mutation channel
 exists for them. The returned catalog omits Electron channel names and the
 plugin never receives the MCP bearer token. Invocation reuses the controller,
@@ -1138,7 +1138,7 @@ command belonging to that plugin.
 
 `command` must already be registered by the calling plugin; anything else fails
 `INVALID_ARGUMENT`. An accelerator reserved by the operating system, one
-PI-Desktop itself currently spends (by default `Alt+Space` opens the plugin
+Ocode itself currently spends (by default `Alt+Space` opens the plugin
 launcher and `Alt+Shift+W` shows or hides the window; once the user rebinds one of
 them, the freed accelerator is available again), or one held by another plugin
 is refused rather than taken over, and a refused re-registration leaves the
