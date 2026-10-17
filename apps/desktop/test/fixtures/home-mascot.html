@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ocode home mark — isolated component fixture</title>
+    <link rel="stylesheet" href="../../src/styles/chat-shell.css" />
+    <style>
+      :root { color-scheme: dark; background: #191a1d; color: #f9f9f7; font: 14px/1.5 system-ui, sans-serif; }
+      :root[data-theme="light"] { color-scheme: light; background: #f9f9f7; color: #202124; }
+      body { margin: 0; }
+      main { box-sizing: border-box; width: min(100%, 640px); margin: 0 auto; padding: 32px 24px; }
+      h1 { font-size: 20px; font-weight: 500; }
+      nav { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-block: 24px; }
+      button, select { font: inherit; padding: 8px 12px; }
+      :focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+      #root { display: grid; place-items: center; min-height: 180px; }
+      .fixture-status { min-height: 24px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Ocode home mark</h1>
+      <p>Isolated fixture. Real component and stylesheet; no Desktop, IPC, or user data.</p>
+      <nav aria-label="Fixture controls">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="unset">Default</option>
+        </select>
+        <button id="toggle" type="button" aria-pressed="true">Show home mark</button>
+      </nav>
+      <div id="root"></div>
+      <p class="fixture-status" id="status" role="status">Loading the real component…</p>
+    </main>
+    <script type="module" src="./home-mascot.jsx"></script>
+  </body>
+</html>

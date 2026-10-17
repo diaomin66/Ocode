@@ -224,12 +224,9 @@ mod tests {
         link_dir(&outside, &worktree.join("deep/linked"));
         try_link_file(&outside.join("KEEP_ME.txt"), &worktree.join("file-link"));
 
-        remove_worktree(
-            &GitRunner::default(),
-            &row_for(&repo, &worktree, "ocode/t"),
-        )
-        .await
-        .unwrap();
+        remove_worktree(&GitRunner::default(), &row_for(&repo, &worktree, "ocode/t"))
+            .await
+            .unwrap();
 
         assert!(!worktree.exists());
         assert!(outside.join("KEEP_ME.txt").is_file());

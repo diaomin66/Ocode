@@ -20,6 +20,48 @@ requires an injected Developer ID identity (local) or `CSC_LINK` certificate
 (CI), and fails before publication if signing or notarization verification does
 not pass.
 
+### Windows-only candidate builds
+
+Use `.github/workflows/windows-installer.yml` on a `build/windows/**` branch
+or by manual dispatch to produce a Windows x64 candidate without launching
+the macOS/Linux release matrix. It uses the locked dependency graph, native
+MSVC host build, existing `dist:win` command, packaging contract tests and
+`scripts/verify-windows-installer.mjs` on a disposable GitHub-hosted runner.
+The verifier silently installs NSIS into a temporary path, checks the installed
+and extracted ZIP metadata/native architecture, and boots both through the
+existing preload/Host RPC probe with separate temporary profiles.
+
+The workflow uploads the installer, portable EXE/ZIP, blockmap, verified
+`latest.yml` (or prerelease channel file), SHA-256 sums and commit/base-bound
+evidence as a private Actions artifact with seven-day retention. Repository
+permissions stay read-only; the build never publishes or consumes signing
+secrets. Before uploading, the verifier checks that NSIS alone owns the feed,
+its size and SHA-512 match the installer, and both packaged copies point to
+`diaomin66/Ocode-releases` without a token or private-provider setting.
+
+### Ocode public Windows distribution
+
+The source repository stays private. After candidate validation, publish a
+stable, non-draft Release in `diaomin66/Ocode-releases` with the exact verified
+NSIS EXE, blockmap, portable ZIP/EXE, `latest.yml`, checksum/evidence files and
+the full corresponding source snapshot. Export source with `git archive` at
+the tested commit, including licenses, dependency patches and build scripts;
+never export `.git`, ignored profiles, local configuration or credentials.
+Upload all assets to a draft first, verify completeness, then publish it as
+latest. Do not tag the private source repository to invoke the multi-platform
+workflow for this Windows-only lane.
+
+Verify anonymous access to the latest Release and update YAML after publishing.
+The index must reference only `Ocode-Setup-<version>.exe`, with its exact size
+and SHA-512. Installed Windows defaults to automatic download/restart delivery;
+ZIP and portable retain their existing manual-update default. A prior build
+pointing at private `diaomin66/Ocode` needs one manual upgrade to switch feeds.
+The same application ID/profile are retained; no database migration is added.
+
+These artifacts are unsigned unless maintainer signing credentials are
+explicitly provided. SmartScreen reputation, clean-client upgrade installation
+and publisher signing remain separate qualification work.
+
 On macOS, `pnpm dev` creates and reuses a fingerprinted branded Electron host
 bundle under `.cache/electron-dev/`. Its bundle name, executable, identifier,
 and ICNS resource are development-only Ocode values, so AppKit shows

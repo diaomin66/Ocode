@@ -26,9 +26,9 @@ Both paths ship the same bytes.
 > such a package as four blockers before it can be submitted — pack from a copy
 > of the tagged tree with `views-src/` removed instead.
 
-The files below are byte-identical to that commit, except for the one manifest
-field listed under local changes. Line endings are LF: the upstream commit
-stores LF, and this repository's `.gitattributes` keeps it that way.
+The original upstream hashes are retained below. Ocode's only changes to the
+three branded files are literal `PI-Desktop` to `Ocode` text replacements;
+the local byte counts and hashes are recorded separately. Line endings are LF.
 
 ## Upstream checksums (sha256)
 
@@ -45,7 +45,7 @@ directory carries the built view the plugin publishes, not its React source.
 
 ## Local changes
 
-Two, so a re-sync stays a copy:
+The host carries the following explicitly recorded local changes:
 
 - `manifest.json` gains `"license": "MIT"` (after `author`), making the vendored
   copy 14191 bytes
@@ -62,6 +62,17 @@ Two, so a re-sync stays a copy:
   ancestor's `"module"`, which is why the marker cannot live one directory up.
   In a packaged app the file is inert, and deleting it only costs the developer
   experience, never a user.
+- Ocode replaces only the literal product text `PI-Desktop` with `Ocode` in
+  `main.js`, `README.md` and `views/assets/index.js`; API identifiers and logic
+  remain unchanged. Reversing that substitution reproduces the upstream hashes.
+
+### Ocode branded checksums (sha256)
+
+| File | Bytes | sha256 |
+| --- | --- | --- |
+| `main.js` | 63229 | `3c3ce9e6496f83094f6a853ed6ae61a517047ae12bb6dc6e354cb2e3bcfc5737` |
+| `README.md` | 20024 | `c79139194a565868152c3c39ab0b82620534816ee25ab863a53f535f29fdcb50` |
+| `views/assets/index.js` | 1345402 | `492279c78bb582543cbf5970cc2272a84c7b2edba47fe0b9652fcac70c77850a` |
 
 ## Re-syncing a newer release
 

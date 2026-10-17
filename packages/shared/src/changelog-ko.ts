@@ -3,8 +3,10 @@ import type { ChangelogEntry } from "./changelog.js";
 export const koEntries: ChangelogEntry[] = [
   {
     version: "0.21.0",
-    date: "2026-10-16",
+    date: "2026-10-17",
     highlights: [
+      "Windows 설치 버전은 이제 Ocode 공개 업데이트 채널을 사용합니다. 이전 비공개 채널 버전은 한 번 수동으로 업그레이드해야 합니다.",
+      "홈의 Ocode 로고가 저프레임 GIF 대신 선명한 벡터 애니메이션으로 부드럽게 움직이며, 화면 배율과 동작 줄이기 설정을 지원합니다.",
       "긴 Bash 명령은 턴이 끝난 뒤에도 백그라운드 작업으로 계속 실행되며, 나중에 출력을 확인할 수 있습니다.",
       "한 프로젝트의 병렬 대화는 각각 분리된 Git worktree에서 실행됩니다.",
       "Todo 목록을 작성창 옆에 고정하고 필요할 때 전체 목록을 펼쳐 보세요.",

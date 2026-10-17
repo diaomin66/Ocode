@@ -116,13 +116,13 @@ describe("packaged sidecar extension loader", () => {
   /** Read the esbuild defines from the production bundle configuration. */
   function bundleDefines(): Record<string, string> {
     const source = readFileSync(resolve(here, "..", "..", "scripts", "bundle.mjs"), "utf8");
-    const value = source.match(/OCODE_BUNDLED_NODE:\s*"([^"]+)"/)?.[1];
-    return value ? { OCODE_BUNDLED_NODE: value } : {};
+    const value = source.match(/PI_BUNDLED_NODE:\s*"([^"]+)"/)?.[1];
+    return value ? { PI_BUNDLED_NODE: value } : {};
   }
 
   it("loads a typebox-importing extension from a bundle outside the repo", async () => {
     expect(existsSync(extensionLoader)).toBe(true);
-    expect(bundleDefines()).toEqual({ OCODE_BUNDLED_NODE: "true" });
+    expect(bundleDefines()).toEqual({ PI_BUNDLED_NODE: "true" });
     const entry = join(work, "entry.mjs");
     writeFileSync(
       entry,

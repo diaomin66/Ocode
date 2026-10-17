@@ -25,13 +25,18 @@ preload bridge name remains an alias with the same allowlist.
 The plugin CLI is `ocode-plugin`, with `pi-plugin` retained as an alias.
 The internal `pi.sqlite` name, plugin theme tokens, and Pi engine protocol
 identifiers are retained for data and extension compatibility, not branding.
+The Pi kernel compile-time flag `PI_BUNDLED_NODE` is also retained unchanged;
+it selects virtual dependency modules in standalone packaged extension loaders.
 The existing upstream plugin marketplace remains an external ecosystem service.
 
-Ocode release and feedback configuration targets `diaomin66/Ocode`. The private
-repository has no published release assets yet; unauthenticated update and
-remote Host downloads are not available. Never embed GitHub credentials in the
-application. Configure a suitable release channel before distributing builds.
-The upstream-only CNB mirror remains disabled for this fork.
+The development and feedback repository remains `diaomin66/Ocode` (private).
+Windows desktop releases and anonymous update feeds use the public
+`diaomin66/Ocode-releases` distribution repository. Each release includes the
+corresponding committed source snapshot, license, and build instructions;
+private Git history and local configuration are not published. Earlier builds
+that point to the private feed require one manual upgrade. Never embed GitHub
+credentials in the application. Remote Linux Host bundles are not part of the
+Windows-only release lane. The upstream-only CNB mirror stays disabled.
 
 Historical brand references and unchanged dependency-patch comments are
 intentional provenance exceptions. Product-facing text, package names and

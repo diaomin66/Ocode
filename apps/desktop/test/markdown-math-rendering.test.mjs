@@ -55,7 +55,7 @@ test("TeX math and wrapped HTTP links render through the production Markdown pip
     );
     assert.match(
       wrappedLink,
-      /<a[^>]*href="https:\/\/github\.com\/vastsa\/Ocode\/issues\/1106"/,
+      /<a[^>]*href="https:\/\/github\.com\/vastsa\/PI-Desktop\/issues\/1106"/,
     );
     assert.match(wrappedLink, /target="_blank"/);
 

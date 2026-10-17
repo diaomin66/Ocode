@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Download
-      link: https://github.com/diaomin66/Ocode/releases/latest
+      link: https://github.com/diaomin66/Ocode-releases/releases/latest
     - theme: alt
       text: Documentation
       link: /guide/

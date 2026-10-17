@@ -51,7 +51,7 @@ try {
   await writeFile(join(temp, "agent-runtime/package.json"), '{"type":"module"}');
   await build({ entryPoints: [join(root, "packages/agent-runtime/src/sidecar.ts")],
     outfile: join(temp, "agent-runtime/sidecar.js"), bundle: true, platform: "node", format: "esm",
-    define: { OCODE_BUNDLED_NODE: "true" },
+    define: { PI_BUNDLED_NODE: "true" },
     banner: { js: `import { createRequire as __piCreateRequire } from 'node:module'; const require = __piCreateRequire(import.meta.url);
 import __certificateProbeTls from 'node:tls';
 { const tls = __certificateProbeTls; const defaults = new Set(tls.getCACertificates('default'));

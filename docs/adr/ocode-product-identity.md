@@ -1,6 +1,6 @@
-# Ocode product and distribution identity
+# ADR: Ocode product and distribution identity
 
-Status: Accepted for the separately branded derivative.
+- Status: Accepted
 
 ## Context
 
@@ -25,9 +25,11 @@ installing the wrong executable during an update.
 - Plugin CLI: `ocode-plugin`; `pi-plugin` remains a compatibility alias.
 - New session links use `ocode://`; pasted `pi-desktop://session/` links remain
   readable with identical identifier bounds and reference limits.
-- Release/feedback repository: `diaomin66/Ocode`. CNB mirroring is opt-in and
-  uses only maintainer-configured coordinates. Signing uses the maintainer's
-  credentials, never a hard-coded upstream developer identity.
+- Development/feedback repository: `diaomin66/Ocode` (private). Windows
+  installer updates and downloads use `diaomin66/Ocode-releases` (public).
+  Releases include corresponding source snapshots without private Git history
+  or local configuration. Existing private-feed builds need one manual upgrade.
+  CNB mirroring remains opt-in. Signing uses maintainer credentials only.
 - The geometric O/slash mark is generated locally by `scripts/make-brand.py`;
   `make-icon.py` and `make-dmg-background.py` derive platform resources.
 

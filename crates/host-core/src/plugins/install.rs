@@ -201,11 +201,7 @@ impl PluginManager {
             // Record the publisher the catalog named. Falling back to the
             // project keeps registries written before publisher-owned sources
             // readable, but a v2 entry must not be relabelled as ours.
-            publisher_id: Some(
-                info.publisher_id
-                    .clone()
-                    .unwrap_or_else(|| "ocode".into()),
-            ),
+            publisher_id: Some(info.publisher_id.clone().unwrap_or_else(|| "ocode".into())),
             trust: info.trust.clone(),
             provenance: info.provenance.clone(),
         };

@@ -726,38 +726,52 @@
 }
 
 .home-mascot-logo {
+  /* Match the paper/ink palette of the Ocode brand masters. */
+  --home-mascot-paper: #f9f9f7;
+  --home-mascot-ink: #202124;
   display: block;
-  position: relative;
   width: 100px;
   height: 100px;
   flex: 0 0 auto;
-  overflow: hidden;
-}
-
-.home-mascot-logo img {
-  display: none;
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
+  color: var(--home-mascot-paper);
   pointer-events: none;
-  -webkit-user-drag: none;
   user-select: none;
 }
 
-:root:not([data-theme="light"]) .home-mascot-logo .home-mascot-motion.home-mascot-dark,
-:root[data-theme="light"] .home-mascot-logo .home-mascot-motion.home-mascot-light {
+:root[data-theme="light"] .home-mascot-logo {
+  color: var(--home-mascot-ink);
+}
+
+.home-mascot-motion,
+.home-mascot-logo svg {
   display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.home-mascot-motion {
+  /* Animate the HTML layer, not SVG geometry or a decoded frame sequence. */
+  transform-origin: center;
+  animation: home-mascot-wobble 2.4s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  will-change: transform;
+}
+
+@keyframes home-mascot-wobble {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+
+  50% {
+    transform: rotate(3deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-theme="light"]) .home-mascot-logo .home-mascot-motion.home-mascot-dark,
-  :root[data-theme="light"] .home-mascot-logo .home-mascot-motion.home-mascot-light {
-    display: none;
-  }
-
-  :root:not([data-theme="light"]) .home-mascot-logo .home-mascot-still.home-mascot-dark,
-  :root[data-theme="light"] .home-mascot-logo .home-mascot-still.home-mascot-light {
-    display: block;
+  .home-mascot-motion {
+    animation: none;
+    transform: none;
+    will-change: auto;
   }
 }
 

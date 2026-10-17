@@ -5,7 +5,6 @@ Run this before make-icon.py and make-dmg-background.py. Historical screenshots
 are deliberately not rewritten. The mark uses no font or third-party artwork.
 """
 from pathlib import Path
-import math
 
 from PIL import Image, ImageDraw
 
@@ -43,21 +42,6 @@ def main() -> None:
     for relative, image in outputs.items():
         image.save(ROOT / relative, optimize=True)
         print(f"wrote {relative}")
-    # Match the existing reduced-motion switch with paired GIF/still assets.
-    for theme, source in [("light", light_mark), ("dark", dark_mark)]:
-        still = source.resize((200, 200), Image.Resampling.LANCZOS)
-        still.save(ROOT / f"apps/desktop/src/assets/home-mascot-still-{theme}.png", optimize=True)
-        frames = []
-        for index in range(24):
-            angle = 3 * math.sin(index * 2 * math.pi / 24)
-            frame = still.rotate(angle, resample=Image.Resampling.BICUBIC)
-            mask = frame.getchannel("A").point(lambda alpha: 255 if alpha < 128 else 0)
-            palette = frame.convert("RGB").quantize(colors=255)
-            palette.paste(255, mask=mask)
-            frames.append(palette)
-        frames[0].save(ROOT / f"apps/desktop/src/assets/home-mascot-{theme}.gif", save_all=True,
-                       append_images=frames[1:], duration=100, loop=0, transparency=255, disposal=2)
-        print(f"wrote home-mascot {theme} motion/still assets")
 
 
 if __name__ == "__main__":

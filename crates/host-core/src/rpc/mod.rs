@@ -5486,10 +5486,7 @@ mod tests {
         )
         .await
         .unwrap();
-        assert_eq!(
-            enabled,
-            json!({ "id": "ocode/imagegen", "enabled": true })
-        );
+        assert_eq!(enabled, json!({ "id": "ocode/imagegen", "enabled": true }));
         let current = handle_request(
             state,
             "skills.disabledBuiltins",

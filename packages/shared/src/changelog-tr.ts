@@ -3,8 +3,10 @@ import type { ChangelogEntry } from "./changelog.js";
 export const trEntries: ChangelogEntry[] = [
   {
     version: "0.21.0",
-    date: "2026-10-16",
+    date: "2026-10-17",
     highlights: [
+      "Windows güncellemeleri artık Ocode'un herkese açık yayın kanalını kullanır; eski özel kanal sürümleri bir kez elle yükseltilmelidir.",
+      "Ana sayfadaki Ocode işareti her ölçekte net kalır ve düşük kare hızlı GIF yerine akıcı vektör animasyonu kullanır; azaltılmış hareket tercihi korunur.",
       "Uzun Bash komutları tur bittikten sonra arka plan görevleri olarak çalışmaya devam eder; çıktıları daha sonra inceleyebilirsiniz.",
       "Aynı projedeki paralel konuşmalar birbirinden yalıtılmış Git worktree'lerinde çalışır.",
       "Todo listesini Composer'ın yanında sabit tutun, gerektiğinde tamamını açın.",

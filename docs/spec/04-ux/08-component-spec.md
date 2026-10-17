@@ -691,14 +691,19 @@ visually distinct from list content.
   splash at 3x; ADR 0125). The component subscribes to
   `document.documentElement[data-theme]` via a `MutationObserver` and swaps the
   source at runtime for the sidebar and startup splash without a reload. The
-  empty-home hero uses `HomeMascotLogo` as a 100px eight-frame GIF. Light and
-  dark themes each have a dedicated GIF plus still PNG. CSS follows
-  `document.documentElement[data-theme]` without a reload; anything other than
-  `light` uses the dark artwork. The mascot loops a processed wave with a
-  short idle hold on the first frame. Playback is native to the GIF and does
-  not change on pointer hover; reduced motion swaps to the matching still
-  first-frame PNG. The expanded/collapsed sidebar remains 20px/18px and the
-  startup splash 64px.
+  empty-home hero uses `HomeMascotLogo` as a decorative inline SVG in the same
+  100px square. Its rounded O and slash match `scripts/make-brand.py` geometry;
+  CSS follows `document.documentElement[data-theme]` with the brand's ink in
+  light mode and paper otherwise, without replacing the node or restarting
+  motion. Only its HTML wrapper transforms: a smoothly interpolated ±3° wobble
+  loops every 2.4s with matching endpoints, no raster playback, JavaScript
+  timers, per-frame React updates, or hover-driven speed changes. Reduced
+  motion disables the animation and layer hint and leaves the same SVG upright.
+  The mark remains `aria-hidden`, unfocusable, and layout-stable at high DPI.
+  `home-mascot-browser.test.mjs` checks mount → theme changes → reduced motion
+  → unmount/remount using the real component/CSS, plus keyboard focus, narrow
+  viewports, 1x/2x/3x DPI, loop continuity and Chromium compositing. The
+  expanded/collapsed sidebar remains 20px/18px and the startup splash 64px.
   Home and thread-docked composer prompt rows do not render a leading brand
   icon.
 - Project and Temporary session creation controls render the dedicated
