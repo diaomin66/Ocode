@@ -36,8 +36,15 @@ jobs:
           cache: pnpm
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
       - name: Install locked dependencies and native modules
         run: pnpm install --frozen-lockfile
+      - name: Ensure the locked Electron runtime exists for browser tests
+        run: |
+          set -euo pipefail
+          node apps/desktop/node_modules/electron/install.js
+          node --input-type=module -e "import { resolveElectronBinary } from './scripts/e2e/boot.mjs'; console.log(resolveElectronBinary());"
       - name: Build native host and workspace dependencies
         run: |
           set -euo pipefail

@@ -12,6 +12,8 @@ test("Windows candidate packaging is isolated and never publishes releases", asy
   assert.doesNotMatch(source, /contents: write|secrets\.|softprops\/action-gh-release/);
   assert.match(source, /runs-on: windows-2022/);
   assert.match(source, /pnpm install --frozen-lockfile/);
+  assert.match(source, /node apps\/desktop\/node_modules\/electron\/install\.js/);
+  assert.ok(source.indexOf("electron/install.js") < source.indexOf("cargo build --release"), "runtime must be checked before the native build");
   assert.match(source, /cargo build --release --locked -p host-core/);
   assert.match(source, /pnpm --filter @ocode\/desktop run dist:win/);
   assert.match(source, /node scripts\/verify-windows-installer\.mjs/);
