@@ -41,7 +41,7 @@ describe("normalizeProviderHeaders", () => {
         "X-Control": "ab\u0000cd",
       }),
     ).toEqual({
-      "X-Title": "Ocode",
+      "X-Title": "PI Desktop",
       "X-Key": "12345670",
     });
   });

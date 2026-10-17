@@ -64,7 +64,8 @@ export async function bundleAgentRuntime(outputDir = join(packageRoot, "dist-bun
       outdir: stagingDir,
       entryNames: "sidecar",
       chunkNames: "chunks/[name]-[hash]",
-      define: { OCODE_BUNDLED_NODE: "true" },
+      // This is the third-party Pi kernel's compile-time contract, not branding.
+      define: { PI_BUNDLED_NODE: "true" },
       banner: { js: banner },
     });
 

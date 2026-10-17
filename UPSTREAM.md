@@ -25,6 +25,8 @@ preload bridge name remains an alias with the same allowlist.
 The plugin CLI is `ocode-plugin`, with `pi-plugin` retained as an alias.
 The internal `pi.sqlite` name, plugin theme tokens, and Pi engine protocol
 identifiers are retained for data and extension compatibility, not branding.
+The Pi kernel compile-time flag `PI_BUNDLED_NODE` is also retained unchanged;
+it selects virtual dependency modules in standalone packaged extension loaders.
 The existing upstream plugin marketplace remains an external ecosystem service.
 
 The development and feedback repository remains `diaomin66/Ocode` (private).
