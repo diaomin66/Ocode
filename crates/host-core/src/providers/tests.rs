@@ -1770,7 +1770,7 @@ fn header_values_fold_fullwidth_and_reject_non_latin1() {
     )
     .unwrap();
     let stored = provider.headers.unwrap();
-    assert_eq!(stored["X-Title"], "Ocode");
+    assert_eq!(stored["X-Title"], "PI Desktop");
     assert_eq!(stored["X-Key"], "12345670");
 
     // A value with no ASCII counterpart is refused at the boundary and names
@@ -1951,7 +1951,7 @@ fn sync_payloads_keep_only_storable_headers() {
         }
     });
     retain_storable_headers(&mut payload);
-    assert_eq!(payload["headers"]["X-Title"], "Ocode");
+    assert_eq!(payload["headers"]["X-Title"], "PI Desktop");
     assert_eq!(payload["headers"]["X-Key"], "12345670");
     assert!(payload["headers"].get("X-CJK").is_none());
     assert!(payload["headers"].get("Authorization").is_none());
