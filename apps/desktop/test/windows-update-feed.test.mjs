@@ -45,6 +45,22 @@ test("Windows release candidate preserves the update feed and verifies its packa
   const verifier = await readFile(new URL("scripts/verify-windows-installer.mjs", root), "utf8");
   assert.match(workflow, /apps\/desktop\/release\/latest\.yml/);
   assert.match(verifier, /verifyWindowsUpdateFeed/);
-  assert.match(verifier, /Ocode-releases/);
+  assert.match(verifier, /Ocode/);
   assert.match(verifier, /app-update\.yml/);
+});
+
+test("stable release uses the public Ocode repository and validates publication", async () => {
+  const root = new URL("../../../", import.meta.url);
+  const manifest = JSON.parse(await readFile(new URL("apps/desktop/package.json", root), "utf8"));
+  const updater = await readFile(new URL("apps/desktop/resources/app-update.yml", root), "utf8");
+  const workflow = await readFile(new URL(".github/workflows/windows-release.yml", root), "utf8");
+  const checksums = await readFile(new URL("scripts/create-release-checksums.mjs", root), "utf8");
+  assert.equal(manifest.build.publish[0].repo, "Ocode");
+  assert.match(updater, /repo: Ocode\r?\n/);
+  assert.match(workflow, /github\.repository == 'diaomin66\/Ocode'/);
+  assert.match(workflow, /--jq \.visibility/);
+  assert.match(workflow, /merge-base --is-ancestor/);
+  assert.match(workflow, /permissions:\n      contents: write/);
+  assert.match(workflow, /gh release create/);
+  assert.match(checksums, /createHash\("sha256"\)/);
 });

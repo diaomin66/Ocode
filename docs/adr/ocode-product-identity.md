@@ -4,7 +4,7 @@
 
 ## Context
 
-Ocode is a private derivative of upstream PI-Desktop at revision `d940c8d`.
+Ocode is a separately branded derivative of upstream PI-Desktop at revision `d940c8d`.
 A product rename must include shipped binaries and resources, not only titles.
 Reusing the upstream application ID, profile or update channel would risk opening
 another running product's database, conflicting single-instance locks, and
@@ -25,11 +25,13 @@ installing the wrong executable during an update.
 - Plugin CLI: `ocode-plugin`; `pi-plugin` remains a compatibility alias.
 - New session links use `ocode://`; pasted `pi-desktop://session/` links remain
   readable with identical identifier bounds and reference limits.
-- Development/feedback repository: `diaomin66/Ocode` (private). Windows
-  installer updates and downloads use `diaomin66/Ocode-releases` (public).
-  Releases include corresponding source snapshots without private Git history
-  or local configuration. Existing private-feed builds need one manual upgrade.
-  CNB mirroring remains opt-in. Signing uses maintainer credentials only.
+- Development, feedback and Windows release repository: public `diaomin66/Ocode`
+  with complete Git history and upstream authorship. Starting with 0.21.1,
+  installer updates and downloads use that repository. Corresponding source
+  archives exclude ignored profiles and local configuration. Existing
+  `Ocode-releases/v0.21.0` assets remain unchanged; its `0.21.0-beta.1` binaries
+  need one manual upgrade. CNB mirroring remains opt-in. No update credentials
+  are embedded. The 0.21.1 Windows release is explicitly unsigned.
 - The geometric O/slash mark is generated locally by `scripts/make-brand.py`;
   `make-icon.py` and `make-dmg-background.py` derive platform resources.
 
@@ -47,13 +49,12 @@ reauthentication. Never point two running products at one writable database.
 
 ## Consequences
 
-Ocode is a distinct installation, not an in-place upstream update. The private
-repository does not provide anonymous release access; updates and automatic
-remote Host downloads need an appropriate distribution channel before public
-builds are distributed. No credentials are embedded to work around this.
-Historical screenshots are retained as upstream illustrations, not evidence of
-new Ocode builds. Platform signing and packaging still require their native
-build environments and the maintainer's own certificates.
+Ocode is a distinct installation, not an in-place upstream update. Public
+Windows releases and anonymous update feeds share the public source repository.
+Remote Linux Host artifacts still require a separate native validation and
+distribution lane. Historical screenshots remain upstream illustrations rather
+than evidence of new Ocode builds. Platform signing requires the maintainer's
+own certificates; unsigned Windows packages may show publisher warnings.
 
 ## Validation
 

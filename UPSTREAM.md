@@ -29,14 +29,15 @@ The Pi kernel compile-time flag `PI_BUNDLED_NODE` is also retained unchanged;
 it selects virtual dependency modules in standalone packaged extension loaders.
 The existing upstream plugin marketplace remains an external ecosystem service.
 
-The development and feedback repository remains `diaomin66/Ocode` (private).
-Windows desktop releases and anonymous update feeds use the public
-`diaomin66/Ocode-releases` distribution repository. Each release includes the
-corresponding committed source snapshot, license, and build instructions;
-private Git history and local configuration are not published. Earlier builds
-that point to the private feed require one manual upgrade. Never embed GitHub
-credentials in the application. Remote Linux Host bundles are not part of the
-Windows-only release lane. The upstream-only CNB mirror stays disabled.
+The public development, feedback and Windows release repository is
+`diaomin66/Ocode`, including its complete Git history and upstream authorship.
+Starting with 0.21.1, anonymous update feeds and corresponding source archives
+are published there. Existing `diaomin66/Ocode-releases/v0.21.0` assets stay
+available and unchanged. Its `0.21.0-beta.1` binaries require one manual upgrade
+to switch feeds. Never embed GitHub credentials in the application. Ignored
+profiles, local configuration and credentials are excluded from source archives.
+Remote Linux Host bundles are not part of the Windows-only release lane.
+The upstream-only CNB mirror stays disabled.
 
 Historical brand references and unchanged dependency-patch comments are
 intentional provenance exceptions. Product-facing text, package names and

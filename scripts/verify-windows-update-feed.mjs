@@ -33,5 +33,6 @@ export async function verifyWindowsUpdateFeed(releaseDir, version) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const manifest = JSON.parse(await readFile(join(root, "apps/desktop/package.json"), "utf8"));
-  console.log(JSON.stringify(await verifyWindowsUpdateFeed(join(root, "apps/desktop/release"), manifest.version), null, 2));
+  const directory = process.argv[2] ? resolve(process.argv[2]) : join(root, "apps/desktop/release");
+  console.log(JSON.stringify(await verifyWindowsUpdateFeed(directory, manifest.version), null, 2));
 }

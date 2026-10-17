@@ -12,8 +12,8 @@
 
 <br />
 
-[![Release](https://img.shields.io/github/v/release/diaomin66/Ocode-releases?label=release)](https://github.com/diaomin66/Ocode-releases/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/diaomin66/Ocode-releases/total?label=downloads)](https://github.com/diaomin66/Ocode-releases/releases)
+[![Release](https://img.shields.io/github/v/release/diaomin66/Ocode?label=release)](https://github.com/diaomin66/Ocode/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/diaomin66/Ocode/total?label=downloads)](https://github.com/diaomin66/Ocode/releases)
 [![Stars](https://img.shields.io/github/stars/diaomin66/Ocode?style=flat\&label=stars)](https://github.com/diaomin66/Ocode/stargazers)
 [![CI](https://github.com/diaomin66/Ocode/actions/workflows/ci.yml/badge.svg)](https://github.com/diaomin66/Ocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/diaomin66/Ocode)](LICENSE)
@@ -22,7 +22,7 @@
 
 <br />
 
-**[Download](https://github.com/diaomin66/Ocode-releases/releases/latest)** ·
+**[Download](https://github.com/diaomin66/Ocode/releases/latest)** ·
 [使用文档](docs/zh-CN/index.md) ·
 [插件开发](docs/plugin-development.md) ·
 [界面预览](docs/guide/screenshots.md) ·
@@ -38,9 +38,11 @@
 
 </div>
 
-> **Ocode 私有衍生版本。** 请参阅[上游来源与兼容性说明](UPSTREAM.md)。
-> 安装包、可执行文件、用户目录和图标均使用 Ocode。当前尚无 Ocode 发布
-> 安装包，请从源码构建。下方截图来自上游历史版本，并非 Ocode 发布版截图。
+> **Current release line: 0.21.x (Early Preview).** See the
+> [upstream provenance and compatibility notes](UPSTREAM.md). Source and new
+> Windows releases share this public repository. Packages are unsigned and may
+> trigger SmartScreen or unknown-publisher warnings. Existing 0.21.0-beta.1
+> installations need one manual upgrade. Screenshots are historical.
 
 ---
 
@@ -570,7 +572,7 @@ Agent / Plan / Goal
 
 <div align="center">
 
-### [Download Ocode →](https://github.com/diaomin66/Ocode-releases/releases/latest)
+### [下载 Ocode →](https://github.com/diaomin66/Ocode/releases/latest)
 
 **macOS · Windows · Linux**
 
@@ -762,7 +764,7 @@ Ocode 使用 **GNU Lesser General Public License v3.0**。
 
 <br />
 
-**[Download](https://github.com/diaomin66/Ocode-releases/releases/latest)** ·
+**[Download](https://github.com/diaomin66/Ocode/releases/latest)** ·
 [Documentation](docs/index.md) ·
 [Build a Plugin](docs/plugin-development.md)
 

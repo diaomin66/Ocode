@@ -6,16 +6,16 @@ const root = new URL("../../../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 const manifest = JSON.parse(read("apps/desktop/package.json"));
 
-test("Ocode uses an isolated identity and its own release repository", () => {
+test("Ocode publishes public installers and updates from its main repository", () => {
   assert.equal(manifest.name, "@ocode/desktop");
   assert.equal(manifest.build.productName, "Ocode");
   assert.equal(manifest.build.appId, "com.ocode.desktop");
   assert.equal(manifest.build.win.executableName, "Ocode");
   assert.equal(manifest.build.nsis.shortcutName, "Ocode");
   assert.deepEqual(manifest.build.publish, [
-    { provider: "github", owner: "diaomin66", repo: "Ocode-releases" },
+    { provider: "github", owner: "diaomin66", repo: "Ocode" },
   ]);
-  assert.match(read("apps/desktop/resources/app-update.yml"), /owner: diaomin66\r?\nrepo: Ocode-releases\r?\n/);
+  assert.match(read("apps/desktop/resources/app-update.yml"), /owner: diaomin66\r?\nrepo: Ocode\r?\n/);
   assert.match(read("packages/shared/src/protocol.ts"), /APP_NAME = "Ocode"/);
 });
 

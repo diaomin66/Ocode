@@ -31,6 +31,10 @@ disagrees, so a green `check:release-docs` is a precondition, not a substitute.
 | `macos-codesign-shim.sh` | used by `macos-signing-watchdog.mjs` | PATH shim that timestamps every `codesign` invocation and then executes the real `codesign`; inert unless `OCODE_CODESIGN_LOG` is set |
 | `export-linux-asar.mjs` | `node scripts/export-linux-asar.mjs` | Copy the Linux `linux-unpacked/resources/app.asar` into the versioned release asset used for system-Electron repackaging |
 | `build-desktop-release.mjs` | called by the desktop `dist` / `dist:win` scripts | Build the native runner target without publishing; Windows runs separate NSIS and ZIP passes and stamps their updater distribution metadata |
+| `verify-windows-installer.mjs` | `node scripts/verify-windows-installer.mjs` | Disposable GitHub-hosted Windows runner only: isolated NSIS/ZIP boot, native architecture, packaged provider, exact feed hashes and unsigned status |
+| `verify-windows-update-feed.mjs` | `node scripts/verify-windows-update-feed.mjs [release-dir]` | Require an NSIS-only feed with exact installer size, SHA-512 and blockmap |
+| `create-release-checksums.mjs` | `node scripts/create-release-checksums.mjs [release-dir]` | Write SHA-256 sums for the exact stable Windows asset set, corresponding source, license and evidence |
+| `verify-windows-release-assets.mjs` | `node scripts/verify-windows-release-assets.mjs <release-dir> <version> <commit>` | Recheck downloaded assets, full checksum coverage, source, license and commit-bound unsigned startup evidence before draft publication |
 | `check-linux-host-glibc.mjs` | `node scripts/check-linux-host-glibc.mjs [bin]` | Fail a Linux host-core binary whose needed glibc is above 2.35 |
 | `make-icon.py` | `python3 scripts/make-icon.py` | Derive the package PNG, the macOS tray template, and the iconset/ICNS from the canonical PNG |
 | `publish-screenshots.py` | `python3 scripts/publish-screenshots.py` | Publish documentation screenshots |

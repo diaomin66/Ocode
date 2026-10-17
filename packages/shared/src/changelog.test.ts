@@ -34,7 +34,7 @@ describe("changelog catalog", () => {
 
   it("lists stable releases from 0.1.1 newest-first without pre-releases", () => {
     const versions = CHANGELOG.en.map((e) => e.version);
-    expect(versions[0]).toBe("0.21.0");
+    expect(versions[0]).toBe("0.21.1");
     expect(versions.at(-1)).toBe(STABLE_FROM);
     // 0.11.1 is intentionally absent: that tag was pushed before the release
     // branch was complete, and 0.11.2 is the tag that actually ships its
@@ -42,6 +42,7 @@ describe("changelog catalog", () => {
     // 0.20.0 has a tag but no published Release; its highlights are carried by
     // 0.20.1, the first published release on the 0.20 line.
     expect(versions).toEqual([
+      "0.21.1",
       "0.21.0",
       "0.20.1",
       "0.19.1",
@@ -165,6 +166,20 @@ describe("changelog catalog", () => {
     expect(formatChangelogNotes("9.9.9", "en")).toBeUndefined();
     expect(formatChangelogNotes("0.2.0-rc.6", "en")).toBeUndefined();
   });
+
+  it.each(["en", "zh-CN", "zh-TW", "tr", "de", "es", "fr", "ko", "pt-BR"])(
+    "loads and formats the 0.21.1 notes for %s",
+    async (locale) => {
+      const catalog = await loadChangelogCatalog(locale);
+      const latest = catalog[0];
+
+      expect(latest?.version).toBe("0.21.1");
+      expect(latest?.highlights).toHaveLength(6);
+      expect(formatChangelogNotes("v0.21.1", locale)).toBe(
+        latest?.highlights.map((line) => `• ${line}`).join("\n"),
+      );
+    },
+  );
 
   it("loads and caches the catalog for the resolved locale", async () => {
     const catalog = await loadChangelogCatalog("fr-CA");

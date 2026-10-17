@@ -2,6 +2,17 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const zhTWEntries: ChangelogEntry[] = [
   {
+    version: "0.21.1",
+    highlights: [
+      "Ocode 原始碼於 diaomin66/Ocode 公開，完整保留上游歷史、授權條款與相依套件修補程式。",
+      "後續 Windows 下載與內建更新程式統一使用 diaomin66/Ocode；Ocode-releases 中現有的 v0.21.0 檔案保持不變。",
+      "0.21.0-beta.1 內建更新來源仍指向 Ocode-releases，需手動升級一次至 0.21.1。",
+      "保留 com.ocode.desktop、.ocode 設定目錄與 pi.sqlite，不執行自動設定或資料移轉。",
+      "NSIS 安裝版預設自動更新；ZIP 與可攜版仍預設手動更新。",
+      "Windows 0.21.1 仍未簽署，可能出現 SmartScreen 或未知發行者警告。",
+    ],
+  },
+  {
     version: "0.21.0",
     date: "2026-10-17",
     highlights: [

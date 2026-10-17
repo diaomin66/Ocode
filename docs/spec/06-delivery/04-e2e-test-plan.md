@@ -20,12 +20,13 @@
   boot probe succeed. All expected artifacts are nonempty and have SHA-256
   checksums. Update YAML contains only the matching NSIS artifact, with its
   exact size and SHA-512. Installed/ZIP provider configuration names the public
-  `diaomin66/Ocode-releases` repository with no embedded credentials. Upload
-  only after verification; CI does not itself publish a Release.
+  `diaomin66/Ocode` repository with no embedded credentials. Signature status is
+  recorded as `NotSigned`; publisher signing is not claimed. Upload only after
+  verification. Branch candidates cannot publish a Release.
 - **Command:** `node scripts/verify-windows-installer.mjs` (hosted CI only).
 - **Boundary:** No real provider, credentials, existing profile or self-hosted
-  runner. Signing, SmartScreen reputation, upgrades and portable EXE startup
-  remain separate qualification work.
+  runner. SmartScreen reputation, upgrades and portable EXE startup remain
+  separate qualification work.
 
 ### E2E-OCODE-public-update-channel
 
@@ -36,8 +37,12 @@
   downloaded candidate. Run updater-controller, preference and timeout tests.
 - **Expected:** Anonymous discovery/download succeed; no private source token
   is present in the client. Installed builds retain download/restart delivery,
-  while portable defaults remain manual. Private-feed beta installs require
-  a one-time manual upgrade; do not claim they can discover this release.
+  while portable defaults remain manual. Old 0.21.0-beta.1 installs embed
+  `Ocode-releases` and need one manual upgrade to switch to `Ocode`.
+- **Publication:** `windows-release.yml` validates the candidate commit on main,
+  exact tag, installer feed, evidence, checksums, source and license assets before
+  publishing a draft as latest. A real `electron-updater` probe then discovers
+  and downloads from the public Ocode feed and verifies SHA-512 without installing.
 - **Boundary:** No production profile, real provider or signing credentials.
   Full old-to-new installation remains a separate qualification step.
 

@@ -1,0 +1,174 @@
+name: Windows stable release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable version in apps/desktop/package.json
+        required: true
+        type: string
+      publish:
+        description: Publish the verified release from public main
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-stable-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    if: github.repository == 'diaomin66/Ocode'
+    runs-on: windows-2022
+    timeout-minutes: 120
+    outputs:
+      source: ${{ steps.revision.outputs.source }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Validate candidate base and release version
+        id: revision
+        env:
+          PUBLISH_RELEASE: ${{ inputs.publish }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch origin main --tags
+          git merge-base --is-ancestor origin/main HEAD
+          [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$RELEASE_VERSION" == "$(node -p "require('./apps/desktop/package.json').version")" ]]
+          [[ "$(node -p "require('./apps/desktop/package.json').build.publish[0].repo")" == "Ocode" ]]
+          if [[ "$PUBLISH_RELEASE" == "true" ]]; then
+            [[ "$GITHUB_REF" == "refs/heads/main" ]]
+            [[ "$(gh api "repos/${GITHUB_REPOSITORY}" --jq .visibility)" == "public" ]]
+          fi
+          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "OCODE_BASE_SHA=$(git rev-parse origin/main)" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+      - name: Install locked dependencies and native modules
+        run: pnpm install --frozen-lockfile
+      - name: Ensure the locked Electron runtime exists
+        run: |
+          set -euo pipefail
+          node apps/desktop/node_modules/electron/install.js
+          node --input-type=module -e "import { resolveElectronBinary } from './scripts/e2e/boot.mjs'; console.log(resolveElectronBinary());"
+      - name: Build native host and workspace dependencies
+        run: |
+          set -euo pipefail
+          cargo build --release --locked -p host-core
+          pnpm --filter '@ocode/desktop^...' --fail-if-no-match build
+      - name: Run release, updater and branding gates
+        run: |
+          set -euo pipefail
+          pnpm --filter @ocode/desktop typecheck
+          pnpm lint
+          node scripts/check-release-docs.mjs "$RELEASE_VERSION"
+          node scripts/check-agent-policy-sync.mjs
+          node --test apps/desktop/test/windows-installer-workflow.test.mjs apps/desktop/test/windows-host-runtime.test.mjs apps/desktop/test/ocode-branding.test.mjs apps/desktop/test/ocode-compatibility.test.mjs apps/desktop/test/packaging-footprint.test.mjs apps/desktop/test/release-asar.test.mjs apps/desktop/test/auto-update.test.mjs apps/desktop/test/updater-controller.test.mjs apps/desktop/test/update-preference.test.mjs apps/desktop/test/update-timeout.test.mjs apps/desktop/test/renderer-branding.test.mjs apps/desktop/test/home-mascot-browser.test.mjs apps/desktop/test/windows-update-feed.test.mjs apps/desktop/test/agent-runtime-bundle-package.test.mjs
+          node --test apps/desktop/test/windows-release-assets.test.mjs
+          pnpm --filter @ocode/agent-runtime exec vitest run src/provider-headers.test.ts src/extensions/bundle.test.ts
+          node packages/shared/node_modules/vitest/vitest.mjs run packages/shared/src/changelog.test.ts
+      - name: Build Windows installer and portable artifacts
+        run: pnpm --filter @ocode/desktop run dist:win
+      - name: Verify installer, boot, updater, hashes and unsigned state
+        run: node scripts/verify-windows-installer.mjs
+      - name: Build corresponding source archive, licenses and checksum manifest
+        run: |
+          set -euo pipefail
+          git archive --format=tar.gz --prefix="Ocode-${RELEASE_VERSION}/" --output="apps/desktop/release/Ocode-Source-${RELEASE_VERSION}.tar.gz" HEAD
+          cp LICENSE apps/desktop/release/
+          node scripts/create-release-checksums.mjs
+      - name: Upload exact tested release candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: Ocode-windows-release-${{ inputs.version }}-${{ github.sha }}
+          path: |
+            apps/desktop/release/Ocode-Setup-*.exe
+            apps/desktop/release/Ocode-Setup-*.exe.blockmap
+            apps/desktop/release/Ocode-Portable-*.exe
+            apps/desktop/release/Ocode-Portable-*.zip
+            apps/desktop/release/latest.yml
+            apps/desktop/release/windows-verification.json
+            apps/desktop/release/SHA256SUMS.txt
+            apps/desktop/release/Ocode-Source-*.tar.gz
+            apps/desktop/release/LICENSE
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+  publish:
+    if: github.repository == 'diaomin66/Ocode' && inputs.publish && github.ref == 'refs/heads/main'
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      OCODE_SOURCE_COMMIT: ${{ needs.package.outputs.source }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.package.outputs.source }}
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install locked verifier dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: actions/download-artifact@v8
+        with:
+          name: Ocode-windows-release-${{ inputs.version }}-${{ github.sha }}
+          path: release-assets
+      - name: Recheck candidate bytes and evidence before publication
+        run: |
+          set -euo pipefail
+          (cd release-assets && sha256sum --check SHA256SUMS.txt)
+          node scripts/verify-windows-release-assets.mjs release-assets "$RELEASE_VERSION" "$OCODE_SOURCE_COMMIT"
+      - name: Verify public main and preserve exact release tag
+        run: |
+          set -euo pipefail
+          [[ "$(gh api "repos/${GITHUB_REPOSITORY}" --jq .visibility)" == "public" ]]
+          git fetch origin main --tags
+          git merge-base --is-ancestor "$OCODE_SOURCE_COMMIT" origin/main
+          tag="v${RELEASE_VERSION}"
+          if git show-ref --verify --quiet "refs/tags/$tag"; then
+            [[ "$(git rev-parse "refs/tags/$tag^{commit}")" == "$OCODE_SOURCE_COMMIT" ]]
+          else
+            git tag "$tag" "$OCODE_SOURCE_COMMIT"
+            git push origin "refs/tags/$tag"
+          fi
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo '::error::Release already exists; never replace published assets.'
+            exit 1
+          fi
+      - name: Upload complete draft then publish as latest
+        run: |
+          set -euo pipefail
+          gh release create "v${RELEASE_VERSION}" release-assets/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Ocode ${RELEASE_VERSION} — Windows x64" \
+            --notes-file "docs/releases/v${RELEASE_VERSION}.md" \
+            --verify-tag --draft
+          gh release edit "v${RELEASE_VERSION}" --repo "$GITHUB_REPOSITORY" --draft=false --latest

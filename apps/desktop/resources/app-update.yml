@@ -1,4 +1,4 @@
 provider: github
 owner: diaomin66
-repo: Ocode-releases
+repo: Ocode
 updaterCacheDirName: '@ocodedesktop-updater'

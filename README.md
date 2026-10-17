@@ -12,8 +12,8 @@ Local-first · Model-agnostic · Plugin-powered · macOS / Windows / Linux
 
 <br />
 
-[![Release](https://img.shields.io/github/v/release/diaomin66/Ocode-releases?label=release)](https://github.com/diaomin66/Ocode-releases/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/diaomin66/Ocode-releases/total?label=downloads)](https://github.com/diaomin66/Ocode-releases/releases)
+[![Release](https://img.shields.io/github/v/release/diaomin66/Ocode?label=release)](https://github.com/diaomin66/Ocode/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/diaomin66/Ocode/total?label=downloads)](https://github.com/diaomin66/Ocode/releases)
 [![Stars](https://img.shields.io/github/stars/diaomin66/Ocode?style=flat\&label=stars)](https://github.com/diaomin66/Ocode/stargazers)
 [![CI](https://github.com/diaomin66/Ocode/actions/workflows/ci.yml/badge.svg)](https://github.com/diaomin66/Ocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/diaomin66/Ocode)](LICENSE)
@@ -21,7 +21,7 @@ Local-first · Model-agnostic · Plugin-powered · macOS / Windows / Linux
 
 <br />
 
-**[Download](https://github.com/diaomin66/Ocode-releases/releases/latest)** ·
+**[Download](https://github.com/diaomin66/Ocode/releases/latest)** ·
 [Documentation](docs/index.md) ·
 [Build a Plugin](docs/plugin-development.md) ·
 [Screenshots](docs/guide/screenshots.md) ·
@@ -39,10 +39,11 @@ Local-first · Model-agnostic · Plugin-powered · macOS / Windows / Linux
 
 > **Current release line: 0.21.x (Early Preview).**
 >
-> **Private Ocode derivative.** See [upstream attribution and compatibility](UPSTREAM.md).
-> Installer names, executables, profiles and icons use Ocode. No Ocode release
-> assets have been published yet; build locally for now. Screenshots below are
-> historical upstream illustrations, not screenshots of a released Ocode build.
+> Installer names, executables, profiles and icons use Ocode. Source and new
+> Windows releases share this public repository. Windows packages are unsigned
+> and may trigger SmartScreen or unknown-publisher warnings. Existing
+> 0.21.0-beta.1 installations need one manual upgrade to switch update feeds.
+> Screenshots remain historical upstream illustrations.
 
 ---
 
@@ -567,7 +568,7 @@ Agent / Plan / Goal
 
 <div align="center">
 
-### [Download Ocode →](https://github.com/diaomin66/Ocode-releases/releases/latest)
+### [Download Ocode →](https://github.com/diaomin66/Ocode/releases/latest)
 
 **macOS · Windows · Linux**
 
@@ -759,7 +760,7 @@ See [LICENSE](LICENSE) for details.
 
 <br />
 
-**[Download](https://github.com/diaomin66/Ocode-releases/releases/latest)** ·
+**[Download](https://github.com/diaomin66/Ocode/releases/latest)** ·
 [Documentation](docs/index.md) ·
 [Build a Plugin](docs/plugin-development.md)
 

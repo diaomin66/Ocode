@@ -2,6 +2,17 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const trEntries: ChangelogEntry[] = [
   {
+    version: "0.21.1",
+    highlights: [
+      "Ocode kaynak kodu diaomin66/Ocode adresinde herkese açıktır; tüm upstream geçmişi, lisanslar ve bağımlılık yamaları korunur.",
+      "Gelecekteki Windows indirmeleri ve yerleşik güncelleyici diaomin66/Ocode'u kullanır; Ocode-releases içindeki mevcut v0.21.0 dosyaları değişmez.",
+      "0.21.0-beta.1'in yerleşik akışı hâlâ Ocode-releases'a işaret ettiği için 0.21.1'e bir kez elle yükseltme gerekir.",
+      "com.ocode.desktop, .ocode profiliniz ve pi.sqlite korunur; otomatik profil veya veri taşıması yapılmaz.",
+      "Kurulu NSIS sürümleri varsayılan olarak otomatik güncellenir; ZIP ve taşınabilir sürümler elle güncelleme varsayılanını korur.",
+      "Windows 0.21.1 imzasız kalır; SmartScreen veya bilinmeyen yayımcı uyarıları gösterebilir.",
+    ],
+  },
+  {
     version: "0.21.0",
     date: "2026-10-17",
     highlights: [
