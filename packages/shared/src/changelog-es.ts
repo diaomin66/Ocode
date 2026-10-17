@@ -2,6 +2,17 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const esEntries: ChangelogEntry[] = [
   {
+    version: "0.21.1",
+    highlights: [
+      "El código de Ocode es público en diaomin66/Ocode y conserva todo el historial de upstream, las licencias y los parches de dependencias.",
+      "Las futuras descargas de Windows y el actualizador integrado usan diaomin66/Ocode; los archivos existentes de v0.21.0 en Ocode-releases no cambian.",
+      "0.21.0-beta.1 requiere una única actualización manual a 0.21.1 porque su canal integrado aún apunta a Ocode-releases.",
+      "Se conservan com.ocode.desktop, el perfil .ocode y pi.sqlite; no se realiza ninguna migración automática de perfiles o datos.",
+      "Las instalaciones NSIS usan actualizaciones automáticas de forma predeterminada; ZIP y las versiones portátiles mantienen la opción manual.",
+      "Windows 0.21.1 sigue sin firmar y puede mostrar avisos de SmartScreen o de editor desconocido.",
+    ],
+  },
+  {
     version: "0.21.0",
     date: "2026-10-17",
     highlights: [

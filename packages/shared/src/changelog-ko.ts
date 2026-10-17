@@ -2,6 +2,17 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const koEntries: ChangelogEntry[] = [
   {
+    version: "0.21.1",
+    highlights: [
+      "Ocode 소스가 diaomin66/Ocode에 공개되며 전체 업스트림 기록, 라이선스와 의존성 패치를 보존합니다.",
+      "앞으로 Windows 다운로드와 내장 업데이트는 diaomin66/Ocode를 사용합니다. Ocode-releases의 기존 v0.21.0 파일은 변경되지 않습니다.",
+      "0.21.0-beta.1의 내장 피드는 아직 Ocode-releases를 가리키므로 0.21.1로 한 번 수동 업그레이드해야 합니다.",
+      "com.ocode.desktop, .ocode 프로필과 pi.sqlite를 유지하며 프로필이나 데이터를 자동으로 이전하지 않습니다.",
+      "NSIS 설치 버전은 기본적으로 자동 업데이트를 사용하며 ZIP과 포터블 버전은 수동 업데이트 기본값을 유지합니다.",
+      "Windows 0.21.1은 여전히 서명되지 않았으며 SmartScreen 또는 알 수 없는 게시자 경고가 표시될 수 있습니다.",
+    ],
+  },
+  {
     version: "0.21.0",
     date: "2026-10-17",
     highlights: [

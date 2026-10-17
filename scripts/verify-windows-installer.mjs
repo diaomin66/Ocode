@@ -53,6 +53,16 @@ async function sha256(file) {
   return hash.digest("hex");
 }
 
+async function unsignedSignature(file) {
+  const { stdout } = await run("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command",
+    "(Get-AuthenticodeSignature -LiteralPath $env:OCODE_VERIFY_EXE).Status.ToString()"], {
+    env: { ...process.env, OCODE_VERIFY_EXE: file }, timeout: 60_000, windowsHide: true,
+  });
+  const status = stdout.trim();
+  assert.equal(status, "NotSigned", "this release lane must report unsigned executables accurately");
+  return status;
+}
+
 async function main() {
   // Silent installation writes registry entries and shortcuts. Never run it
   // against a developer's live machine or profile.
@@ -70,6 +80,10 @@ async function main() {
     `Ocode-Portable-${version}.exe`,
     updateFeed.feedName,
   ];
+  const signatures = {
+    installer: await unsignedSignature(join(release, files[0])),
+    portable: await unsignedSignature(join(release, files[3])),
+  };
   const artifacts = [];
   for (const name of files) {
     const path = join(release, name);
@@ -98,13 +112,14 @@ async function main() {
     await assertX64(join(directory, "Ocode.exe"));
     await assertX64(join(directory, "resources", "bin", "ocode-host-core.exe"));
     const metadata = JSON.parse(extractFile(join(directory, "resources", "app.asar"), "package.json"));
+    signatures[distribution] = await unsignedSignature(join(directory, "Ocode.exe"));
     assert.equal(metadata.name, "@ocode/desktop");
     assert.equal(metadata.version, version);
     assert.equal(metadata.ocodeDistribution, distribution);
     const provider = load(await readFile(join(directory, "resources", "app-update.yml"), "utf8"));
     assert.equal(provider.provider, "github");
     assert.equal(provider.owner, "diaomin66");
-    assert.equal(provider.repo, "Ocode-releases");
+    assert.equal(provider.repo, "Ocode");
     assert.ok(!provider.token && !provider.private, "updates must work without embedded credentials");
     const profile = await createBootProfile();
     const { stdout, stderr } = await run(join(directory, "Ocode.exe"), [], {
@@ -132,8 +147,8 @@ async function main() {
   const evidence = {
     version, architecture: "x64", commit: process.env.GITHUB_SHA,
     base: process.env.OCODE_BASE_SHA ?? null, signed: false,
-    signatureNote: "Unsigned candidate; no publisher certificate was supplied.",
-    installedProbe, zipProbe, updateFeed, artifacts,
+    signatureNote: "Unsigned Windows release; SmartScreen or unknown-publisher warnings may appear.",
+    signatures, installedProbe, zipProbe, updateFeed, artifacts,
   };
   await writeFile(join(release, "windows-verification.json"), `${JSON.stringify(evidence, null, 2)}\n`);
   await writeFile(join(release, "SHA256SUMS.txt"), `${artifacts.map((item) => `${item.sha256}  ${item.name}`).join("\n")}\n`);

@@ -141,7 +141,7 @@ test("updater gates delivery mode by platform and delivery policy", () => {
   assert.match(updaterSource, /autoUpdater\.on\("error"/);
   assert.match(
     updaterSource,
-    /github\.com\/diaomin66\/Ocode-releases\/releases/,
+    /github\.com\/diaomin66\/Ocode\/releases/,
     "releases fallback URL",
   );
   assert.match(
@@ -258,7 +258,7 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
   assert.ok(pkg.dependencies["electron-updater"], "electron-updater dependency");
   assert.equal(pkg.build.publish[0].provider, "github");
   assert.equal(pkg.build.publish[0].owner, "diaomin66");
-  assert.equal(pkg.build.publish[0].repo, "Ocode-releases");
+  assert.equal(pkg.build.publish[0].repo, "Ocode");
   const windowsUpdateConfigResource = pkg.build.win.extraResources.find(
     ({ from }) => from === "resources/app-update.yml",
   );

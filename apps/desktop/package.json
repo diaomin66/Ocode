@@ -1,6 +1,6 @@
 {
   "name": "@ocode/desktop",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "desktopName": "ocode.desktop",
   "private": true,
   "description": "Ocode Electron application",
@@ -89,7 +89,7 @@
       {
         "provider": "github",
         "owner": "diaomin66",
-        "repo": "Ocode-releases"
+        "repo": "Ocode"
       }
     ],
     "extraMetadata": {

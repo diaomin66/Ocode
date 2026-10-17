@@ -33,34 +33,44 @@ existing preload/Host RPC probe with separate temporary profiles.
 
 The workflow uploads the installer, portable EXE/ZIP, blockmap, verified
 `latest.yml` (or prerelease channel file), SHA-256 sums and commit/base-bound
-evidence as a private Actions artifact with seven-day retention. Repository
-permissions stay read-only; the build never publishes or consumes signing
-secrets. Before uploading, the verifier checks that NSIS alone owns the feed,
-its size and SHA-512 match the installer, and both packaged copies point to
-`diaomin66/Ocode-releases` without a token or private-provider setting.
+evidence as an Actions artifact with seven-day retention. Repository permissions
+stay read-only; the build never publishes or consumes signing secrets. Before
+uploading, the verifier checks that NSIS alone owns the feed, its size and SHA-512
+match the installer, and both packaged copies point to `diaomin66/Ocode` without
+a token or private-provider setting. Installer, portable EXE and installed/ZIP
+executables must report `NotSigned` in this unsigned lane.
 
 ### Ocode public Windows distribution
 
-The source repository stays private. After candidate validation, publish a
-stable, non-draft Release in `diaomin66/Ocode-releases` with the exact verified
-NSIS EXE, blockmap, portable ZIP/EXE, `latest.yml`, checksum/evidence files and
-the full corresponding source snapshot. Export source with `git archive` at
-the tested commit, including licenses, dependency patches and build scripts;
-never export `.git`, ignored profiles, local configuration or credentials.
-Upload all assets to a draft first, verify completeness, then publish it as
-latest. Do not tag the private source repository to invoke the multi-platform
-workflow for this Windows-only lane.
+The public `diaomin66/Ocode` repository preserves complete Git history and
+upstream authorship. Dispatch `.github/workflows/windows-release.yml` with a
+stable `version` matching the manifests. `publish=false` validates a candidate;
+`publish=true` requires public `main` containing the latest remote main. The
+workflow builds and tests the Windows x64 packages, then exports corresponding
+source with `git archive` at the tested commit, including `LICENSE`, dependency
+patches and build scripts. Never export `.git`, ignored profiles, local
+configuration or credentials.
+
+Publication rechecks the downloaded candidate's exact asset set, SHA-256 sums,
+NSIS feed, unsigned state, startup evidence and source commit. It creates or
+verifies the exact `v<version>` tag and refuses an existing Release. All assets
+are uploaded to a draft before it is published as latest. Windows-only tags
+created with the workflow token do not invoke the multi-platform release lane.
 
 Verify anonymous access to the latest Release and update YAML after publishing.
 The index must reference only `Ocode-Setup-<version>.exe`, with its exact size
 and SHA-512. Installed Windows defaults to automatic download/restart delivery;
-ZIP and portable retain their existing manual-update default. A prior build
-pointing at private `diaomin66/Ocode` needs one manual upgrade to switch feeds.
-The same application ID/profile are retained; no database migration is added.
+ZIP and portable retain their existing manual-update default.
 
-These artifacts are unsigned unless maintainer signing credentials are
-explicitly provided. SmartScreen reputation, clean-client upgrade installation
-and publisher signing remain separate qualification work.
+Keep `diaomin66/Ocode-releases/v0.21.0` and its assets unchanged and available.
+Its `0.21.0-beta.1` binaries retain the old feed and require one manual upgrade
+to 0.21.1. The same application ID/profile are retained; no database migration
+or automatic profile/credential copy is added.
+
+The 0.21.1 Windows artifacts are unsigned; SmartScreen or unknown-publisher
+warnings may appear. Clean-client upgrade installation, portable EXE startup,
+SmartScreen reputation and publisher signing are not implied by the installed
+and ZIP startup probes.
 
 On macOS, `pnpm dev` creates and reuses a fingerprinted branded Electron host
 bundle under `.cache/electron-dev/`. Its bundle name, executable, identifier,
