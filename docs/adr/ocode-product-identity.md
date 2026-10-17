@@ -1,6 +1,6 @@
-# Ocode product and distribution identity
+# ADR: Ocode product and distribution identity
 
-Status: Accepted for the separately branded derivative.
+- Status: Accepted
 
 ## Context
 
