@@ -13,9 +13,9 @@ test("Ocode uses an isolated identity and its own release repository", () => {
   assert.equal(manifest.build.win.executableName, "Ocode");
   assert.equal(manifest.build.nsis.shortcutName, "Ocode");
   assert.deepEqual(manifest.build.publish, [
-    { provider: "github", owner: "diaomin66", repo: "Ocode" },
+    { provider: "github", owner: "diaomin66", repo: "Ocode-releases" },
   ]);
-  assert.match(read("apps/desktop/resources/app-update.yml"), /owner: diaomin66\r?\nrepo: Ocode/);
+  assert.match(read("apps/desktop/resources/app-update.yml"), /owner: diaomin66\r?\nrepo: Ocode-releases\r?\n/);
   assert.match(read("packages/shared/src/protocol.ts"), /APP_NAME = "Ocode"/);
 });
 

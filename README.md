@@ -12,8 +12,8 @@ Local-first · Model-agnostic · Plugin-powered · macOS / Windows / Linux
 
 <br />
 
-[![Release](https://img.shields.io/github/v/release/diaomin66/Ocode?label=release)](https://github.com/diaomin66/Ocode/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/diaomin66/Ocode/total?label=downloads)](https://github.com/diaomin66/Ocode/releases)
+[![Release](https://img.shields.io/github/v/release/diaomin66/Ocode-releases?label=release)](https://github.com/diaomin66/Ocode-releases/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/diaomin66/Ocode-releases/total?label=downloads)](https://github.com/diaomin66/Ocode-releases/releases)
 [![Stars](https://img.shields.io/github/stars/diaomin66/Ocode?style=flat\&label=stars)](https://github.com/diaomin66/Ocode/stargazers)
 [![CI](https://github.com/diaomin66/Ocode/actions/workflows/ci.yml/badge.svg)](https://github.com/diaomin66/Ocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/diaomin66/Ocode)](LICENSE)
@@ -21,7 +21,7 @@ Local-first · Model-agnostic · Plugin-powered · macOS / Windows / Linux
 
 <br />
 
-**[Download](https://github.com/diaomin66/Ocode/releases/latest)** ·
+**[Download](https://github.com/diaomin66/Ocode-releases/releases/latest)** ·
 [Documentation](docs/index.md) ·
 [Build a Plugin](docs/plugin-development.md) ·
 [Screenshots](docs/guide/screenshots.md) ·
@@ -567,7 +567,7 @@ Agent / Plan / Goal
 
 <div align="center">
 
-### [Download Ocode →](https://github.com/diaomin66/Ocode/releases/latest)
+### [Download Ocode →](https://github.com/diaomin66/Ocode-releases/releases/latest)
 
 **macOS · Windows · Linux**
 
@@ -759,7 +759,7 @@ See [LICENSE](LICENSE) for details.
 
 <br />
 
-**[Download](https://github.com/diaomin66/Ocode/releases/latest)** ·
+**[Download](https://github.com/diaomin66/Ocode-releases/releases/latest)** ·
 [Documentation](docs/index.md) ·
 [Build a Plugin](docs/plugin-development.md)
 

@@ -18,11 +18,28 @@
 - **Expected:** Both copies contain x64 Ocode/host executables, matching version
   and installed/ZIP distribution metadata. The sandboxed preload and Host RPC
   boot probe succeed. All expected artifacts are nonempty and have SHA-256
-  checksums. Upload only after verification; do not publish an updater feed.
+  checksums. Update YAML contains only the matching NSIS artifact, with its
+  exact size and SHA-512. Installed/ZIP provider configuration names the public
+  `diaomin66/Ocode-releases` repository with no embedded credentials. Upload
+  only after verification; CI does not itself publish a Release.
 - **Command:** `node scripts/verify-windows-installer.mjs` (hosted CI only).
 - **Boundary:** No real provider, credentials, existing profile or self-hosted
   runner. Signing, SmartScreen reputation, upgrades and portable EXE startup
   remain separate qualification work.
+
+### E2E-OCODE-public-update-channel
+
+- **Preconditions:** Verified Windows candidate and an authorized public Release
+  with installers, update index and corresponding source snapshot.
+- **Steps:** Request the latest Release and `latest.yml` without authentication;
+  compare the index version, installer filename, size and SHA-512 with the
+  downloaded candidate. Run updater-controller, preference and timeout tests.
+- **Expected:** Anonymous discovery/download succeed; no private source token
+  is present in the client. Installed builds retain download/restart delivery,
+  while portable defaults remain manual. Private-feed beta installs require
+  a one-time manual upgrade; do not claim they can discover this release.
+- **Boundary:** No production profile, real provider or signing credentials.
+  Full old-to-new installation remains a separate qualification step.
 
 ### E2E-QUEUE-send-now-wakes-subagents
 
@@ -4144,16 +4161,16 @@ window; opening a normal panel afterward must still work.
 - **Preconditions**: App running in both English and zh-CN locales, with an
   empty home and a docked transcript available.
 - **Steps**: 1) Inspect the expanded and collapsed sidebar. 2) Inspect the
-  empty-home hero and docked composer. 3) Observe the eight-frame mascot GIF
-  looping in place, move the pointer over it, and confirm its cadence and
-  geometry do not change. Enable reduced motion and confirm the still first
-  frame is shown. 4) Focus the footer Settings and Plugins icons, then each
+  empty-home hero and docked composer. 3) Observe the vector Ocode mark
+  swaying continuously, move the pointer over it, and confirm its cadence and
+  layout do not change. Enable reduced motion and confirm the same mark is
+  stationary. 4) Focus the footer Settings and Plugins icons, then each
   project/Temporary session create control. 5) Open Settings and the composer
   input.
 - **Expected**: Visible shell identity reads `Ocode`; the empty-home hero
-  renders the theme-matching 100px `HomeMascotLogo` GIF with a short idle hold
-  and a looping wave. Pointer hover does not alter the cadence or geometry,
-  and reduced motion shows the matching still first frame.
+  renders the theme-matching 100px `HomeMascotLogo` SVG with a subtle 2.4s sway.
+  Pointer hover does not alter cadence or layout, and reduced motion stops the
+  transform animation. No raster frames or per-frame React updates are used.
   The expanded/collapsed
   sidebar renders the derived `src/assets/brand/logo-*.png` asset through `BrandLogo`
   and the docked composer prompt row has no leading
@@ -6467,8 +6484,8 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - **Steps**:
   1. In light mode, open the app shell, an empty chat home, and the expanded sidebar (Windows/Linux) or startup splash.
   2. Inspect the rendered `BrandLogo` source in the sidebar and startup splash,
-     and inspect the light eight-frame `HomeMascotLogo` GIF in the empty-home
-     hero. Hover the mascot and verify that its cadence does not change.
+     and inspect the vector `HomeMascotLogo` in the empty-home hero.
+     Hover the mark and verify that its cadence does not change.
   3. Switch the theme to dark (Settings → General → Appearance, or system appearance change).
   4. Re-inspect the same surfaces without reloading.
   5. Switch back to light and re-inspect.
@@ -6476,11 +6493,10 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   - Light and dark mode render `src/assets/brand/logo-light.png` /
     `src/assets/brand/logo-dark.png`
     live in the sidebar and startup splash without a window reload.
-  - The empty-home hero renders the 100px eight-frame mascot GIF for the
-    active theme (`home-mascot-light.gif` / `home-mascot-dark.gif`) with a
-    short idle hold and a looping wave. Switching theme swaps the pair live
-    without a window reload. Pointer hover does not change the cadence;
-    under reduced motion the matching still first frame remains visible.
+  - The empty-home hero renders the 100px Ocode O/slash SVG in the active
+    theme's paper/ink color. Switching theme updates color without remounting
+    or restarting the transform animation. Pointer hover does not change its
+    cadence; reduced motion leaves the same vector mark stationary.
   - Sizes stay stable across theme changes (sidebar 20px, hero 100px, splash
     64px), and the marks stay decorative with no click, keyboard, or focus
     behavior.
@@ -10393,11 +10409,12 @@ This test plan spec is accepted when:
   row, with no Logo/Home brand or back/forward buttons.
 
 ### US-UI-17 Ocode home hero logo
-- On empty chat home, the 100px `HomeMascotLogo` GIF renders above the title
-  as an eight-frame waving mascot with a short idle hold. Light and dark
-  themes each use a dedicated GIF and still PNG.
-- Pointer hover does not change the cadence or geometry; reduced motion shows
-  the matching still first frame. The mascot remains decorative.
+- On empty chat home, the 100px `HomeMascotLogo` SVG renders above the title
+  as the Ocode O/slash mark with a smooth 2.4s, ±3° transform-only sway.
+  Light and dark themes use their original paper/ink colors on the same SVG.
+- Hover does not change cadence or layout; reduced motion disables animation.
+  The mark remains decorative. `home-mascot-browser.test.mjs` exercises real
+  mount/theme/motion/unmount behavior, high DPI and compositor interpolation.
 - Title is 28px / weight 400; active project name uses dotted underline (1px, offset 4px).
 - Composer does not render attachment or appshot controls before their payload
   reaches pi end to end.

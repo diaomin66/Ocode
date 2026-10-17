@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: 立即下载
-      link: https://github.com/diaomin66/Ocode/releases/latest
+      link: https://github.com/diaomin66/Ocode-releases/releases/latest
     - theme: alt
       text: 使用文档
       link: /zh-CN/guide/

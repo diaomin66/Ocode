@@ -3,8 +3,10 @@ import type { ChangelogEntry } from "./changelog.js";
 export const frEntries: ChangelogEntry[] = [
   {
     version: "0.21.0",
-    date: "2026-10-16",
+    date: "2026-10-17",
     highlights: [
+      "Les mises à jour Windows utilisent désormais le canal public Ocode ; les anciennes versions sur canal privé nécessitent une première mise à niveau manuelle.",
+      "Le symbole Ocode de l’accueil reste net à toute échelle et s’anime fluidement sans GIF saccadé ; le réglage de réduction des animations est respecté.",
       "Les longues commandes Bash continuent en tâche de fond à la fin du tour, et leur sortie reste consultable.",
       "Les conversations parallèles d’un projet s’exécutent chacune dans un worktree Git isolé.",
       "Gardez la liste Todo à côté du Composer et développez-la pour voir toute la liste.",

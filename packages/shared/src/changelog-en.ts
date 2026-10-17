@@ -3,8 +3,10 @@ import type { ChangelogEntry } from "./changelog.js";
 export const enEntries: ChangelogEntry[] = [
   {
     version: "0.21.0",
-    date: "2026-10-16",
+    date: "2026-10-17",
     highlights: [
+      "Windows installer updates now use Ocode's public release channel; earlier private-channel builds need one manual upgrade.",
+      "The Home Ocode mark stays sharp at any display scale and moves smoothly without low-frame-rate GIF playback; reduced motion is respected.",
       "Keep long-running Bash commands going after a turn ends, then review their output as background tasks.",
       "Run parallel conversations in a project with an isolated Git worktree for each session.",
       "Keep the Todo list docked beside the Composer and expand it when you need the full checklist.",

@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { verifyWindowsUpdateFeed } from "./verify-windows-update-feed.mjs";
 
 const run = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -61,11 +62,13 @@ async function main() {
   const desktop = join(root, "apps", "desktop");
   const release = join(desktop, "release");
   const { version } = JSON.parse(await readFile(join(desktop, "package.json"), "utf8"));
+  const updateFeed = await verifyWindowsUpdateFeed(release, version);
   const files = [
     `Ocode-Setup-${version}.exe`,
     `Ocode-Setup-${version}.exe.blockmap`,
     `Ocode-Portable-${version}.zip`,
     `Ocode-Portable-${version}.exe`,
+    updateFeed.feedName,
   ];
   const artifacts = [];
   for (const name of files) {
@@ -90,6 +93,7 @@ async function main() {
 
   const desktopRequire = createRequire(join(desktop, "package.json"));
   const { extractFile } = desktopRequire("@electron/asar");
+  const { load } = createRequire(desktopRequire.resolve("electron-updater/package.json"))("js-yaml");
   async function verifyApp(directory, distribution) {
     await assertX64(join(directory, "Ocode.exe"));
     await assertX64(join(directory, "resources", "bin", "ocode-host-core.exe"));
@@ -97,6 +101,11 @@ async function main() {
     assert.equal(metadata.name, "@ocode/desktop");
     assert.equal(metadata.version, version);
     assert.equal(metadata.ocodeDistribution, distribution);
+    const provider = load(await readFile(join(directory, "resources", "app-update.yml"), "utf8"));
+    assert.equal(provider.provider, "github");
+    assert.equal(provider.owner, "diaomin66");
+    assert.equal(provider.repo, "Ocode-releases");
+    assert.ok(!provider.token && !provider.private, "updates must work without embedded credentials");
     const profile = await createBootProfile();
     const { stdout, stderr } = await run(join(directory, "Ocode.exe"), [], {
       ...options, cwd: directory, env: { ...env, OCODE_DATA_DIR: profile, OCODE_BOOT_PROBE: "1" },
@@ -124,7 +133,7 @@ async function main() {
     version, architecture: "x64", commit: process.env.GITHUB_SHA,
     base: process.env.OCODE_BASE_SHA ?? null, signed: false,
     signatureNote: "Unsigned candidate; no publisher certificate was supplied.",
-    installedProbe, zipProbe, artifacts,
+    installedProbe, zipProbe, updateFeed, artifacts,
   };
   await writeFile(join(release, "windows-verification.json"), `${JSON.stringify(evidence, null, 2)}\n`);
   await writeFile(join(release, "SHA256SUMS.txt"), `${artifacts.map((item) => `${item.sha256}  ${item.name}`).join("\n")}\n`);

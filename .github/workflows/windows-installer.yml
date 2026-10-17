@@ -49,6 +49,8 @@ jobs:
           pnpm --filter @ocode/desktop typecheck
           pnpm lint
           node --test apps/desktop/test/windows-installer-workflow.test.mjs apps/desktop/test/windows-host-runtime.test.mjs apps/desktop/test/ocode-branding.test.mjs apps/desktop/test/ocode-compatibility.test.mjs apps/desktop/test/packaging-footprint.test.mjs apps/desktop/test/release-asar.test.mjs
+          node --test apps/desktop/test/windows-update-feed.test.mjs apps/desktop/test/auto-update.test.mjs apps/desktop/test/renderer-branding.test.mjs
+          node --test apps/desktop/test/updater-controller.test.mjs apps/desktop/test/update-preference.test.mjs apps/desktop/test/update-timeout.test.mjs apps/desktop/test/home-mascot-browser.test.mjs
       - name: Package Windows installer and portable artifacts
         run: pnpm --filter @ocode/desktop run dist:win
       - name: Install, boot and verify candidate artifacts
@@ -62,6 +64,8 @@ jobs:
             apps/desktop/release/Ocode-Setup-*.exe.blockmap
             apps/desktop/release/Ocode-Portable-*.exe
             apps/desktop/release/Ocode-Portable-*.zip
+            apps/desktop/release/latest.yml
+            apps/desktop/release/beta.yml
             apps/desktop/release/*-verification.json
             apps/desktop/release/SHA256SUMS.txt
           if-no-files-found: error

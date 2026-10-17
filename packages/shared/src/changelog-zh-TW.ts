@@ -3,8 +3,10 @@ import type { ChangelogEntry } from "./changelog.js";
 export const zhTWEntries: ChangelogEntry[] = [
   {
     version: "0.21.0",
-    date: "2026-10-16",
+    date: "2026-10-17",
     highlights: [
+      "Windows 安裝版改用 Ocode 公開更新管道；先前使用私人管道的版本需手動升級一次。",
+      "首頁 Ocode 標誌改為高畫質向量動畫，在不同縮放比例下保持清晰流暢，不再播放低影格率 GIF，並遵循減少動態效果設定。",
       "長時間執行的 Bash 命令可轉為背景工作，在本輪結束後繼續執行，並可隨時查看輸出。",
       "同一專案中的平行對話各自在獨立的 Git 工作樹中執行。",
       "Todo 清單可停駐在輸入框旁，需要時展開查看完整清單。",
